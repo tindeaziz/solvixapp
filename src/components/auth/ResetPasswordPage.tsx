@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -12,16 +12,24 @@ const ResetPasswordPage: React.FC = () => {
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' }>({ text: '', type: 'info' });
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
-  const [hash, setHash] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    // Extraire le hash de l'URL
-    const hashFragment = window.location.hash;
-    if (hashFragment) {
-      setHash(hashFragment);
-      console.log('🔑 RESET_PASSWORD - Hash trouvé dans l\'URL:', hashFragment);
+    // Extraire le token de l'URL
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token');
+    const type = params.get('type');
+    
+    console.log('🔍 RESET_PASSWORD - Paramètres URL:', { token: token?.substring(0, 5) + '...', type });
+    
+    if (token && type === 'recovery') {
+      console.log('✅ RESET_PASSWORD - Token de récupération détecté dans l\'URL');
       setIsRecoveryMode(true);
+      setMessage({ 
+        text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
+        type: 'info' 
+      });
     }
 
     // Vérifier si l'utilisateur est dans un état de récupération
@@ -32,10 +40,10 @@ const ResetPasswordPage: React.FC = () => {
         console.log('🔄 RESET_PASSWORD - Session actuelle:', session ? 'Présente' : 'Absente');
         
         if (session) {
-          console.log('👤 RESET_PASSWORD - Utilisateur déjà connecté, considéré en mode récupération');
+          console.log('👤 RESET_PASSWORD - Utilisateur connecté, considéré en mode récupération');
           setIsRecoveryMode(true);
           setMessage({ 
-            text: 'Vous êtes connecté. Vous pouvez maintenant définir un nouveau mot de passe.', 
+            text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
             type: 'info' 
           });
         }
@@ -53,10 +61,9 @@ const ResetPasswordPage: React.FC = () => {
             });
           } else if (event === 'SIGNED_IN') {
             console.log('👤 RESET_PASSWORD - Utilisateur connecté');
-            // Si l'utilisateur est déjà connecté, on le considère en mode récupération
             setIsRecoveryMode(true);
             setMessage({ 
-              text: 'Vous êtes connecté. Vous pouvez maintenant définir un nouveau mot de passe.', 
+              text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
               type: 'info' 
             });
           }
@@ -85,7 +92,7 @@ const ResetPasswordPage: React.FC = () => {
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [location]);
 
   const getPasswordStrength = (password: string) => {
     let strength = 0;
@@ -156,6 +163,18 @@ const ResetPasswordPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Afficher un loader pendant la vérification
+  if (!isRecoveryMode) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-solvix-light via-white to-solvix-light flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-solvix-blue border-t-transparent mx-auto mb-4"></div>
+          <p className="text-solvix-dark font-inter text-sm sm:text-base">Vérification du lien de réinitialisation...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-solvix-light via-white to-solvix-light flex items-center justify-center p-4">
