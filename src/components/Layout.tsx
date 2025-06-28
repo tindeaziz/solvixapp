@@ -34,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
     { id: 'settings' as ActiveSection, name: 'Paramètres', icon: SettingsIcon, mobileLabel: 'Réglages' },
   ];
 
-  // Détecter si on est sur mobile
+  // Détecter si on est sur mobile et gérer la sidebar
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth <= 768;
