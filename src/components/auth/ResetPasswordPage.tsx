@@ -12,27 +12,52 @@ const ResetPasswordPage: React.FC = () => {
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' }>({ text: '', type: 'info' });
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [hash, setHash] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Extraire le hash de l'URL
+    const hashFragment = window.location.hash;
+    if (hashFragment) {
+      setHash(hashFragment);
+      console.log('🔑 RESET_PASSWORD - Hash trouvé dans l\'URL:', hashFragment);
+    }
+
     // Vérifier si l'utilisateur est dans un état de récupération
     const checkAuthState = async () => {
-      const { data } = await supabase.auth.onAuthStateChange((event, session) => {
-        console.log('🔄 RESET_PASSWORD - Événement auth:', event);
+      try {
+        // Vérifier l'état d'authentification actuel
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔄 RESET_PASSWORD - Session actuelle:', session ? 'Présente' : 'Absente');
         
-        if (event === 'PASSWORD_RECOVERY') {
-          console.log('✅ RESET_PASSWORD - Mode récupération de mot de passe activé');
-          setIsRecoveryMode(true);
-          setMessage({ 
-            text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
-            type: 'info' 
-          });
-        }
-      });
+        // S'abonner aux changements d'état d'authentification
+        const { data } = await supabase.auth.onAuthStateChange((event, session) => {
+          console.log('🔄 RESET_PASSWORD - Événement auth:', event);
+          
+          if (event === 'PASSWORD_RECOVERY') {
+            console.log('✅ RESET_PASSWORD - Mode récupération de mot de passe activé');
+            setIsRecoveryMode(true);
+            setMessage({ 
+              text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
+              type: 'info' 
+            });
+          } else if (event === 'SIGNED_IN') {
+            console.log('👤 RESET_PASSWORD - Utilisateur connecté');
+            // Si l'utilisateur est déjà connecté, on le considère en mode récupération
+            setIsRecoveryMode(true);
+            setMessage({ 
+              text: 'Vous êtes connecté. Vous pouvez maintenant définir un nouveau mot de passe.', 
+              type: 'info' 
+            });
+          }
+        });
 
-      return () => {
-        data.subscription.unsubscribe();
-      };
+        return () => {
+          data.subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('❌ RESET_PASSWORD - Erreur lors de la vérification de l\'état d\'authentification:', error);
+      }
     };
 
     checkAuthState();
@@ -148,149 +173,131 @@ const ResetPasswordPage: React.FC = () => {
             </div>
           )}
 
-          {isRecoveryMode ? (
-            <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-solvix-dark mb-2 font-inter">
-                  Nouveau mot de passe
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:border-transparent transition-colors duration-200 font-inter border-gray-300"
-                    placeholder="Votre nouveau mot de passe"
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    disabled={loading}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                    )}
-                  </button>
+          {/* Toujours afficher le formulaire, même si isRecoveryMode est false */}
+          <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-solvix-dark mb-2 font-inter">
+                Nouveau mot de passe
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
                 </div>
-                
-                {/* Password strength indicator */}
-                {password && (
-                  <div className="mt-2">
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map((level) => (
-                        <div
-                          key={level}
-                          className={`h-1 flex-1 rounded ${
-                            passwordStrength >= level
-                              ? passwordStrength <= 2
-                                ? 'bg-red-400'
-                                : passwordStrength <= 3
-                                ? 'bg-yellow-400'
-                                : 'bg-green-400'
-                              : 'bg-gray-200'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Force du mot de passe: {
-                        passwordStrength <= 2 ? 'Faible' :
-                        passwordStrength <= 3 ? 'Moyenne' : 'Forte'
-                      }
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-solvix-dark mb-2 font-inter">
-                  Confirmer le mot de passe
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:border-transparent transition-colors duration-200 font-inter border-gray-300"
-                    placeholder="Confirmez votre mot de passe"
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    disabled={loading}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                    )}
-                  </button>
-                </div>
-                {confirmPassword && password === confirmPassword && (
-                  <div className="mt-1 flex items-center text-green-600">
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    <span className="text-sm">Les mots de passe correspondent</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <button
-                  type="submit"
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:border-transparent transition-colors duration-200 font-inter border-gray-300"
+                  placeholder="Votre nouveau mot de passe"
                   disabled={loading}
-                  className="w-full bg-solvix-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-solvix-blue-dark focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-inter shadow-solvix"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      Mise à jour en cours...
-                    </>
-                  ) : (
-                    'Mettre à jour le mot de passe'
-                  )}
-                </button>
-
+                />
                 <button
                   type="button"
-                  onClick={() => navigate('/')}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   disabled={loading}
-                  className="w-full flex items-center justify-center py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 font-inter"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Retour à la connexion
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
                 </button>
               </div>
-            </form>
-          ) : (
-            <div className="text-center space-y-6">
-              <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertCircle className="h-8 w-8 text-red-600" />
+              
+              {/* Password strength indicator */}
+              {password && (
+                <div className="mt-2">
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((level) => (
+                      <div
+                        key={level}
+                        className={`h-1 flex-1 rounded ${
+                          passwordStrength >= level
+                            ? passwordStrength <= 2
+                              ? 'bg-red-400'
+                              : passwordStrength <= 3
+                              ? 'bg-yellow-400'
+                              : 'bg-green-400'
+                            : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Force du mot de passe: {
+                      passwordStrength <= 2 ? 'Faible' :
+                      passwordStrength <= 3 ? 'Moyenne' : 'Forte'
+                    }
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-solvix-dark mb-2 font-inter">
+                Confirmer le mot de passe
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:border-transparent transition-colors duration-200 font-inter border-gray-300"
+                  placeholder="Confirmez votre mot de passe"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  disabled={loading}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
               </div>
-              
-              <p className="text-gray-600">
-                Le lien de réinitialisation est invalide ou a expiré. Veuillez demander un nouveau lien de réinitialisation.
-              </p>
-              
+              {confirmPassword && password === confirmPassword && (
+                <div className="mt-1 flex items-center text-green-600">
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  <span className="text-sm">Les mots de passe correspondent</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
               <button
-                onClick={() => navigate('/')}
-                className="w-full bg-solvix-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-solvix-blue-dark focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:ring-offset-2 transition-colors duration-200 font-inter shadow-solvix"
+                type="submit"
+                disabled={loading}
+                className="w-full bg-solvix-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-solvix-blue-dark focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-inter shadow-solvix"
               >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Mise à jour en cours...
+                  </>
+                ) : (
+                  'Mettre à jour le mot de passe'
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                disabled={loading}
+                className="w-full flex items-center justify-center py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 font-inter"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour à la connexion
               </button>
             </div>
-          )}
+          </form>
         </div>
 
         {/* Footer */}
