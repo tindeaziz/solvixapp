@@ -130,7 +130,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
   };
 
   return (
-    <div className="min-h-screen bg-solvix-light flex">
+    <div className="app-layout">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -145,7 +145,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowLogoutModal(false)}></div>
             
-            <div className="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-solvix-lg transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full mx-4">
+            <div className="modal-container inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-solvix-lg transform transition-all sm:my-8 sm:align-middle mx-4">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -184,16 +184,16 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
         </div>
       )}
 
-      {/* Sidebar - Responsive */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-solvix-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+      {/* Sidebar */}
+      <div className={`sidebar fixed inset-y-0 left-0 z-50 bg-white shadow-solvix-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:flex lg:flex-col lg:flex-shrink-0`}>
-        <div className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-gray-200 bg-solvix-blue">
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-solvix-blue">
           <div className="flex items-center">
             <img 
               src="/Logo-Solvix.png" 
               alt="Solvix Logo" 
-              className="h-6 sm:h-8 w-auto"
+              className="h-8 w-auto"
             />
           </div>
           <button
@@ -204,7 +204,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
           </button>
         </div>
         
-        <nav className="flex-1 px-2 sm:px-4 py-4 sm:py-6 space-y-1 sm:space-y-2 overflow-y-auto">
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -216,28 +216,28 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
                   setActiveSection(item.id);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center px-3 sm:px-4 py-2 sm:py-3 text-left rounded-xl transition-all duration-200 font-inter text-sm sm:text-base ${
+                className={`nav-item w-full flex items-center text-left rounded-xl transition-all duration-200 font-inter ${
                   isActive
                     ? 'bg-solvix-blue text-white shadow-solvix border-l-4 border-solvix-orange'
                     : 'text-gray-600 hover:bg-solvix-light hover:text-solvix-dark'
                 }`}
               >
-                <Icon className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 flex-shrink-0 ${isActive ? 'text-solvix-orange' : 'text-gray-400'}`} />
+                <Icon className={`h-5 w-5 mr-3 flex-shrink-0 ${isActive ? 'text-solvix-orange' : 'text-gray-400'}`} />
                 <span className="font-medium truncate">{item.name}</span>
               </button>
             );
           })}
         </nav>
 
-        {/* User Profile Section - Responsive */}
-        <div className="p-2 sm:p-4 border-t border-gray-200">
+        {/* User Profile Section */}
+        <div className="p-4 border-t border-gray-200">
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-solvix-light transition-colors duration-200"
               disabled={loadingUserInfo}
             >
-              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+              <div className="flex items-center space-x-3 min-w-0 flex-1">
                 {loadingUserInfo ? (
                   <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse flex-shrink-0"></div>
                 ) : (
@@ -246,12 +246,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
                 <div className="text-left min-w-0 flex-1">
                   {loadingUserInfo ? (
                     <>
-                      <div className="h-3 sm:h-4 bg-gray-200 rounded w-16 sm:w-20 mb-1 animate-pulse"></div>
-                      <div className="h-2 sm:h-3 bg-gray-200 rounded w-20 sm:w-24 animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded w-20 mb-1 animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
                     </>
                   ) : (
                     <>
-                      <p className="text-xs sm:text-sm font-medium text-solvix-dark font-inter truncate">
+                      <p className="text-sm font-medium text-solvix-dark font-inter truncate">
                         {userInfo.name}
                       </p>
                       <p className="text-xs text-gray-500 font-inter truncate">
@@ -316,11 +316,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
         </div>
       </div>
 
-      {/* Main content - Responsive */}
+      {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header - Responsive */}
+        {/* Header */}
         <header className="bg-white shadow-solvix border-b border-gray-200 flex-shrink-0">
-          <div className="flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16 px-6">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -329,20 +329,20 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
                 <Menu className="h-6 w-6" />
               </button>
               
-              <h2 className="text-lg sm:text-xl font-semibold text-solvix-dark capitalize font-poppins truncate">
+              <h2 className="text-xl font-semibold text-solvix-dark capitalize font-poppins truncate">
                 {activeSection === 'create-quote' ? 'Créer un devis' : 
                  activeSection === 'quote-management' ? 'Mes devis' : 
                  activeSection}
               </h2>
             </div>
 
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-4">
               {/* Dernière connexion - Masqué sur mobile */}
               <div className="hidden md:flex items-center space-x-2 text-sm text-gray-500 font-inter">
                 {loadingUserInfo ? (
                   <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
                 ) : (
-                  <span className="text-xs lg:text-sm">Dernière connexion: {userInfo.lastConnection}</span>
+                  <span className="text-sm">Dernière connexion: {userInfo.lastConnection}</span>
                 )}
               </div>
               
@@ -412,9 +412,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
           </div>
         </header>
 
-        {/* Page content - Responsive */}
-        <main className="flex-1 w-full">
-          <div className="w-full px-4 sm:px-6 py-4 sm:py-6">
+        {/* Page content */}
+        <main className="main-content flex-1">
+          <div className="dashboard-container">
             {children}
           </div>
         </main>

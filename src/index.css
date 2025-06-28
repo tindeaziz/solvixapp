@@ -1,3 +1,243 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Prévention du débordement global */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Layout principal */
+.app-layout {
+  display: flex;
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Sidebar fixe */
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  flex-shrink: 0;
+}
+
+/* Contenu principal */
+.main-content {
+  width: 100%;
+  max-width: calc(100vw - 280px);
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Container dashboard */
+.dashboard-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Grille de statistiques optimisée */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.stat-card {
+  min-width: 0;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Section inférieure optimisée */
+.bottom-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.bottom-card {
+  min-width: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Textes adaptatifs */
+.stat-card h3 {
+  font-size: clamp(0.875rem, 1.5vw, 1.125rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-value {
+  font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+  line-height: 1.2;
+}
+
+/* Responsive breakpoints pour desktop */
+@media (max-width: 1400px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .bottom-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .bottom-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .main-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
+  
+  .main-content {
+    max-width: calc(100vw - 260px);
+  }
+}
+
+/* Tables responsives */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.table-container table {
+  min-width: 100%;
+  width: max-content;
+}
+
+/* Prévention des débordements sur les cartes */
+.card {
+  min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Optimisation des modales */
+.modal-container {
+  max-width: min(90vw, 600px);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Correction des grilles Tailwind */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Espacement cohérent */
+.section-spacing {
+  margin-bottom: clamp(1rem, 3vw, 2rem);
+}
+
+/* Boutons adaptatifs */
+.btn-responsive {
+  padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 24px);
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+/* Navigation responsive */
+.nav-item {
+  padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+/* Correction des largeurs fixes dans les composants */
+.w-full-safe {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.container-safe {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding-left: clamp(16px, 3vw, 24px);
+  padding-right: clamp(16px, 3vw, 24px);
+  box-sizing: border-box;
+}
+
+/* Optimisation pour les écrans larges */
+@media (min-width: 1600px) {
+  .stats-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  
+  .bottom-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .main-content {
+    padding: 24px;
+  }
+}
+
+/* Correction spécifique pour les tableaux */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+  width: 100%;
+  min-width: 800px;
+}
+
+/* Prévention des débordements sur les inputs */
+input, select, textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Correction des flex containers */
+.flex-container-safe {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.flex-item-safe {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+}
