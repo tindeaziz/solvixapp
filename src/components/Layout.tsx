@@ -52,39 +52,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
     }
   }, [activeSection, isMobile]);
 
-  // Fermer les menus quand on clique en dehors
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      
-      // Fermer la sidebar si on clique sur l'overlay
-      if (sidebarOpen && isMobile && target.classList.contains('sidebar-overlay')) {
-        setSidebarOpen(false);
-      }
-      
-      // Fermer le menu utilisateur si on clique en dehors
-      if (userMenuOpen && !target.closest('.user-menu-container')) {
-        setUserMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [sidebarOpen, userMenuOpen, isMobile]);
-
-  // Empêcher le scroll du body quand la sidebar est ouverte sur mobile
-  useEffect(() => {
-    if (isMobile && sidebarOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMobile, sidebarOpen]);
-
   // Charger les informations utilisateur réelles
   useEffect(() => {
     const loadUserInfo = async () => {
@@ -143,7 +110,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
   const handleLogout = () => {
     setShowLogoutModal(false);
     setUserMenuOpen(false);
-    setSidebarOpen(false);
     onLogout();
   };
 
@@ -183,18 +149,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
     }
   };
 
-  const handleSectionChange = (section: ActiveSection) => {
-    setActiveSection(section);
-    setSidebarOpen(false); // Fermer la sidebar après sélection
-    setUserMenuOpen(false); // Fermer le menu utilisateur
-  };
-
   return (
     <div className="min-h-screen bg-solvix-light">
-      {/* Overlay pour mobile - CORRECTION CRITIQUE */}
+      {/* Mobile sidebar overlay */}
       {sidebarOpen && isMobile && (
         <div 
-          className="sidebar-overlay fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -265,7 +225,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
               return (
                 <button
                   key={item.id}
-                  onClick={() => handleSectionChange(item.id)}
+                  onClick={() => setActiveSection(item.id)}
                   className={`nav-item w-full flex items-center text-left rounded-xl transition-all duration-200 font-inter ${
                     isActive
                       ? 'bg-solvix-blue text-white shadow-solvix border-l-4 border-solvix-orange'
@@ -281,7 +241,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
 
           {/* User Profile Section */}
           <div className="p-4 border-t border-gray-200">
-            <div className="relative user-menu-container">
+            <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-solvix-light transition-colors duration-200"
@@ -340,7 +300,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
 
                   <button
                     onClick={() => {
-                      handleSectionChange('settings');
+                      setActiveSection('settings');
                       setUserMenuOpen(false);
                     }}
                     className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-solvix-light transition-colors duration-200 font-inter"
@@ -366,7 +326,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
         </div>
       )}
 
-      {/* Mobile Sidebar - CORRECTION CRITIQUE */}
+      {/* Mobile Sidebar */}
       {isMobile && (
         <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-solvix-lg transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -381,7 +341,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 rounded-md text-white hover:text-gray-200 transition-colors duration-200"
+              className="p-2 rounded-md text-white hover:text-gray-200"
             >
               <X className="h-6 w-6" />
             </button>
@@ -395,7 +355,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
               return (
                 <button
                   key={item.id}
-                  onClick={() => handleSectionChange(item.id)}
+                  onClick={() => {
+                    setActiveSection(item.id);
+                    setSidebarOpen(false);
+                  }}
                   className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 font-inter ${
                     isActive
                       ? 'bg-solvix-blue text-white shadow-solvix border-l-4 border-solvix-orange'
@@ -439,7 +402,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
             <div className="space-y-2">
               <button
                 onClick={() => {
-                  handleSectionChange('settings');
+                  setActiveSection('settings');
+                  setSidebarOpen(false);
                 }}
                 className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-solvix-light rounded-lg transition-colors duration-200 font-inter"
               >
@@ -489,13 +453,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
 
               <div className="flex items-center space-x-2">
                 {!loadingUserInfo && (
-                  <div className="relative user-menu-container">
-                    <button
-                      onClick={() => setUserMenuOpen(!userMenuOpen)}
-                      className="relative"
-                    >
-                      {renderUserAvatar('sm')}
-                    </button>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="relative"
+                  >
+                    {renderUserAvatar('sm')}
                     
                     {userMenuOpen && (
                       <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-solvix-lg py-1 z-50">
@@ -515,7 +477,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
 
                         <button
                           onClick={() => {
-                            handleSectionChange('settings');
+                            setActiveSection('settings');
                             setUserMenuOpen(false);
                           }}
                           className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-solvix-light transition-colors duration-200 font-inter"
@@ -536,7 +498,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
                         </button>
                       </div>
                     )}
-                  </div>
+                  </button>
                 )}
               </div>
             </div>
@@ -584,7 +546,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
                 return (
                   <button
                     key={item.id}
-                    onClick={() => handleSectionChange(item.id)}
+                    onClick={() => setActiveSection(item.id)}
                     className={`flex flex-col items-center justify-center p-2 min-w-0 flex-1 transition-colors duration-200 ${
                       isActive ? 'text-solvix-blue' : 'text-gray-500'
                     }`}
@@ -600,6 +562,14 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
           </nav>
         )}
       </div>
+
+      {/* Click outside handler for user menu */}
+      {userMenuOpen && (
+        <div 
+          className="fixed inset-0 z-20" 
+          onClick={() => setUserMenuOpen(false)}
+        />
+      )}
     </div>
   );
 };

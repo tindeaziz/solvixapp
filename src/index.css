@@ -76,25 +76,6 @@ html, body {
   padding: 8px;
 }
 
-/* CORRECTION CRITIQUE - Overlay sidebar mobile */
-.sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 40;
-  backdrop-filter: blur(2px);
-}
-
-/* Empêcher le scroll du body quand sidebar ouverte */
-body.sidebar-open {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-}
-
 /* Bannière principale - Welcome Card */
 .welcome-card {
   width: 100%;
@@ -669,33 +650,5 @@ input, select, textarea {
   
   .stat-card, .bottom-card {
     border-radius: 12px;
-  }
-}
-
-/* CORRECTION CRITIQUE - Z-index et positionnement */
-.sidebar-overlay {
-  z-index: 40 !important;
-}
-
-/* Sidebar mobile avec z-index correct */
-@media (max-width: 1023px) {
-  .sidebar {
-    z-index: 50 !important;
-  }
-}
-
-/* Menu utilisateur avec z-index approprié */
-.user-menu-container .absolute {
-  z-index: 60 !important;
-}
-
-/* Empêcher les interactions avec le contenu quand sidebar ouverte */
-@media (max-width: 1023px) {
-  body.sidebar-open .main-content {
-    pointer-events: none;
-  }
-  
-  body.sidebar-open .mobile-bottom-nav {
-    pointer-events: none;
   }
 }
