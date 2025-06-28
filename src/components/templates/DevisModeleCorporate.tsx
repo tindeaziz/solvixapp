@@ -68,275 +68,155 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
   };
 
   return (
-    <div className="corporate-template" style={{
+    <div className="devis-container" style={{
+      width: '210mm',
+      minHeight: '297mm',
+      padding: '20mm',
       fontFamily: 'Inter, sans-serif',
-      fontSize: '14px',
-      lineHeight: '1.5',
-      color: '#1B4B8C',
+      fontSize: '11px',
+      lineHeight: '1.4',
+      color: '#212529',
       backgroundColor: 'white',
-      minHeight: '100vh',
-      padding: '30px',
-      maxWidth: '210mm',
-      margin: '0 auto',
       position: 'relative',
-      boxSizing: 'border-box',
-      paddingBottom: '120px'
+      boxSizing: 'border-box'
     }}>
-      {/* Header Corporate - Très structuré */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: '25px',
+      
+      {/* HEADER - 25% de la page */}
+      <div className="header-section" style={{
+        height: '60mm',
+        marginBottom: '10mm',
         borderBottom: '3px solid #1B4B8C',
-        paddingBottom: '15px'
+        paddingBottom: '15mm'
       }}>
-        {/* Logo et infos entreprise - Alignement gauche */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
-          {entrepriseData.logo && (
-            <img 
-              src={entrepriseData.logo} 
-              alt="Logo" 
-              style={{ 
-                maxHeight: '50px', 
-                width: 'auto'
-              }} 
-            />
-          )}
-          <div>
-            <div style={{
-              fontSize: '22px',
-              fontWeight: '700',
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          height: '100%'
+        }}>
+          {/* Logo et entreprise - Gauche */}
+          <div className="entreprise-info" style={{ width: '45%', display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
+            {entrepriseData.logo && (
+              <img 
+                src={entrepriseData.logo} 
+                style={{ maxHeight: '40px', marginBottom: '8px' }} 
+              />
+            )}
+            <div>
+              <h2 style={{
+                fontSize: '16px',
+                color: '#1B4B8C',
+                margin: '0 0 8px 0',
+                fontWeight: '700',
+                letterSpacing: '0.5px'
+              }}>
+                {entrepriseData.name}
+              </h2>
+              <div style={{ fontSize: '10px', lineHeight: '1.3', color: '#6C757D' }}>
+                <p style={{ margin: '2px 0' }}>{entrepriseData.address}</p>
+                <p style={{ margin: '2px 0' }}>{entrepriseData.phone} | {entrepriseData.email}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Titre DEVIS - Centre */}
+          <div className="devis-title" style={{ width: '30%', textAlign: 'center' }}>
+            <h1 style={{
+              fontSize: '24px',
               color: '#1B4B8C',
-              marginBottom: '8px',
-              letterSpacing: '0.5px'
+              fontWeight: '700',
+              margin: '0 0 8px 0',
+              letterSpacing: '1px'
             }}>
-              {entrepriseData.name}
-            </div>
+              DEVIS
+            </h1>
             <div style={{
+              fontSize: '14px',
+              fontWeight: '600',
               color: '#6C757D',
-              fontSize: '11px',
-              lineHeight: '1.3',
-              whiteSpace: 'pre-line'
+              padding: '4px 8px',
+              border: '1px solid #E9ECEF',
+              borderRadius: '4px',
+              backgroundColor: '#F8F9FA'
             }}>
-              {entrepriseData.address}
-            </div>
-            <div style={{ 
-              color: '#6C757D', 
-              fontSize: '11px', 
-              marginTop: '3px'
-            }}>
-              {entrepriseData.phone} | {entrepriseData.email}
+              {devisData.numeroDevis}
             </div>
           </div>
-        </div>
-        
-        {/* Section devis - Alignement droite */}
-        <div style={{ textAlign: 'right', minWidth: '200px' }}>
-          <div style={{
-            fontSize: '28px',
-            fontWeight: '700',
-            color: '#1B4B8C',
-            marginBottom: '8px',
-            letterSpacing: '1px'
-          }}>
-            DEVIS
-          </div>
-          <div style={{
-            fontSize: '16px',
-            color: '#6C757D',
-            fontWeight: '600',
-            marginBottom: '12px'
-          }}>
-            {devisData.numeroDevis}
-          </div>
-          <div style={{ color: '#6C757D', fontSize: '11px' }}>
-            Date: {formatDate(devisData.dateCreation)}
-          </div>
-          <div style={{ color: '#6C757D', fontSize: '11px' }}>
-            Valide jusqu'au: {formatDate(devisData.dateExpiration)}
+
+          {/* Dates - Droite */}
+          <div className="dates-info" style={{ width: '25%', textAlign: 'right' }}>
+            <div style={{ fontSize: '10px', color: '#6C757D' }}>
+              <p style={{ margin: '4px 0' }}><strong>Date:</strong> {formatDate(devisData.dateCreation)}</p>
+              <p style={{ margin: '4px 0' }}><strong>Valide jusqu'au:</strong> {formatDate(devisData.dateExpiration)}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Section Client - Dimensions standardisées */}
-      <div className="section-client" style={{
-        maxHeight: '80px',
-        fontSize: '10px',
-        lineHeight: '1.1',
-        padding: '8px',
-        margin: '15px 0',
+      {/* SECTION CLIENT - 15% de la page */}
+      <div className="client-section" style={{
         backgroundColor: '#F8F9FA',
-        border: '1px solid #E9ECEF',
+        padding: '12px',
         borderRadius: '4px',
-        overflow: 'hidden'
+        marginBottom: '15mm',
+        border: '1px solid #E9ECEF'
       }}>
-        <div style={{
-          fontWeight: 'bold',
+        <h3 style={{
+          fontSize: '12px',
           color: '#1B4B8C',
-          marginBottom: '6px',
-          fontSize: '11px'
+          margin: '0 0 8px 0',
+          fontWeight: 'bold'
         }}>
-          Facturé à:
-        </div>
-        <div style={{
-          fontWeight: 'bold',
-          fontSize: '11px',
-          marginBottom: '2px',
-          color: '#1B4B8C'
-        }}>
-          {clientData.name}
-        </div>
-        <div style={{
-          fontSize: '10px',
-          marginBottom: '2px',
-          color: '#6C757D'
-        }}>
-          {clientData.company}
-        </div>
-        <div style={{
-          fontSize: '9px',
-          color: '#6C757D',
-          marginBottom: '1px'
-        }}>
-          {clientData.email} | {clientData.phone}
-        </div>
-        <div style={{
-          fontSize: '9px',
-          color: '#6C757D',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        }}>
-          {clientData.address.replace(/\n/g, ', ')}
+          CLIENT:
+        </h3>
+        <div style={{ fontSize: '11px' }}>
+          <p style={{ margin: '2px 0', fontWeight: 'bold', color: '#1B4B8C' }}>{clientData.name}</p>
+          <p style={{ margin: '2px 0', color: '#6C757D' }}>{clientData.company}</p>
+          <p style={{ margin: '2px 0', color: '#6C757D' }}>{clientData.address}</p>
+          <p style={{ margin: '2px 0', color: '#6C757D' }}>{clientData.phone} | {clientData.email}</p>
         </div>
       </div>
 
-      {/* Tableau des prestations - Dimensions standardisées */}
-      <div className="tableau-produits" style={{ margin: '10px 0' }}>
-        <div style={{
-          fontWeight: 'bold',
+      {/* TABLEAU PRESTATIONS - 45% de la page */}
+      <div className="prestations-section" style={{ marginBottom: '15mm' }}>
+        <h3 style={{
+          fontSize: '12px',
           color: '#1B4B8C',
-          marginBottom: '12px',
-          fontSize: '14px'
+          margin: '0 0 8px 0',
+          fontWeight: 'bold'
         }}>
           Détail des prestations:
-        </div>
-        
+        </h3>
+
         <table style={{
           width: '100%',
           borderCollapse: 'collapse',
+          fontSize: '10px',
           border: '1px solid #E9ECEF',
-          borderRadius: '6px',
-          overflow: 'hidden',
-          fontSize: '11px'
+          borderRadius: '4px',
+          overflow: 'hidden'
         }}>
           <thead>
             <tr style={{ backgroundColor: '#F8F9FA' }}>
-              <th style={{
-                color: '#1B4B8C',
-                padding: '10px 8px',
-                textAlign: 'left',
-                fontWeight: 'bold',
-                fontSize: '11px'
-              }}>
-                Description
-              </th>
-              <th style={{
-                color: '#1B4B8C',
-                padding: '10px 8px',
-                textAlign: 'right',
-                fontWeight: 'bold',
-                fontSize: '11px',
-                width: '60px'
-              }}>
-                Qté
-              </th>
-              <th style={{
-                color: '#1B4B8C',
-                padding: '10px 8px',
-                textAlign: 'right',
-                fontWeight: 'bold',
-                fontSize: '11px',
-                width: '90px'
-              }}>
-                Prix unitaire
-              </th>
-              <th style={{
-                color: '#1B4B8C',
-                padding: '10px 8px',
-                textAlign: 'right',
-                fontWeight: 'bold',
-                fontSize: '11px',
-                width: '50px'
-              }}>
-                TVA %
-              </th>
-              <th style={{
-                color: '#1B4B8C',
-                padding: '10px 8px',
-                textAlign: 'right',
-                fontWeight: 'bold',
-                fontSize: '11px',
-                width: '90px'
-              }}>
-                Total HT
-              </th>
+              <th style={{ padding: '10px 8px', textAlign: 'left', width: '45%', fontWeight: 'bold', color: '#1B4B8C' }}>DESCRIPTION</th>
+              <th style={{ padding: '10px 8px', textAlign: 'center', width: '10%', fontWeight: 'bold', color: '#1B4B8C' }}>QTÉ</th>
+              <th style={{ padding: '10px 8px', textAlign: 'right', width: '15%', fontWeight: 'bold', color: '#1B4B8C' }}>PRIX</th>
+              <th style={{ padding: '10px 8px', textAlign: 'center', width: '10%', fontWeight: 'bold', color: '#1B4B8C' }}>TVA</th>
+              <th style={{ padding: '10px 8px', textAlign: 'right', width: '20%', fontWeight: 'bold', color: '#1B4B8C' }}>TOTAL</th>
             </tr>
           </thead>
           <tbody>
-            {articles.map((item, index) => (
-              <tr key={item.id} style={{
+            {articles.map((article, index) => (
+              <tr key={article.id} style={{
+                borderBottom: '1px solid #E9ECEF',
                 backgroundColor: index % 2 === 0 ? '#ffffff' : '#FAFBFC'
               }}>
-                <td style={{
-                  padding: '8px',
-                  borderBottom: '1px solid #E9ECEF',
-                  fontSize: '10px',
-                  lineHeight: '1.3',
-                  color: '#374151'
-                }}>
-                  {item.designation}
-                </td>
-                <td style={{
-                  padding: '8px',
-                  borderBottom: '1px solid #E9ECEF',
-                  textAlign: 'right',
-                  fontWeight: 'bold',
-                  fontSize: '10px',
-                  color: '#374151'
-                }}>
-                  {item.quantity}
-                </td>
-                <td style={{
-                  padding: '8px',
-                  borderBottom: '1px solid #E9ECEF',
-                  textAlign: 'right',
-                  fontWeight: 'bold',
-                  fontSize: '10px',
-                  color: '#374151'
-                }}>
-                  {formatCurrency(item.unitPrice, devisData.devise)}
-                </td>
-                <td style={{
-                  padding: '8px',
-                  borderBottom: '1px solid #E9ECEF',
-                  textAlign: 'right',
-                  fontWeight: 'bold',
-                  fontSize: '10px',
-                  color: '#374151'
-                }}>
-                  {item.vatRate}%
-                </td>
-                <td style={{
-                  padding: '8px',
-                  borderBottom: '1px solid #E9ECEF',
-                  textAlign: 'right',
-                  fontWeight: 'bold',
-                  fontSize: '10px',
-                  color: '#1B4B8C'
-                }}>
-                  {formatCurrency(calculateItemTotal(item), devisData.devise)}
+                <td style={{ padding: '8px', color: '#374151' }}>{article.designation}</td>
+                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#374151' }}>{article.quantity}</td>
+                <td style={{ padding: '8px', textAlign: 'right', color: '#374151' }}>{formatCurrency(article.unitPrice, devisData.devise)}</td>
+                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#374151' }}>{article.vatRate}%</td>
+                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#1B4B8C' }}>
+                  {formatCurrency(calculateItemTotal(article), devisData.devise)}
                 </td>
               </tr>
             ))}
@@ -344,161 +224,94 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
         </table>
       </div>
 
-      {/* Section Totaux - Dimensions standardisées */}
-      <div style={{
-        marginTop: '20px',
+      {/* TOTAUX - 10% de la page */}
+      <div className="totaux-section" style={{
         display: 'flex',
-        justifyContent: 'flex-end'
+        justifyContent: 'flex-end',
+        marginBottom: '15mm'
       }}>
-        <div style={{ width: '280px' }}>
-          <table style={{
-            width: '100%',
-            backgroundColor: '#F8F9FA',
-            border: '2px solid #1B4B8C',
-            borderRadius: '6px',
-            overflow: 'hidden',
-            fontSize: '12px'
-          }}>
-            <tbody>
-              <tr>
-                <td style={{
-                  padding: '8px 15px',
-                  borderBottom: '1px solid #E9ECEF',
-                  fontSize: '12px',
-                  color: '#6C757D'
-                }}>
-                  Sous-total HT:
-                </td>
-                <td style={{
-                  padding: '8px 15px',
-                  borderBottom: '1px solid #E9ECEF',
-                  textAlign: 'right',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  color: '#1B4B8C'
-                }}>
-                  {formatCurrency(calculateSubtotal(), devisData.devise)}
-                </td>
-              </tr>
-              <tr>
-                <td style={{
-                  padding: '8px 15px',
-                  borderBottom: '1px solid #E9ECEF',
-                  fontSize: '12px',
-                  color: '#6C757D'
-                }}>
-                  Total TVA:
-                </td>
-                <td style={{
-                  padding: '8px 15px',
-                  borderBottom: '1px solid #E9ECEF',
-                  textAlign: 'right',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  color: '#1B4B8C'
-                }}>
-                  {formatCurrency(calculateVAT(), devisData.devise)}
-                </td>
-              </tr>
-              <tr style={{ backgroundColor: '#1B4B8C' }}>
-                <td style={{
-                  padding: '12px 15px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  color: 'white'
-                }}>
-                  TOTAL TTC:
-                </td>
-                <td style={{
-                  padding: '12px 15px',
-                  textAlign: 'right',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  color: 'white'
-                }}>
-                  {formatCurrency(calculateTotal(), devisData.devise)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div style={{
+          width: '40%',
+          border: '2px solid #1B4B8C',
+          borderRadius: '4px',
+          padding: '12px',
+          backgroundColor: '#F8F9FA'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <span style={{ color: '#6C757D' }}>Sous-total HT:</span>
+            <span style={{ fontWeight: 'bold', color: '#1B4B8C' }}>{formatCurrency(calculateSubtotal(), devisData.devise)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <span style={{ color: '#6C757D' }}>TVA:</span>
+            <span style={{ fontWeight: 'bold', color: '#1B4B8C' }}>{formatCurrency(calculateVAT(), devisData.devise)}</span>
+          </div>
+          <hr style={{ margin: '8px 0', border: '1px solid #1B4B8C' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#1B4B8C' }}>TOTAL TTC:</span>
+            <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#1B4B8C' }}>
+              {formatCurrency(calculateTotal(), devisData.devise)}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Notes - Dimensions standardisées */}
+      {/* NOTES */}
       {devisData.notes && (
-        <div className="notes-conditions" style={{
-          fontSize: '9px',
-          maxHeight: '60px',
-          padding: '5px',
-          overflow: 'hidden',
-          marginTop: '20px',
+        <div style={{
           backgroundColor: '#F8F9FA',
-          borderRadius: '6px',
+          padding: '12px',
+          borderRadius: '4px',
+          marginBottom: '10mm',
           border: '1px solid #E9ECEF'
         }}>
-          <div style={{
+          <h4 style={{
+            fontSize: '10px',
             fontWeight: 'bold',
             color: '#1B4B8C',
-            marginBottom: '4px',
-            fontSize: '10px'
+            margin: '0 0 6px 0'
           }}>
             Notes et conditions:
-          </div>
-          <div style={{
-            whiteSpace: 'pre-line',
-            color: '#6C757D',
+          </h4>
+          <p style={{
             fontSize: '9px',
-            lineHeight: '1.2',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            color: '#6C757D',
+            margin: '0',
+            whiteSpace: 'pre-line'
           }}>
             {devisData.notes}
-          </div>
+          </p>
         </div>
       )}
 
-      {/* SECTION SIGNATURE AUTOMATIQUE */}
-      <div className="signature-footer" style={{
-        position: 'absolute',
-        bottom: '60px',
-        right: '30px',
-        textAlign: 'center',
-        fontSize: '10px',
-        fontStyle: 'italic',
-        color: '#6C757D'
-      }}>
-        <div style={{ marginBottom: '5px' }}>
-          Fait le {new Date().toLocaleDateString('fr-FR')}, {entrepriseData.name}
-        </div>
-        {entrepriseData.signature && (
-          <img 
-            src={entrepriseData.signature} 
-            alt="Signature" 
-            className="signature-image"
-            style={{ 
-              maxHeight: '60px', 
-              maxWidth: '150px',
-              marginTop: '5px'
-            }} 
-          />
-        )}
-      </div>
-
-      {/* Footer */}
-      <div style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '30px',
-        right: '30px',
-        textAlign: 'center',
-        color: '#6C757D',
-        fontSize: '10px',
+      {/* FOOTER - 5% de la page */}
+      <div className="footer-section" style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        marginTop: 'auto',
         borderTop: '1px solid #E9ECEF',
         paddingTop: '12px'
       }}>
-        <div>Devis généré le {formatDate(new Date().toISOString().split('T')[0])}</div>
-        <div style={{ marginTop: '3px' }}>
-          Solvix - Génération de devis professionnels
+        <div style={{ fontSize: '9px', color: '#6C757D' }}>
+          <p style={{ margin: '2px 0' }}>Devis généré le {formatDate(new Date().toISOString().split('T')[0])}</p>
+          <p style={{ margin: '2px 0' }}>Solvix - Génération de devis professionnels</p>
+        </div>
+
+        <div style={{ textAlign: 'center' }}>
+          <p style={{
+            fontSize: '10px',
+            margin: '0 0 8px 0',
+            color: '#6C757D',
+            fontStyle: 'italic'
+          }}>
+            Fait le {formatDate(new Date().toISOString().split('T')[0])}, {entrepriseData.name}
+          </p>
+          {entrepriseData.signature && (
+            <img 
+              src={entrepriseData.signature} 
+              style={{ maxHeight: '40px', maxWidth: '120px' }} 
+            />
+          )}
         </div>
       </div>
     </div>
