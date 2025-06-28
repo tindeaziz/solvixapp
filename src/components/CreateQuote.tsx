@@ -16,11 +16,13 @@ import {
   Printer,
   Loader2,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { devisService, clientService, articleService, profileService } from '../lib/supabase';
 import { CURRENCIES, formatCurrency, getCurrencyByCode } from '../types/currency';
+import { generateDevisPDF } from '../utils/pdfGenerator';
 import ShareModal from './ShareModal';
 
 interface QuoteItem {
@@ -58,6 +60,7 @@ const CreateQuote: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
   // États pour le devis
   const [quoteData, setQuoteData] = useState({
@@ -323,6 +326,46 @@ const CreateQuote: React.FC = () => {
     };
     
     navigate('/devis/preview/new', { state: devisData });
+  };
+
+  const handleDownloadPDF = async () => {
+    const validItems = quoteData.items.filter(item => 
+      item.designation.trim() !== '' && 
+      item.quantity > 0 && 
+      item.unitPrice >= 0
+    );
+    
+    if (validItems.length === 0) {
+      setError('Veuillez ajouter au moins un produit avec une désignation et un prix valides.');
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+    try {
+      const devisData = {
+        articles: validItems,
+        client: quoteData.client,
+        entreprise: entrepriseData,
+        numeroDevis: quoteData.number,
+        dateCreation: quoteData.date,
+        dateExpiration: quoteData.validUntil,
+        devise: quoteData.currency,
+        notes: quoteData.notes,
+        template: quoteData.template,
+        sousTotal: calculateSubtotal(),
+        totalTVA: calculateVAT(),
+        totalTTC: calculateTotal()
+      };
+
+      console.log('📥 CREATE_QUOTE - Génération PDF pour devis:', devisData.numeroDevis);
+      await generateDevisPDF(devisData);
+      console.log('✅ CREATE_QUOTE - PDF généré avec succès');
+    } catch (error) {
+      console.error('❌ CREATE_QUOTE - Erreur génération PDF:', error);
+      setError('Erreur lors de la génération du PDF. Veuillez réessayer.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const selectedCurrency = getCurrencyByCode(quoteData.currency);
@@ -787,11 +830,21 @@ const CreateQuote: React.FC = () => {
                 )}
               </button>
               <button
-                onClick={handlePreview}
-                className="flex items-center justify-center px-4 py-3 bg-solvix-orange text-white rounded-lg text-sm font-medium hover:bg-solvix-orange-dark transition-colors duration-200 font-inter shadow-solvix"
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPDF}
+                className="flex items-center justify-center px-4 py-3 bg-solvix-orange text-white rounded-lg text-sm font-medium hover:bg-solvix-orange-dark transition-colors duration-200 disabled:opacity-50 font-inter shadow-solvix"
               >
-                <Printer className="h-4 w-4 mr-2" />
-                Imprimer / PDF
+                {isGeneratingPDF ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    PDF
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -813,7 +866,7 @@ const CreateQuote: React.FC = () => {
           const encodedMessage = encodeURIComponent(message);
           window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
         }}
-        onDownload={handlePreview}
+        onDownload={handleDownloadPDF}
       />
     </div>
   );
