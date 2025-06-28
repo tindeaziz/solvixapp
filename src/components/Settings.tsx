@@ -204,17 +204,17 @@ const Settings: React.FC = () => {
   const renderProfileSettings = () => {
     if (isLoading) {
       return (
-        <div className="flex items-center justify-center py-12 sm:py-16">
+        <div className="flex items-center justify-center py-16">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-4 border-solvix-blue border-t-transparent mx-auto mb-4"></div>
-            <p className="text-solvix-dark font-inter text-sm sm:text-base">Chargement du profil...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-solvix-blue border-t-transparent mx-auto mb-4"></div>
+            <p className="text-solvix-dark font-inter">Chargement du profil...</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-6 sm:space-y-8">
         {/* Success Message */}
         {showSuccess && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
@@ -243,12 +243,12 @@ const Settings: React.FC = () => {
           </div>
         )}
 
-        {/* Photo de profil - Responsive */}
-        <div className="border-b border-gray-200 pb-4 sm:pb-6">
+        {/* Photo de profil */}
+        <div className="border-b border-gray-200 pb-6 sm:pb-8">
           <h3 className="text-lg font-medium text-gray-900 mb-4 sm:mb-6">Photo de profil</h3>
           <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
             <div className="flex-shrink-0 relative mx-auto sm:mx-0">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
                 {photoPreview || profile.photo ? (
                   <img 
                     src={photoPreview || profile.photo || ''} 
@@ -256,14 +256,14 @@ const Settings: React.FC = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-white text-sm sm:text-lg md:text-2xl font-medium">
+                  <span className="text-white text-lg sm:text-2xl font-medium">
                     {getInitials(profile.name || 'U')}
                   </span>
                 )}
               </div>
               {isUploading && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-4 w-4 sm:h-6 sm:w-6 border-2 border-white border-t-transparent"></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
                 </div>
               )}
             </div>
@@ -272,7 +272,7 @@ const Settings: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-3 mb-3">
                 <label
                   htmlFor="photo-upload"
-                  className={`btn btn-secondary text-xs sm:text-sm ${
+                  className={`inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors duration-200 ${
                     isUploading ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
@@ -284,7 +284,7 @@ const Settings: React.FC = () => {
                   <button
                     onClick={removePhoto}
                     disabled={isUploading}
-                    className="btn border border-red-300 text-red-700 bg-white hover:bg-red-50 text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Supprimer
                   </button>
@@ -300,12 +300,12 @@ const Settings: React.FC = () => {
                 disabled={isUploading}
               />
               
-              <p className="text-xs sm:text-sm text-gray-500 mb-2">
+              <p className="text-sm text-gray-500 mb-2">
                 JPG, PNG ou GIF. Taille maximale : 2MB
               </p>
               
               {photoError && (
-                <div className="flex items-center text-red-600 text-xs sm:text-sm">
+                <div className="flex items-center text-red-600 text-sm">
                   <AlertCircle className="h-4 w-4 mr-2" />
                   {photoError}
                 </div>
@@ -314,49 +314,49 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        {/* Informations personnelles - Responsive */}
+        {/* Informations personnelles */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Informations personnelles</h3>
-          <div className="form-grid">
-            <div className="form-field">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
               <input
                 type="text"
                 value={profile.name}
                 onChange={(e) => setProfile({...profile, name: e.target.value})}
-                className="form-input"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Votre nom complet"
               />
             </div>
-            <div className="form-field">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
                 type="email"
                 value={profile.email}
                 onChange={(e) => setProfile({...profile, email: e.target.value})}
-                className="form-input bg-gray-50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
                 placeholder="votre@email.com"
                 disabled
               />
               <p className="text-xs text-gray-500 mt-1">L'email ne peut pas être modifié ici</p>
             </div>
-            <div className="form-field">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
               <input
                 type="tel"
                 value={profile.phone}
                 onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                className="form-input"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="+33 1 23 45 67 89"
               />
             </div>
-            <div className="form-field">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Poste</label>
               <input
                 type="text"
                 value={profile.position}
                 onChange={(e) => setProfile({...profile, position: e.target.value})}
-                className="form-input"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Votre poste"
               />
             </div>
@@ -429,25 +429,25 @@ const Settings: React.FC = () => {
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900">Sécurité</h3>
             <div className="space-y-4">
-              <div className="form-field">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
                 <input
                   type="password"
-                  className="form-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
-              <div className="form-field">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
                 <input
                   type="password"
-                  className="form-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
-              <div className="form-field">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe</label>
                 <input
                   type="password"
-                  className="form-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
             </div>
@@ -457,17 +457,17 @@ const Settings: React.FC = () => {
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900">Langue et région</h3>
-            <div className="form-field">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Langue</label>
-              <select className="form-input">
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
                 <option value="fr">Français</option>
                 <option value="en">English</option>
                 <option value="es">Español</option>
               </select>
             </div>
-            <div className="form-field">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Fuseau horaire</label>
-              <select className="form-input">
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
                 <option value="Europe/Paris">Europe/Paris (GMT+1)</option>
                 <option value="Europe/London">Europe/London (GMT+0)</option>
                 <option value="America/New_York">America/New_York (GMT-5)</option>
@@ -490,9 +490,9 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="settings-grid">
+        <div className="flex flex-col lg:flex-row">
           {/* Sidebar - Responsive */}
-          <div className="border-b lg:border-b-0 lg:border-r border-gray-200">
+          <div className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-200">
             <nav className="p-4 space-y-1 overflow-x-auto lg:overflow-x-visible">
               <div className="flex lg:flex-col space-x-2 lg:space-x-0 lg:space-y-1 min-w-max lg:min-w-0">
                 {tabs.map((tab) => {
@@ -501,14 +501,14 @@ const Settings: React.FC = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center px-3 py-2 text-left rounded-lg transition-colors duration-200 whitespace-nowrap lg:w-full text-sm ${
+                      className={`flex items-center px-3 py-2 text-left rounded-lg transition-colors duration-200 whitespace-nowrap lg:w-full ${
                         activeTab === tab.id
                           ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                     >
-                      <Icon className={`h-4 w-4 mr-2 sm:mr-3 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'}`} />
-                      <span className="font-medium">{tab.name}</span>
+                      <Icon className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <span className="text-sm font-medium">{tab.name}</span>
                     </button>
                   );
                 })}
@@ -517,7 +517,7 @@ const Settings: React.FC = () => {
           </div>
 
           {/* Content */}
-          <div className="p-4 sm:p-6">
+          <div className="flex-1 p-4 sm:p-6">
             {renderTabContent()}
             
             {/* Save Button - Only show for profile tab */}
@@ -526,7 +526,7 @@ const Settings: React.FC = () => {
                 <button 
                   onClick={handleSaveProfile}
                   disabled={isSaving || isLoading}
-                  className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 >
                   {isSaving ? (
                     <>
@@ -546,7 +546,7 @@ const Settings: React.FC = () => {
             {/* Save Button - For other tabs (non-company) */}
             {activeTab !== 'company' && activeTab !== 'profile' && (
               <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
-                <button className="btn btn-primary">
+                <button className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                   <Save className="h-4 w-4 mr-2" />
                   Sauvegarder les modifications
                 </button>
