@@ -181,10 +181,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
       <header className="top-navbar fixed top-0 left-0 right-0 z-50 bg-solvix-blue text-white shadow-solvix-lg">
         <div className="navbar-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo et Brand */}
+            {/* Logo et Brand - Utilisation du nouveau logo blanc */}
             <div className="navbar-brand flex items-center space-x-3">
               <img 
-                src="/Logo-Solvix.png" 
+                src="/Logo-Solvix-blanc.png" 
                 alt="Solvix Logo" 
                 className="h-8 w-auto"
               />
