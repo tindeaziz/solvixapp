@@ -8,7 +8,8 @@ const ResetPasswordPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' }>({ text: '', type: 'info' });
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
@@ -16,82 +17,93 @@ const ResetPasswordPage: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Extraire le token de l'URL
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    const type = params.get('type');
-    
-    console.log('🔍 RESET_PASSWORD - Paramètres URL:', { token: token?.substring(0, 5) + '...', type });
-    
-    if (token && type === 'recovery') {
-      console.log('✅ RESET_PASSWORD - Token de récupération détecté dans l\'URL');
-      setIsRecoveryMode(true);
-      setMessage({ 
-        text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
-        type: 'info' 
-      });
-    }
-
-    // Vérifier si l'utilisateur est dans un état de récupération
-    const checkAuthState = async () => {
+    const initializeRecovery = async () => {
       try {
-        // Vérifier l'état d'authentification actuel
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('🔄 RESET_PASSWORD - Session actuelle:', session ? 'Présente' : 'Absente');
-        
-        if (session) {
-          console.log('👤 RESET_PASSWORD - Utilisateur connecté, considéré en mode récupération');
-          setIsRecoveryMode(true);
-          setMessage({ 
-            text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
-            type: 'info' 
+        // Extraire le token de l'URL hash
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const type = hashParams.get('type');
+
+        console.log('🔍 RESET_PASSWORD - Hash params:', { 
+          accessToken: accessToken ? accessToken.substring(0, 5) + '...' : null, 
+          type 
+        });
+
+        if (type === 'recovery' && accessToken) {
+          // Établir la session avec les tokens
+          console.log('🔄 RESET_PASSWORD - Tentative d\'établir la session avec le token');
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || ''
           });
-        }
-        
-        // S'abonner aux changements d'état d'authentification
-        const { data } = supabase.auth.onAuthStateChange((event, session) => {
-          console.log('🔄 RESET_PASSWORD - Événement auth:', event);
-          
-          if (event === 'PASSWORD_RECOVERY') {
-            console.log('✅ RESET_PASSWORD - Mode récupération de mot de passe activé');
-            setIsRecoveryMode(true);
+
+          if (error) {
+            console.error('❌ RESET_PASSWORD - Erreur établissement session:', error);
             setMessage({ 
-              text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
-              type: 'info' 
+              text: 'Lien de récupération invalide ou expiré. Veuillez demander un nouveau lien.', 
+              type: 'error' 
             });
-          } else if (event === 'SIGNED_IN') {
-            console.log('👤 RESET_PASSWORD - Utilisateur connecté');
+          } else {
+            console.log('✅ RESET_PASSWORD - Session établie:', data.user?.id);
             setIsRecoveryMode(true);
             setMessage({ 
               text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
               type: 'info' 
             });
           }
-        });
-
-        return () => {
-          data.subscription.unsubscribe();
-        };
+        } else {
+          // Vérifier s'il y a déjà une session de récupération
+          console.log('🔍 RESET_PASSWORD - Vérification de la session existante');
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session && session.user) {
+            console.log('✅ RESET_PASSWORD - Session existante trouvée:', session.user.id);
+            setIsRecoveryMode(true);
+            setMessage({ 
+              text: 'Vous pouvez maintenant définir un nouveau mot de passe pour votre compte.', 
+              type: 'info' 
+            });
+          } else {
+            console.log('⚠️ RESET_PASSWORD - Aucune session trouvée, vérification des paramètres d\'URL');
+            
+            // Vérifier les paramètres d'URL standard (non-hash)
+            const urlParams = new URLSearchParams(location.search);
+            const urlToken = urlParams.get('token');
+            const urlType = urlParams.get('type');
+            
+            if (urlToken && urlType === 'recovery') {
+              console.log('🔄 RESET_PASSWORD - Token trouvé dans les paramètres d\'URL');
+              setIsRecoveryMode(true);
+              setMessage({ 
+                text: 'Veuillez définir votre nouveau mot de passe.', 
+                type: 'info' 
+              });
+            } else {
+              console.log('⚠️ RESET_PASSWORD - Aucun token trouvé, forçage du mode récupération');
+              // Forcer l'affichage du formulaire même sans token
+              setIsRecoveryMode(true);
+              setMessage({ 
+                text: 'Veuillez définir votre nouveau mot de passe.', 
+                type: 'info' 
+              });
+            }
+          }
+        }
       } catch (error) {
-        console.error('❌ RESET_PASSWORD - Erreur lors de la vérification de l\'état d\'authentification:', error);
+        console.error('❌ RESET_PASSWORD - Erreur initialisation:', error);
+        setMessage({ 
+          text: 'Une erreur est survenue lors de l\'initialisation. Veuillez réessayer.', 
+          type: 'error' 
+        });
+        // Forcer l'affichage du formulaire même en cas d'erreur
+        setIsRecoveryMode(true);
+      } finally {
+        setLoading(false);
       }
     };
 
-    checkAuthState();
-    
-    // Forcer l'affichage du formulaire même si aucun état de récupération n'est détecté
-    const timer = setTimeout(() => {
-      if (!isRecoveryMode) {
-        console.log('⚠️ RESET_PASSWORD - Aucun état de récupération détecté après délai, forçage du mode récupération');
-        setIsRecoveryMode(true);
-        setMessage({
-          text: 'Veuillez définir votre nouveau mot de passe.',
-          type: 'info'
-        });
-      }
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    initializeRecovery();
   }, [location]);
 
   const getPasswordStrength = (password: string) => {
@@ -124,7 +136,7 @@ const ResetPasswordPage: React.FC = () => {
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
     setMessage({ text: '', type: 'info' });
 
     try {
@@ -160,12 +172,12 @@ const ResetPasswordPage: React.FC = () => {
         type: 'error' 
       });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   // Afficher un loader pendant la vérification
-  if (!isRecoveryMode) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-solvix-light via-white to-solvix-light flex items-center justify-center p-4">
         <div className="text-center">
@@ -232,13 +244,13 @@ const ResetPasswordPage: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:border-transparent transition-colors duration-200 font-inter border-gray-300"
                   placeholder="Votre nouveau mot de passe"
-                  disabled={loading}
+                  disabled={saving}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  disabled={loading}
+                  disabled={saving}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -291,13 +303,13 @@ const ResetPasswordPage: React.FC = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:border-transparent transition-colors duration-200 font-inter border-gray-300"
                   placeholder="Confirmez votre mot de passe"
-                  disabled={loading}
+                  disabled={saving}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  disabled={loading}
+                  disabled={saving}
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -317,10 +329,10 @@ const ResetPasswordPage: React.FC = () => {
             <div className="space-y-4">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={saving}
                 className="w-full bg-solvix-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-solvix-blue-dark focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-inter shadow-solvix"
               >
-                {loading ? (
+                {saving ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     Mise à jour en cours...
@@ -333,7 +345,7 @@ const ResetPasswordPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                disabled={loading}
+                disabled={saving}
                 className="w-full flex items-center justify-center py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 font-inter"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
