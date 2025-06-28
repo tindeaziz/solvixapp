@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Printer, ArrowLeft, FileText } from 'lucide-react';
 import { formatCurrency } from '../types/currency';
 
-// Import des nouveaux modèles
+// Import des modèles
 import DevisModeleCorporate from './templates/DevisModeleCorporate';
 import DevisModeleCreatif from './templates/DevisModeleCreatif';
 import DevisModeleArtisan from './templates/DevisModeleArtisan';
@@ -58,8 +58,22 @@ const QuotePreview: React.FC = () => {
   const location = useLocation();
   const [quote, setQuote] = useState<DevisData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // 3. RÉCEPTION DANS LE COMPOSANT D'IMPRESSION avec useLocation
+  // Détecter si l'appareil est mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+
   useEffect(() => {
     const fetchQuote = async () => {
       try {
@@ -83,7 +97,7 @@ const QuotePreview: React.FC = () => {
         } else {
           console.log("=== AUCUNE DONNÉE REÇUE - UTILISATION DES DONNÉES SIMULÉES ===");
           
-          // 5. GESTION DES CAS D'ERREUR - Données simulées si pas de données reçues
+          // Données simulées si pas de données reçues
           const mockQuote: DevisData = {
             numeroDevis: `DEV-2025-${id?.padStart(3, '0') || '001'}`,
             dateCreation: '2025-01-15',
@@ -137,7 +151,7 @@ const QuotePreview: React.FC = () => {
               address: '123 Rue de la Technologie\n75001 Paris, France',
               phone: '+33 1 23 45 67 89',
               email: 'contact@solvix.com',
-              signature: localStorage.getItem('companySignature') || undefined // Récupérer la signature depuis localStorage
+              signature: localStorage.getItem('companySignature') || undefined
             },
             sousTotal: 22800,
             totalTVA: 4560,
@@ -243,15 +257,14 @@ const QuotePreview: React.FC = () => {
         padding: '20px',
         maxWidth: '100%',
         margin: '0 auto',
-        position: 'relative',
-        boxSizing: 'border-box'
+        position: 'relative'
       }}>
         {/* Header Moderne avec gradient */}
         <div style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           borderRadius: '12px',
           padding: '20px',
-          marginBottom: '25px',
+          marginBottom: '20px',
           color: 'white',
           position: 'relative',
           overflow: 'hidden'
@@ -269,13 +282,20 @@ const QuotePreview: React.FC = () => {
 
           <div style={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: '15px',
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: 'space-between',
+            alignItems: isMobile ? 'flex-start' : 'center',
             position: 'relative',
-            zIndex: 2
+            zIndex: 2,
+            gap: isMobile ? '15px' : '0'
           }}>
             {/* Logo et entreprise */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '15px',
+              width: isMobile ? '100%' : 'auto'
+            }}>
               {quote.entreprise.logo && (
                 <div style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.15)',
@@ -296,7 +316,7 @@ const QuotePreview: React.FC = () => {
               )}
               <div>
                 <div style={{
-                  fontSize: '18px',
+                  fontSize: isMobile ? '18px' : '22px',
                   fontWeight: '700',
                   marginBottom: '5px',
                   textShadow: '0 2px 4px rgba(0,0,0,0.1)'
@@ -304,7 +324,7 @@ const QuotePreview: React.FC = () => {
                   {quote.entreprise.name}
                 </div>
                 <div style={{
-                  fontSize: '10px',
+                  fontSize: '11px',
                   opacity: '0.9',
                   lineHeight: '1.3'
                 }}>
@@ -312,11 +332,11 @@ const QuotePreview: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Section DEVIS */}
-            <div style={{ textAlign: 'left' }}>
+            <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
               <div style={{
-                fontSize: '24px',
+                fontSize: isMobile ? '24px' : '32px',
                 fontWeight: '800',
                 marginBottom: '5px',
                 textShadow: '0 2px 4px rgba(0,0,0,0.2)',
@@ -342,9 +362,9 @@ const QuotePreview: React.FC = () => {
         {/* Informations date et client - Cards modernes */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 2fr',
           gap: '15px',
-          marginBottom: '25px'
+          marginBottom: '20px'
         }}>
           {/* Card dates */}
           <div style={{
@@ -363,23 +383,16 @@ const QuotePreview: React.FC = () => {
             }}>
               Dates importantes
             </div>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '10px'
-            }}>
-              <div style={{ marginBottom: '10px', flex: '1', minWidth: '120px' }}>
-                <div style={{ fontSize: '10px', opacity: '0.7' }}>Émission</div>
-                <div style={{ fontSize: '14px', fontWeight: '600' }}>
-                  {formatDate(quote.dateCreation)}
-                </div>
+            <div style={{ marginBottom: '10px' }}>
+              <div style={{ fontSize: '10px', opacity: '0.7' }}>Émission</div>
+              <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                {formatDate(quote.dateCreation)}
               </div>
-              <div style={{ flex: '1', minWidth: '120px' }}>
-                <div style={{ fontSize: '10px', opacity: '0.7' }}>Expiration</div>
-                <div style={{ fontSize: '14px', fontWeight: '600' }}>
-                  {formatDate(quote.dateExpiration)}
-                </div>
+            </div>
+            <div>
+              <div style={{ fontSize: '10px', opacity: '0.7' }}>Expiration</div>
+              <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                {formatDate(quote.dateExpiration)}
               </div>
             </div>
           </div>
@@ -451,12 +464,12 @@ const QuotePreview: React.FC = () => {
           borderRadius: '15px',
           overflow: 'hidden',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          marginBottom: '25px'
+          marginBottom: '20px'
         }}>
           <div style={{
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
-            padding: '15px',
+            padding: '12px 15px',
             fontSize: '14px',
             fontWeight: '700',
             textTransform: 'uppercase',
@@ -465,12 +478,11 @@ const QuotePreview: React.FC = () => {
             💼 Prestations Modernes
           </div>
           
-          <div style={{ overflowX: 'auto' }}>
+          <div className="overflow-x-auto">
             <table style={{
               width: '100%',
               borderCollapse: 'collapse',
-              fontSize: '11px',
-              minWidth: '500px'
+              fontSize: '11px'
             }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8fafc' }}>
@@ -542,7 +554,7 @@ const QuotePreview: React.FC = () => {
                     borderLeft: index % 2 === 0 ? '3px solid #667eea' : '3px solid #764ba2'
                   }}>
                     <td style={{
-                      padding: '12px',
+                      padding: '10px 12px',
                       fontSize: '11px',
                       lineHeight: '1.4',
                       color: '#1f2937'
@@ -550,7 +562,7 @@ const QuotePreview: React.FC = () => {
                       {item.designation}
                     </td>
                     <td style={{
-                      padding: '12px',
+                      padding: '10px 12px',
                       textAlign: 'center',
                       fontWeight: '700',
                       color: '#667eea'
@@ -558,7 +570,7 @@ const QuotePreview: React.FC = () => {
                       {item.quantity}
                     </td>
                     <td style={{
-                      padding: '12px',
+                      padding: '10px 12px',
                       textAlign: 'right',
                       fontWeight: '600',
                       color: '#1f2937'
@@ -566,7 +578,7 @@ const QuotePreview: React.FC = () => {
                       {formatCurrency(item.unitPrice, quote.devise)}
                     </td>
                     <td style={{
-                      padding: '12px',
+                      padding: '10px 12px',
                       textAlign: 'center',
                       fontWeight: '600',
                       color: '#764ba2'
@@ -574,7 +586,7 @@ const QuotePreview: React.FC = () => {
                       {item.vatRate}%
                     </td>
                     <td style={{
-                      padding: '12px',
+                      padding: '10px 12px',
                       textAlign: 'right',
                       fontWeight: '700',
                       color: '#667eea',
@@ -593,9 +605,9 @@ const QuotePreview: React.FC = () => {
         <div style={{
           display: 'flex',
           justifyContent: 'flex-end',
-          marginBottom: '25px'
+          marginBottom: '20px'
         }}>
-          <div style={{ width: '100%', maxWidth: '320px' }}>
+          <div style={{ width: isMobile ? '100%' : '320px' }}>
             <div style={{
               backgroundColor: 'white',
               borderRadius: '15px',
@@ -661,8 +673,8 @@ const QuotePreview: React.FC = () => {
           <div style={{
             backgroundColor: '#f8fafc',
             borderRadius: '15px',
-            padding: '20px',
-            marginBottom: '25px',
+            padding: '15px',
+            marginBottom: '20px',
             border: '2px solid #e2e8f0',
             position: 'relative'
           }}>
@@ -696,17 +708,17 @@ const QuotePreview: React.FC = () => {
         {/* Footer moderne avec signature */}
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          marginTop: '30px',
-          paddingTop: '20px',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'center' : 'flex-end',
+          marginTop: '20px',
+          paddingTop: '15px',
           borderTop: '2px solid #e2e8f0',
-          gap: '15px'
+          gap: isMobile ? '15px' : '0'
         }}>
           <div style={{
             fontSize: '10px',
-            color: '#64748b',
-            textAlign: 'center'
+            color: '#64748b'
           }}>
             <div style={{ fontWeight: '600', marginBottom: '3px' }}>
               Devis généré le {formatDate(new Date().toISOString().split('T')[0])}
@@ -765,8 +777,7 @@ const QuotePreview: React.FC = () => {
         padding: '20px',
         maxWidth: '100%',
         margin: '0 auto',
-        position: 'relative',
-        boxSizing: 'border-box'
+        position: 'relative'
       }}>
         {/* Header minimaliste */}
         <div style={{
@@ -776,7 +787,7 @@ const QuotePreview: React.FC = () => {
           paddingBottom: '20px'
         }}>
           <div style={{
-            fontSize: '18px',
+            fontSize: '20px',
             fontWeight: '300',
             color: '#2d3748',
             marginBottom: '5px'
@@ -784,7 +795,7 @@ const QuotePreview: React.FC = () => {
             {quote.entreprise.name}
           </div>
           <div style={{
-            fontSize: '11px',
+            fontSize: '12px',
             color: '#718096'
           }}>
             {quote.entreprise.phone} • {quote.entreprise.email}
@@ -794,7 +805,7 @@ const QuotePreview: React.FC = () => {
         {/* Titre DEVIS minimaliste */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '25px'
+          marginBottom: '30px'
         }}>
           <div style={{
             fontSize: '24px',
@@ -822,7 +833,7 @@ const QuotePreview: React.FC = () => {
 
         {/* Client minimaliste */}
         <div style={{
-          marginBottom: '25px',
+          marginBottom: '30px',
           fontSize: '14px',
           color: '#2d3748'
         }}>
@@ -836,51 +847,106 @@ const QuotePreview: React.FC = () => {
         </div>
 
         {/* Articles minimalistes */}
-        <div style={{ marginBottom: '25px' }}>
+        <div style={{ marginBottom: '30px' }}>
           <h3 style={{
             fontSize: '14px',
             fontWeight: 'normal',
             textTransform: 'uppercase',
             letterSpacing: '1px',
             color: '#718096',
-            marginBottom: '15px'
+            marginBottom: '20px'
           }}>
             PRESTATIONS:
           </h3>
-          <div style={{ overflowX: 'auto' }}>
-            <div style={{ minWidth: '500px' }}>
-              {quote.articles.map((item, index) => (
-                <div key={item.id} style={{
-                  marginBottom: '15px',
-                  paddingBottom: '10px',
-                  borderBottom: '1px solid #f0f0f0'
-                }}>
-                  <div style={{
-                    fontSize: '14px',
-                    color: '#2d3748',
-                    marginBottom: '5px'
-                  }}>
-                    {index + 1}. {item.designation}
-                  </div>
-                  <div style={{
-                    fontSize: '12px',
+          <div className="overflow-x-auto">
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '12px'
+            }}>
+              <thead>
+                <tr>
+                  <th style={{
+                    textAlign: 'left',
+                    padding: '8px 12px',
+                    borderBottom: '1px solid #edf2f7',
                     color: '#718096',
-                    marginLeft: '20px'
-                  }}>
-                    {item.quantity} × {formatCurrency(item.unitPrice, quote.devise)} = {formatCurrency(calculateItemTotal(item), quote.devise)}
-                  </div>
-                </div>
-              ))}
-            </div>
+                    fontWeight: 'normal',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>Description</th>
+                  <th style={{
+                    textAlign: 'center',
+                    padding: '8px 12px',
+                    borderBottom: '1px solid #edf2f7',
+                    color: '#718096',
+                    fontWeight: 'normal',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    width: '60px'
+                  }}>Qté</th>
+                  <th style={{
+                    textAlign: 'right',
+                    padding: '8px 12px',
+                    borderBottom: '1px solid #edf2f7',
+                    color: '#718096',
+                    fontWeight: 'normal',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    width: '100px'
+                  }}>Prix</th>
+                  <th style={{
+                    textAlign: 'right',
+                    padding: '8px 12px',
+                    borderBottom: '1px solid #edf2f7',
+                    color: '#718096',
+                    fontWeight: 'normal',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    width: '80px'
+                  }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quote.articles.map((item, index) => (
+                  <tr key={item.id}>
+                    <td style={{
+                      padding: '12px',
+                      borderBottom: '1px solid #f7fafc',
+                      color: '#2d3748'
+                    }}>{item.designation}</td>
+                    <td style={{
+                      padding: '12px',
+                      textAlign: 'center',
+                      borderBottom: '1px solid #f7fafc',
+                      color: '#2d3748'
+                    }}>{item.quantity}</td>
+                    <td style={{
+                      padding: '12px',
+                      textAlign: 'right',
+                      borderBottom: '1px solid #f7fafc',
+                      color: '#2d3748'
+                    }}>{formatCurrency(item.unitPrice, quote.devise)}</td>
+                    <td style={{
+                      padding: '12px',
+                      textAlign: 'right',
+                      borderBottom: '1px solid #f7fafc',
+                      color: '#2d3748',
+                      fontWeight: '500'
+                    }}>{formatCurrency(calculateItemTotal(item), quote.devise)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
         {/* Totaux minimalistes */}
         <div style={{
-          margin: '25px 0',
+          margin: '30px 0',
           textAlign: 'right',
           borderTop: '1px solid #e2e8f0',
-          paddingTop: '15px'
+          paddingTop: '20px'
         }}>
           <div style={{
             fontSize: '14px',
@@ -911,8 +977,8 @@ const QuotePreview: React.FC = () => {
         {/* Notes minimalistes */}
         {quote.notes && (
           <div style={{
-            margin: '25px 0',
-            padding: '15px 0',
+            margin: '30px 0',
+            padding: '20px 0',
             borderTop: '1px solid #e2e8f0',
             fontSize: '12px',
             color: '#718096',
@@ -925,17 +991,17 @@ const QuotePreview: React.FC = () => {
         {/* Footer minimaliste */}
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          marginTop: '30px',
-          paddingTop: '15px',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'center' : 'flex-end',
+          marginTop: '40px',
+          paddingTop: '20px',
           borderTop: '1px solid #e2e8f0',
-          gap: '15px'
+          gap: isMobile ? '15px' : '0'
         }}>
           <div style={{
             fontSize: '10px',
-            color: '#718096',
-            textAlign: 'center'
+            color: '#718096'
           }}>
             Devis généré le {formatDate(new Date().toISOString().split('T')[0])}
             <br />
@@ -983,16 +1049,18 @@ const QuotePreview: React.FC = () => {
         margin: '0 auto',
         boxSizing: 'border-box',
         position: 'relative',
-        paddingBottom: '120px'
+        paddingBottom: '100px'
       }}>
         {/* Header */}
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-          marginBottom: '25px',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'flex-start' : 'flex-start',
+          marginBottom: '20px',
           borderBottom: '3px solid #8b5cf6',
-          paddingBottom: '15px'
+          paddingBottom: '15px',
+          gap: isMobile ? '15px' : '0'
         }}>
           <div>
             {quote.entreprise.logo && (
@@ -1007,7 +1075,7 @@ const QuotePreview: React.FC = () => {
               />
             )}
             <div style={{
-              fontSize: '20px',
+              fontSize: isMobile ? '18px' : '22px',
               fontWeight: 'bold',
               color: '#1e293b',
               marginBottom: '8px'
@@ -1027,9 +1095,9 @@ const QuotePreview: React.FC = () => {
             </div>
           </div>
           
-          <div style={{ textAlign: 'left' }}>
+          <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
             <div style={{
-              fontSize: '24px',
+              fontSize: isMobile ? '24px' : '28px',
               fontWeight: 'bold',
               color: '#1e293b',
               marginBottom: '8px'
@@ -1055,7 +1123,6 @@ const QuotePreview: React.FC = () => {
 
         {/* Section Client */}
         <div className="section-client" style={{
-          maxHeight: '80px',
           fontSize: '10px',
           lineHeight: '1.1',
           padding: '8px',
@@ -1107,7 +1174,7 @@ const QuotePreview: React.FC = () => {
         </div>
 
         {/* Tableau des prestations */}
-        <div className="tableau-produits" style={{ margin: '10px 0', overflowX: 'auto' }}>
+        <div className="tableau-produits" style={{ margin: '10px 0' }}>
           <div style={{
             fontWeight: 'bold',
             color: '#1e293b',
@@ -1117,7 +1184,7 @@ const QuotePreview: React.FC = () => {
             Détail des prestations:
           </div>
           
-          <div style={{ minWidth: '500px' }}>
+          <div className="overflow-x-auto">
             <table style={{
               width: '100%',
               borderCollapse: 'collapse',
@@ -1251,7 +1318,7 @@ const QuotePreview: React.FC = () => {
           display: 'flex',
           justifyContent: 'flex-end'
         }}>
-          <div style={{ width: '100%', maxWidth: '280px' }}>
+          <div style={{ width: isMobile ? '100%' : '280px' }}>
             <table style={{
               width: '100%',
               backgroundColor: '#f8f9fa',
@@ -1329,9 +1396,7 @@ const QuotePreview: React.FC = () => {
         {quote.notes && (
           <div className="notes-conditions" style={{
             fontSize: '9px',
-            maxHeight: '60px',
             padding: '5px',
-            overflow: 'hidden',
             marginTop: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '6px',
@@ -1349,9 +1414,7 @@ const QuotePreview: React.FC = () => {
               whiteSpace: 'pre-line',
               color: '#64748b',
               fontSize: '9px',
-              lineHeight: '1.2',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
+              lineHeight: '1.2'
             }}>
               {quote.notes}
             </div>
@@ -1360,10 +1423,8 @@ const QuotePreview: React.FC = () => {
 
         {/* SECTION SIGNATURE AUTOMATIQUE */}
         <div className="signature-footer" style={{
-          position: 'absolute',
-          bottom: '60px',
-          right: '20px',
-          textAlign: 'center',
+          textAlign: 'right',
+          marginTop: '30px',
           fontSize: '10px',
           fontStyle: 'italic',
           color: '#64748b'
@@ -1379,7 +1440,8 @@ const QuotePreview: React.FC = () => {
               style={{ 
                 maxHeight: '60px', 
                 maxWidth: '150px',
-                marginTop: '5px'
+                marginTop: '5px',
+                marginLeft: 'auto'
               }} 
             />
           )}
@@ -1467,40 +1529,28 @@ const QuotePreview: React.FC = () => {
     );
   }
 
-  console.log("=== RENDU FINAL DU DEVIS ===");
-  console.log("Quote à afficher:", quote);
-  console.log("Articles à afficher:", quote.articles);
-  console.log("Template sélectionné:", quote.template);
-  console.log("Signature à afficher:", quote.entreprise.signature ? "OUI" : "NON");
-
   return (
     <>
       {/* Boutons d'action - Cachés à l'impression */}
-      <div className="print:hidden fixed top-4 right-4 z-50 flex flex-col sm:flex-row gap-2 sm:gap-4">
+      <div className="print:hidden fixed top-4 right-4 z-10 flex flex-col sm:flex-row gap-2 sm:gap-4">
         <button
           onClick={handleBack}
-          className="flex items-center justify-center px-3 py-2 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition-colors"
-          style={{
-            fontSize: '14px'
-          }}
+          className="flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors duration-200 shadow-lg"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           <span className="hidden sm:inline">Retour</span>
         </button>
         <button
           onClick={handlePrint}
-          className="flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
-          style={{
-            fontSize: '14px'
-          }}
+          className="flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200 shadow-lg"
         >
           <Printer className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline">Imprimer</span>
+          <span className="hidden sm:inline">Imprimer / PDF</span>
         </button>
       </div>
 
       {/* Rendu du template sélectionné */}
-      <div className="print-container">
+      <div className="max-w-4xl mx-auto">
         {renderTemplate()}
       </div>
 
@@ -1511,18 +1561,11 @@ const QuotePreview: React.FC = () => {
           100% { transform: rotate(360deg); }
         }
 
-        .print-container {
-          max-width: 100%;
-          overflow-x: hidden;
-        }
-
         @media print {
           body {
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
           }
           
           .print\\:hidden {
@@ -1531,69 +1574,12 @@ const QuotePreview: React.FC = () => {
           
           @page {
             size: A4;
-            margin: 10mm;
-          }
-          
-          .section-client,
-          .tableau-produits,
-          .notes-conditions,
-          .signature-footer {
-            page-break-inside: avoid;
-          }
-          
-          .page-break {
-            page-break-before: always;
+            margin: 12mm;
           }
           
           * {
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
-          }
-          
-          .section-client {
-            max-height: 80px !important;
-            font-size: 10px !important;
-            line-height: 1.1 !important;
-            padding: 8px !important;
-          }
-
-          .notes-conditions {
-            font-size: 9px !important;
-            max-height: 60px !important;
-            padding: 5px !important;
-            overflow: hidden !important;
-          }
-
-          .tableau-produits {
-            margin: 10px 0 !important;
-          }
-
-          .signature-footer {
-            position: absolute !important;
-            bottom: 60px !important;
-            right: 30px !important;
-            text-align: center !important;
-            font-size: 10px !important;
-            font-style: italic !important;
-            page-break-inside: avoid !important;
-          }
-
-          .signature-image {
-            max-height: 60px !important;
-            max-width: 150px !important;
-            margin-top: 5px !important;
-          }
-
-          /* Styles spécifiques pour les nouveaux templates */
-          .corporate-template,
-          .creatif-template,
-          .artisan-template,
-          .elegant-template,
-          .professionnel-template,
-          .minimaliste-template {
-            margin: 0 !important;
-            padding: 20px !important;
-            background: white !important;
           }
         }
       `}</style>

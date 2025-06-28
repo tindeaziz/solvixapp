@@ -75,8 +75,8 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       color: '#2D3748',
       backgroundColor: 'white',
       minHeight: '100vh',
-      padding: '20px',
-      maxWidth: '100%',
+      padding: '30px',
+      maxWidth: '210mm',
       margin: '0 auto',
       position: 'relative',
       boxSizing: 'border-box',
@@ -86,7 +86,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       <div style={{
         background: 'linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%)',
         borderRadius: '15px',
-        padding: '20px',
+        padding: '25px',
         marginBottom: '25px',
         color: 'white',
         position: 'relative',
@@ -114,25 +114,25 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
 
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: '15px',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
           position: 'relative',
           zIndex: 2
         }}>
           {/* Logo et entreprise */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '15px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
             {entrepriseData.logo && (
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                padding: '8px',
-                borderRadius: '8px',
+                padding: '10px',
+                borderRadius: '12px',
                 backdropFilter: 'blur(10px)'
               }}>
                 <img 
                   src={entrepriseData.logo} 
                   alt="Logo" 
                   style={{ 
-                    maxHeight: '40px', 
+                    maxHeight: '50px', 
                     width: 'auto',
                     filter: 'brightness(0) invert(1)'
                   }} 
@@ -141,9 +141,9 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
             )}
             <div>
               <div style={{
-                fontSize: '20px',
+                fontSize: '22px',
                 fontWeight: '700',
-                marginBottom: '5px',
+                marginBottom: '8px',
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
                 {entrepriseData.name}
@@ -163,11 +163,11 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
           </div>
 
           {/* Section DEVIS */}
-          <div style={{ textAlign: 'left' }}>
+          <div style={{ textAlign: 'right' }}>
             <div style={{
-              fontSize: '24px',
+              fontSize: '28px',
               fontWeight: '800',
-              marginBottom: '5px',
+              marginBottom: '8px',
               textShadow: '0 2px 4px rgba(0,0,0,0.2)',
               letterSpacing: '2px'
             }}>
@@ -175,16 +175,16 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
             </div>
             <div style={{
               backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              padding: '6px 12px',
+              padding: '8px 15px',
               borderRadius: '20px',
-              fontSize: '14px',
+              fontSize: '16px',
               fontWeight: '600',
               backdropFilter: 'blur(10px)',
-              display: 'inline-block'
+              marginBottom: '12px'
             }}>
               {devisData.numeroDevis}
             </div>
-            <div style={{ fontSize: '11px', opacity: '0.9', marginTop: '8px' }}>
+            <div style={{ fontSize: '11px', opacity: '0.9' }}>
               Date: {formatDate(devisData.dateCreation)}
             </div>
             <div style={{ fontSize: '11px', opacity: '0.9' }}>
@@ -248,7 +248,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       </div>
 
       {/* Tableau des prestations - Dimensions standardisées */}
-      <div className="tableau-produits" style={{ margin: '10px 0', overflowX: 'auto' }}>
+      <div className="tableau-produits" style={{ margin: '10px 0' }}>
         <div style={{
           fontWeight: 'bold',
           color: '#2D3748',
@@ -258,123 +258,121 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
           🎨 Prestations Créatives:
         </div>
         
-        <div style={{ minWidth: '500px' }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            borderRadius: '6px',
-            overflow: 'hidden',
-            fontSize: '11px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
-          }}>
-            <thead>
-              <tr style={{ background: 'linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%)' }}>
-                <th style={{
-                  color: 'white',
-                  padding: '10px 8px',
-                  textAlign: 'left',
-                  fontWeight: 'bold',
-                  fontSize: '11px'
+        <table style={{
+          width: '100%',
+          borderCollapse: 'collapse',
+          borderRadius: '6px',
+          overflow: 'hidden',
+          fontSize: '11px',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+        }}>
+          <thead>
+            <tr style={{ background: 'linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%)' }}>
+              <th style={{
+                color: 'white',
+                padding: '10px 8px',
+                textAlign: 'left',
+                fontWeight: 'bold',
+                fontSize: '11px'
+              }}>
+                Description
+              </th>
+              <th style={{
+                color: 'white',
+                padding: '10px 8px',
+                textAlign: 'right',
+                fontWeight: 'bold',
+                fontSize: '11px',
+                width: '60px'
+              }}>
+                Qté
+              </th>
+              <th style={{
+                color: 'white',
+                padding: '10px 8px',
+                textAlign: 'right',
+                fontWeight: 'bold',
+                fontSize: '11px',
+                width: '90px'
+              }}>
+                Prix unitaire
+              </th>
+              <th style={{
+                color: 'white',
+                padding: '10px 8px',
+                textAlign: 'right',
+                fontWeight: 'bold',
+                fontSize: '11px',
+                width: '50px'
+              }}>
+                TVA %
+              </th>
+              <th style={{
+                color: 'white',
+                padding: '10px 8px',
+                textAlign: 'right',
+                fontWeight: 'bold',
+                fontSize: '11px',
+                width: '90px'
+              }}>
+                Total HT
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {articles.map((item, index) => (
+              <tr key={item.id} style={{
+                backgroundColor: index % 2 === 0 ? '#ffffff' : '#F7FAFC',
+                borderLeft: index % 2 === 0 ? '3px solid #FF6B35' : '3px solid #6F42C1'
+              }}>
+                <td style={{
+                  padding: '8px',
+                  fontSize: '10px',
+                  lineHeight: '1.3',
+                  color: '#2D3748'
                 }}>
-                  Description
-                </th>
-                <th style={{
-                  color: 'white',
-                  padding: '10px 8px',
+                  {item.designation}
+                </td>
+                <td style={{
+                  padding: '8px',
                   textAlign: 'right',
                   fontWeight: 'bold',
-                  fontSize: '11px',
-                  width: '60px'
+                  color: '#FF6B35',
+                  fontSize: '10px'
                 }}>
-                  Qté
-                </th>
-                <th style={{
-                  color: 'white',
-                  padding: '10px 8px',
+                  {item.quantity}
+                </td>
+                <td style={{
+                  padding: '8px',
                   textAlign: 'right',
                   fontWeight: 'bold',
-                  fontSize: '11px',
-                  width: '90px'
+                  color: '#2D3748',
+                  fontSize: '10px'
                 }}>
-                  Prix unitaire
-                </th>
-                <th style={{
-                  color: 'white',
-                  padding: '10px 8px',
+                  {formatCurrency(item.unitPrice, devisData.devise)}
+                </td>
+                <td style={{
+                  padding: '8px',
                   textAlign: 'right',
                   fontWeight: 'bold',
-                  fontSize: '11px',
-                  width: '50px'
+                  color: '#6F42C1',
+                  fontSize: '10px'
                 }}>
-                  TVA %
-                </th>
-                <th style={{
-                  color: 'white',
-                  padding: '10px 8px',
+                  {item.vatRate}%
+                </td>
+                <td style={{
+                  padding: '8px',
                   textAlign: 'right',
                   fontWeight: 'bold',
-                  fontSize: '11px',
-                  width: '90px'
+                  color: '#FF6B35',
+                  fontSize: '10px'
                 }}>
-                  Total HT
-                </th>
+                  {formatCurrency(calculateItemTotal(item), devisData.devise)}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {articles.map((item, index) => (
-                <tr key={item.id} style={{
-                  backgroundColor: index % 2 === 0 ? '#ffffff' : '#F7FAFC',
-                  borderLeft: index % 2 === 0 ? '3px solid #FF6B35' : '3px solid #6F42C1'
-                }}>
-                  <td style={{
-                    padding: '8px',
-                    fontSize: '10px',
-                    lineHeight: '1.3',
-                    color: '#2D3748'
-                  }}>
-                    {item.designation}
-                  </td>
-                  <td style={{
-                    padding: '8px',
-                    textAlign: 'right',
-                    fontWeight: 'bold',
-                    color: '#FF6B35',
-                    fontSize: '10px'
-                  }}>
-                    {item.quantity}
-                  </td>
-                  <td style={{
-                    padding: '8px',
-                    textAlign: 'right',
-                    fontWeight: 'bold',
-                    color: '#2D3748',
-                    fontSize: '10px'
-                  }}>
-                    {formatCurrency(item.unitPrice, devisData.devise)}
-                  </td>
-                  <td style={{
-                    padding: '8px',
-                    textAlign: 'right',
-                    fontWeight: 'bold',
-                    color: '#6F42C1',
-                    fontSize: '10px'
-                  }}>
-                    {item.vatRate}%
-                  </td>
-                  <td style={{
-                    padding: '8px',
-                    textAlign: 'right',
-                    fontWeight: 'bold',
-                    color: '#FF6B35',
-                    fontSize: '10px'
-                  }}>
-                    {formatCurrency(calculateItemTotal(item), devisData.devise)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Section Totaux - Dimensions standardisées */}
@@ -383,7 +381,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
         display: 'flex',
         justifyContent: 'flex-end'
       }}>
-        <div style={{ width: '100%', maxWidth: '280px' }}>
+        <div style={{ width: '280px' }}>
           <table style={{
             width: '100%',
             borderCollapse: 'collapse',
@@ -494,7 +492,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       <div className="signature-footer" style={{
         position: 'absolute',
         bottom: '60px',
-        right: '20px',
+        right: '30px',
         textAlign: 'center',
         fontSize: '10px',
         fontStyle: 'italic',
@@ -521,8 +519,8 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       <div style={{
         position: 'absolute',
         bottom: '20px',
-        left: '20px',
-        right: '20px',
+        left: '30px',
+        right: '30px',
         textAlign: 'center',
         color: '#718096',
         fontSize: '10px',

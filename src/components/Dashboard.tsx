@@ -447,8 +447,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       <div className="w-full max-w-none space-y-4 sm:space-y-8">
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-solvix-blue border-t-transparent mx-auto mb-4"></div>
-            <p className="text-solvix-dark font-inter text-sm sm:text-base">Chargement du dashboard...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-solvix-blue border-t-transparent mx-auto mb-4"></div>
+            <p className="text-solvix-dark font-inter">Chargement du dashboard...</p>
           </div>
         </div>
       </div>
@@ -460,17 +460,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     return (
       <div className="w-full max-w-none space-y-4 sm:space-y-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
-          <AlertTriangle className="h-5 w-5 text-red-600 mr-3 flex-shrink-0" />
-          <p className="text-red-800 text-sm">{error}</p>
+          <AlertTriangle className="h-5 w-5 text-red-600 mr-3" />
+          <p className="text-red-800">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-none space-y-4 sm:space-y-8 dashboard-container">
+    <div className="w-full max-w-none space-y-4 sm:space-y-8">
       {/* Welcome Section - Responsive */}
-      <div className="relative bg-gradient-to-br from-solvix-blue via-solvix-blue-dark to-solvix-blue rounded-xl sm:rounded-2xl p-4 sm:p-8 text-white shadow-solvix-lg overflow-hidden w-full welcome-banner">
+      <div className="relative bg-gradient-to-br from-solvix-blue via-solvix-blue-dark to-solvix-blue rounded-xl sm:rounded-2xl p-4 sm:p-8 text-white shadow-solvix-lg overflow-hidden w-full">
         {/* Motif de fond décoratif */}
         <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 opacity-10">
           <div className="w-full h-full bg-gradient-to-br from-white to-transparent rounded-full transform translate-x-8 sm:translate-x-16 -translate-y-8 sm:-translate-y-16"></div>
@@ -651,8 +651,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
 
         {/* Table - Responsive avec scroll horizontal */}
-        <div className="overflow-x-auto w-full table-container">
-          <table className="w-full min-w-full devis-table">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-full">
             <thead className="bg-gradient-to-r from-gray-50 to-solvix-light">
               <tr>
                 {[
