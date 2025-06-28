@@ -469,7 +469,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   return (
     <div className="w-full-safe space-y-8">
-      {/* Welcome Section - Mobile Optimized */}
+      {/* Welcome Section - Occupation maximale mobile */}
       <div className="welcome-card relative bg-gradient-to-br from-solvix-blue via-solvix-blue-dark to-solvix-blue text-white shadow-solvix-lg overflow-hidden">
         {/* Motif de fond décoratif - Adapté mobile */}
         <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 opacity-10">
@@ -479,13 +479,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div className="w-full h-full bg-gradient-to-tr from-white to-transparent rounded-full transform -translate-x-4 sm:-translate-x-8 translate-y-4 sm:translate-y-8"></div>
         </div>
         
-        <div className="relative flex-container-safe">
+        <div className="welcome-content relative">
           <div className="space-y-4 flex-item-safe">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
               <div className="p-2 sm:p-3 bg-white/20 rounded-lg sm:rounded-xl backdrop-blur-sm self-start">
                 <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
-              <div>
+              <div className="welcome-text">
                 <h1 className="text-2xl sm:text-4xl font-bold font-poppins">Bienvenue sur Solvix</h1>
                 <p className="text-blue-100 text-sm sm:text-lg font-inter mt-1">
                   Gérez vos devis facilement et efficacement
@@ -510,7 +510,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
           </div>
           
-          <div className="mt-6 lg:mt-0 lg:ml-8">
+          <div className="mt-6 lg:mt-0">
             <button
               onClick={handleNewQuoteClick}
               className="new-quote-btn group bg-solvix-orange hover:bg-solvix-orange-dark text-white font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-inter flex items-center justify-center space-x-2 sm:space-x-3"
@@ -522,7 +522,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Compteurs - Grille responsive mobile */}
+      {/* Compteurs - Grille responsive mobile optimisée */}
       <div className="stats-grid">
         {[
           { label: 'Total', value: counters.total, icon: FileText, color: 'blue' },
