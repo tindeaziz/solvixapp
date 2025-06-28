@@ -22,6 +22,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [quoteToDelete, setQuoteToDelete] = useState<Devis | null>(null);
   const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   
   // États pour les devis réels
   const [quotes, setQuotes] = useState<Devis[]>([]);
@@ -30,6 +31,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   
   // État pour la devise par défaut
   const [defaultCurrency, setDefaultCurrency] = useState('EUR');
+
+  // Détecter si on est sur mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Charger les devis et la devise par défaut depuis Supabase
   useEffect(() => {
@@ -497,9 +509,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <div className="date-info flex items-center space-x-2 bg-white/10 rounded-lg px-2 sm:px-3 py-1 sm:py-2 backdrop-blur-sm">
                 <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="font-inter text-xs sm:text-sm">{new Date().toLocaleDateString('fr-FR', { 
-                  weekday: window.innerWidth < 768 ? 'short' : 'long', 
+                  weekday: isMobile ? 'short' : 'long', 
                   year: 'numeric', 
-                  month: window.innerWidth < 768 ? 'short' : 'long', 
+                  month: isMobile ? 'short' : 'long', 
                   day: 'numeric' 
                 })}</span>
               </div>
@@ -668,8 +680,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 ].map((header) => (
                   <th 
                     key={header.field}
-                    className={`px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider font-inter group ${
-                      header.field !== 'actions' ? 'cursor-pointer hover:bg-gray-100 transition-colors duration-200' : ''
+                    className={`px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider font-inter ${
+                      header.field !== 'actions' ? 'cursor-pointer hover:bg-gray-100 transition-colors duration-200 group' : ''
                     }`}
                     onClick={() => header.field !== 'actions' && handleSort(header.field)}
                   >
