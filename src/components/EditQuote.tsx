@@ -17,11 +17,13 @@ import {
   ArrowLeft,
   Loader2,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { devisService, clientService, articleService, profileService, type Devis, type ArticleDevis } from '../lib/supabase';
 import { CURRENCIES, formatCurrency, getCurrencyByCode } from '../types/currency';
+import { generateDevisPDF } from '../utils/pdfGenerator';
 import ShareModal from './ShareModal';
 
 interface QuoteItem {
@@ -60,6 +62,7 @@ const EditQuote: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
   // États pour le devis
   const [quoteData, setQuoteData] = useState({
@@ -393,6 +396,46 @@ const EditQuote: React.FC = () => {
     navigate('/devis/preview/edit', { state: devisData });
   };
 
+  const handleDownloadPDF = async () => {
+    const validItems = quoteData.items.filter(item => 
+      item.designation.trim() !== '' && 
+      item.quantity > 0 && 
+      item.unitPrice >= 0
+    );
+    
+    if (validItems.length === 0) {
+      setError('Veuillez ajouter au moins un produit avec une désignation et un prix valides.');
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+    try {
+      const devisData = {
+        articles: validItems,
+        client: quoteData.client,
+        entreprise: entrepriseData,
+        numeroDevis: quoteData.number,
+        dateCreation: quoteData.date,
+        dateExpiration: quoteData.validUntil,
+        devise: quoteData.currency,
+        notes: quoteData.notes,
+        template: quoteData.template,
+        sousTotal: calculateSubtotal(),
+        totalTVA: calculateVAT(),
+        totalTTC: calculateTotal()
+      };
+
+      console.log('📥 EDIT_QUOTE - Génération PDF pour devis:', devisData.numeroDevis);
+      await generateDevisPDF(devisData);
+      console.log('✅ EDIT_QUOTE - PDF généré avec succès');
+    } catch (error) {
+      console.error('❌ EDIT_QUOTE - Erreur génération PDF:', error);
+      setError('Erreur lors de la génération du PDF. Veuillez réessayer.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   const selectedCurrency = getCurrencyByCode(quoteData.currency);
 
   // Affichage de chargement
@@ -496,6 +539,23 @@ const EditQuote: React.FC = () => {
                 <>
                   <Save className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Sauvegarder</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPDF}
+              className="inline-flex items-center px-3 sm:px-4 py-2 bg-solvix-blue text-white rounded-lg text-sm font-medium hover:bg-solvix-blue-dark transition-colors duration-200 disabled:opacity-50 font-inter shadow-solvix"
+            >
+              {isGeneratingPDF ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <span className="hidden sm:inline">PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Télécharger PDF</span>
                 </>
               )}
             </button>
@@ -855,6 +915,61 @@ const EditQuote: React.FC = () => {
               ))}
             </div>
           </div>
+
+          {/* Bloc d'actions - sous les modèles de devis */}
+          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
+            <h3 className="text-lg font-semibold text-solvix-dark mb-4 font-poppins">Actions</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setShowPreview(true)}
+                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Aperçu
+              </button>
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Partager
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center justify-center px-4 py-3 bg-solvix-blue text-white rounded-lg text-sm font-medium hover:bg-solvix-blue-dark transition-colors duration-200 disabled:opacity-50 font-inter shadow-solvix"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sauvegarde...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Sauvegarder
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPDF}
+                className="flex items-center justify-center px-4 py-3 bg-solvix-orange text-white rounded-lg text-sm font-medium hover:bg-solvix-orange-dark transition-colors duration-200 disabled:opacity-50 font-inter shadow-solvix"
+              >
+                {isGeneratingPDF ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    PDF
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -873,7 +988,7 @@ const EditQuote: React.FC = () => {
           const encodedMessage = encodeURIComponent(message);
           window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
         }}
-        onDownload={handlePreview}
+        onDownload={handleDownloadPDF}
       />
     </div>
   );
