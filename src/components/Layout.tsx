@@ -37,7 +37,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
   // Détecter si on est sur mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      // Fermer automatiquement la sidebar sur mobile
+      if (mobile) {
+        setSidebarOpen(false);
+      }
     };
 
     checkMobile();
@@ -51,6 +56,18 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
       setSidebarOpen(false);
     }
   }, [activeSection, isMobile]);
+
+  // Fermer les menus quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuOpen) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [userMenuOpen]);
 
   // Charger les informations utilisateur réelles
   useEffect(() => {
@@ -154,7 +171,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
       {/* Mobile sidebar overlay */}
       {sidebarOpen && isMobile && (
         <div 
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -204,7 +221,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
         </div>
       )}
 
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - Masquée sur mobile */}
       {!isMobile && (
         <div className="sidebar fixed inset-y-0 left-0 z-50 bg-white shadow-solvix-lg flex flex-col">
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-solvix-blue">
@@ -243,7 +260,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
           <div className="p-4 border-t border-gray-200">
             <div className="relative">
               <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setUserMenuOpen(!userMenuOpen);
+                }}
                 className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-solvix-light transition-colors duration-200"
                 disabled={loadingUserInfo}
               >
@@ -326,7 +346,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
         </div>
       )}
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar - Overlay */}
       {isMobile && (
         <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-solvix-lg transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -341,7 +361,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 rounded-md text-white hover:text-gray-200"
+              className="p-2 rounded-md text-white hover:text-gray-200 transition-colors duration-200"
             >
               <X className="h-6 w-6" />
             </button>
@@ -427,7 +447,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
 
       {/* Main content */}
       <div className={`flex-1 flex flex-col min-h-screen ${!isMobile ? 'ml-80' : ''}`}>
-        {/* Mobile Header */}
+        {/* Mobile Header avec hamburger */}
         {isMobile && (
           <header className="bg-white shadow-solvix border-b border-gray-200 flex-shrink-0 sticky top-0 z-30">
             <div className="flex items-center justify-between h-16 px-4">
@@ -454,7 +474,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
               <div className="flex items-center space-x-2">
                 {!loadingUserInfo && (
                   <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUserMenuOpen(!userMenuOpen);
+                    }}
                     className="relative"
                   >
                     {renderUserAvatar('sm')}
@@ -562,14 +585,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
           </nav>
         )}
       </div>
-
-      {/* Click outside handler for user menu */}
-      {userMenuOpen && (
-        <div 
-          className="fixed inset-0 z-20" 
-          onClick={() => setUserMenuOpen(false)}
-        />
-      )}
     </div>
   );
 };
