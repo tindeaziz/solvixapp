@@ -432,11 +432,11 @@ const EditQuote: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+      {/* Header - Responsive */}
+      <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <button
               onClick={handleBack}
               className="p-2 text-gray-400 hover:text-solvix-blue rounded-lg hover:bg-solvix-light transition-colors duration-200"
@@ -445,24 +445,24 @@ const EditQuote: React.FC = () => {
             </button>
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-orange-50 rounded-lg">
-                <FileText className="h-6 w-6 text-solvix-orange" />
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-solvix-orange" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-solvix-dark font-poppins">Modifier le devis</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-solvix-dark font-poppins">Modifier le devis</h1>
                 <p className="text-gray-600 font-inter">Devis {quoteData.number}</p>
               </div>
             </div>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {/* Messages de statut */}
             {saveSuccess && (
-              <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2 flex items-center">
+              <div className="bg-green-50 border border-green-200 rounded-lg px-3 sm:px-4 py-2 flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
                 <span className="text-sm text-green-800 font-inter">Devis sauvegardé !</span>
               </div>
             )}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2 flex items-center">
+              <div className="bg-red-50 border border-red-200 rounded-lg px-3 sm:px-4 py-2 flex items-center">
                 <AlertCircle className="h-4 w-4 text-red-600 mr-2" />
                 <span className="text-sm text-red-800 font-inter">{error}</span>
               </div>
@@ -470,53 +470,53 @@ const EditQuote: React.FC = () => {
             
             <button
               onClick={() => setShowPreview(true)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
+              className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
             >
               <Eye className="h-4 w-4 mr-2" />
-              Aperçu
+              <span className="hidden sm:inline">Aperçu</span>
             </button>
             <button
               onClick={() => setShowShareModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
+              className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
             >
               <Share2 className="h-4 w-4 mr-2" />
-              Partager
+              <span className="hidden sm:inline">Partager</span>
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center px-4 py-2 bg-solvix-orange text-white rounded-lg text-sm font-medium hover:bg-solvix-orange-dark transition-colors duration-200 disabled:opacity-50 font-inter shadow-solvix"
+              className="inline-flex items-center px-3 sm:px-4 py-2 bg-solvix-orange text-white rounded-lg text-sm font-medium hover:bg-solvix-orange-dark transition-colors duration-200 disabled:opacity-50 font-inter shadow-solvix"
             >
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sauvegarde...
+                  <span className="hidden sm:inline">Sauvegarde...</span>
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Sauvegarder
+                  <span className="hidden sm:inline">Sauvegarder</span>
                 </>
               )}
             </button>
             <button
               onClick={handlePreview}
-              className="inline-flex items-center px-4 py-2 bg-solvix-blue text-white rounded-lg text-sm font-medium hover:bg-solvix-blue-dark transition-colors duration-200 font-inter shadow-solvix"
+              className="inline-flex items-center px-3 sm:px-4 py-2 bg-solvix-blue text-white rounded-lg text-sm font-medium hover:bg-solvix-blue-dark transition-colors duration-200 font-inter shadow-solvix"
             >
               <Printer className="h-4 w-4 mr-2" />
-              Imprimer / PDF
+              <span className="hidden sm:inline">Imprimer / PDF</span>
             </button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Form */}
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Main Form - Responsive */}
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Quote Info */}
-          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-solvix-dark mb-4 font-poppins">Informations du devis</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-solvix-dark mb-2 font-inter">
                   Numéro de devis
@@ -553,7 +553,7 @@ const EditQuote: React.FC = () => {
             </div>
 
             {/* Currency and Status */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-solvix-dark mb-2 font-inter">
                   Devise du devis
@@ -595,12 +595,12 @@ const EditQuote: React.FC = () => {
           </div>
 
           {/* Client Information */}
-          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-solvix-dark mb-4 flex items-center font-poppins">
               <User className="h-5 w-5 mr-2" />
               Informations client
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-solvix-dark mb-2 font-inter">
                   Nom du contact
@@ -684,9 +684,9 @@ const EditQuote: React.FC = () => {
             </div>
           </div>
 
-          {/* Products/Services */}
-          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
+          {/* Products/Services - Responsive */}
+          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-3 sm:space-y-0">
               <h3 className="text-lg font-semibold text-solvix-dark font-poppins">Produits/Services</h3>
               <button
                 onClick={addItem}
@@ -697,83 +697,85 @@ const EditQuote: React.FC = () => {
               </button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-2 text-sm font-medium text-solvix-dark font-inter">Désignation</th>
-                    <th className="text-center py-3 px-2 text-sm font-medium text-solvix-dark w-20 font-inter">Qté</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-solvix-dark w-32 font-inter">Prix unitaire</th>
-                    <th className="text-center py-3 px-2 text-sm font-medium text-solvix-dark w-20 font-inter">TVA%</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-solvix-dark w-32 font-inter">Total HT</th>
-                    <th className="w-10"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {quoteData.items.map((item, index) => (
-                    <tr key={item.id} className="border-b border-gray-100">
-                      <td className="py-3 px-2">
-                        <input
-                          type="text"
-                          value={item.designation}
-                          onChange={(e) => updateItem(item.id, 'designation', e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-solvix-blue focus:border-transparent text-sm font-inter"
-                          placeholder="Description du produit/service"
-                        />
-                      </td>
-                      <td className="py-3 px-2">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-solvix-blue focus:border-transparent text-sm text-center font-inter"
-                        />
-                      </td>
-                      <td className="py-3 px-2">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.unitPrice}
-                          onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-solvix-blue focus:border-transparent text-sm text-right font-inter"
-                        />
-                      </td>
-                      <td className="py-3 px-2">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.1"
-                          value={item.vatRate}
-                          onChange={(e) => updateItem(item.id, 'vatRate', parseFloat(e.target.value) || 0)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-solvix-blue focus:border-transparent text-sm text-center font-inter"
-                        />
-                      </td>
-                      <td className="py-3 px-2 text-right text-sm font-medium font-montserrat">
-                        {formatCurrency(calculateItemTotal(item), quoteData.currency)}
-                      </td>
-                      <td className="py-3 px-2">
-                        {quoteData.items.length > 1 && (
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-200"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        )}
-                      </td>
+            <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
+              <div className="inline-block min-w-full align-middle">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-2 text-sm font-medium text-solvix-dark font-inter">Désignation</th>
+                      <th className="text-center py-3 px-2 text-sm font-medium text-solvix-dark w-16 sm:w-20 font-inter">Qté</th>
+                      <th className="text-right py-3 px-2 text-sm font-medium text-solvix-dark w-24 sm:w-32 font-inter">Prix unitaire</th>
+                      <th className="text-center py-3 px-2 text-sm font-medium text-solvix-dark w-16 sm:w-20 font-inter">TVA%</th>
+                      <th className="text-right py-3 px-2 text-sm font-medium text-solvix-dark w-24 sm:w-32 font-inter">Total HT</th>
+                      <th className="w-10"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {quoteData.items.map((item, index) => (
+                      <tr key={item.id} className="border-b border-gray-100">
+                        <td className="py-2 sm:py-3 px-2">
+                          <input
+                            type="text"
+                            value={item.designation}
+                            onChange={(e) => updateItem(item.id, 'designation', e.target.value)}
+                            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-solvix-blue focus:border-transparent text-sm font-inter"
+                            placeholder="Description du produit/service"
+                          />
+                        </td>
+                        <td className="py-2 sm:py-3 px-2">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.quantity}
+                            onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-solvix-blue focus:border-transparent text-sm text-center font-inter"
+                          />
+                        </td>
+                        <td className="py-2 sm:py-3 px-2">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.unitPrice}
+                            onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-solvix-blue focus:border-transparent text-sm text-right font-inter"
+                          />
+                        </td>
+                        <td className="py-2 sm:py-3 px-2">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value={item.vatRate}
+                            onChange={(e) => updateItem(item.id, 'vatRate', parseFloat(e.target.value) || 0)}
+                            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-solvix-blue focus:border-transparent text-sm text-center font-inter"
+                          />
+                        </td>
+                        <td className="py-2 sm:py-3 px-2 text-right text-sm font-medium font-montserrat">
+                          {formatCurrency(calculateItemTotal(item), quoteData.currency)}
+                        </td>
+                        <td className="py-2 sm:py-3 px-2">
+                          {quoteData.items.length > 1 && (
+                            <button
+                              onClick={() => removeItem(item.id)}
+                              className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-200"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
           {/* Notes */}
-          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-solvix-dark mb-4 font-poppins">Notes et conditions</h3>
             <textarea
               value={quoteData.notes}
@@ -785,10 +787,10 @@ const EditQuote: React.FC = () => {
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
+        {/* Sidebar - Responsive */}
+        <div className="space-y-4 sm:space-y-6">
           {/* Totals */}
-          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-solvix-dark mb-4 font-poppins">Récapitulatif</h3>
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
@@ -801,8 +803,8 @@ const EditQuote: React.FC = () => {
               </div>
               <div className="border-t border-gray-200 pt-3">
                 <div className="flex justify-between">
-                  <span className="text-lg font-semibold text-solvix-dark font-poppins">TOTAL TTC:</span>
-                  <span className="text-lg font-bold text-solvix-orange font-montserrat">{formatCurrency(calculateTotal(), quoteData.currency)}</span>
+                  <span className="text-base sm:text-lg font-semibold text-solvix-dark font-poppins">TOTAL TTC:</span>
+                  <span className="text-base sm:text-lg font-bold text-solvix-orange font-montserrat">{formatCurrency(calculateTotal(), quoteData.currency)}</span>
                 </div>
               </div>
             </div>
@@ -816,10 +818,10 @@ const EditQuote: React.FC = () => {
             )}
           </div>
 
-          {/* Template Selection - TOUS LES MODÈLES DISPONIBLES */}
-          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
+          {/* Template Selection - Responsive Grid */}
+          <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-solvix-dark mb-4 font-poppins">Modèle de devis</h3>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { id: 'classic', name: 'Classique', description: 'Design traditionnel et professionnel' },
                 { id: 'modern', name: 'Moderne', description: 'Style contemporain et épuré' },
@@ -841,12 +843,12 @@ const EditQuote: React.FC = () => {
                   onClick={() => setQuoteData(prev => ({ ...prev, template: template.id as any }))}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-16 h-12 bg-gray-100 rounded border flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-gray-400" />
+                    <div className="w-12 h-10 sm:w-16 sm:h-12 bg-gray-100 rounded border flex items-center justify-center flex-shrink-0">
+                      <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-solvix-dark font-inter">{template.name}</h4>
-                      <p className="text-sm text-gray-500 font-inter">{template.description}</p>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-solvix-dark font-inter text-sm truncate">{template.name}</h4>
+                      <p className="text-xs text-gray-500 font-inter truncate">{template.description}</p>
                     </div>
                   </div>
                 </div>

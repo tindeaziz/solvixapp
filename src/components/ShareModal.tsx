@@ -73,7 +73,7 @@ Cordialement,`
   };
 
   const handlePrint = () => {
-    onDownload(); // This will now trigger the print preview
+    onDownload();
     onClose();
   };
 
@@ -100,9 +100,9 @@ Cordialement`;
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
         
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+        <div className="inline-block align-bottom bg-white rounded-lg sm:rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full mx-4">
           {/* Header */}
-          <div className="bg-white px-6 py-4 border-b border-gray-200">
+          <div className="bg-white px-4 sm:px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
                 Partager le devis {quoteNumber}
@@ -118,18 +118,18 @@ Cordialement`;
 
           {/* Success Message */}
           {showSuccess && (
-            <div className="mx-6 mt-4 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+            <div className="mx-4 sm:mx-6 mt-4 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
               <Check className="h-5 w-5 text-green-600 mr-3" />
               <p className="text-green-800 font-medium">Email envoyé avec succès !</p>
             </div>
           )}
 
           {/* Tabs */}
-          <div className="bg-gray-50 px-6 py-3">
-            <div className="flex space-x-1">
+          <div className="bg-gray-50 px-4 sm:px-6 py-3 overflow-x-auto">
+            <div className="flex space-x-1 min-w-max">
               <button
                 onClick={() => setActiveTab('email')}
-                className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                className={`flex items-center px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                   activeTab === 'email'
                     ? 'bg-blue-100 text-blue-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -140,31 +140,33 @@ Cordialement`;
               </button>
               <button
                 onClick={() => setActiveTab('whatsapp')}
-                className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                className={`flex items-center px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                   activeTab === 'whatsapp'
                     ? 'bg-green-100 text-green-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
-                WhatsApp
+                <span className="hidden sm:inline">WhatsApp</span>
+                <span className="sm:hidden">WA</span>
               </button>
               <button
                 onClick={() => setActiveTab('print')}
-                className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                className={`flex items-center px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                   activeTab === 'print'
                     ? 'bg-purple-100 text-purple-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 <Printer className="h-4 w-4 mr-2" />
-                Imprimer / PDF
+                <span className="hidden sm:inline">Imprimer / PDF</span>
+                <span className="sm:hidden">PDF</span>
               </button>
             </div>
           </div>
 
           {/* Content */}
-          <div className="px-6 py-6">
+          <div className="px-4 sm:px-6 py-4 sm:py-6">
             {/* Email Tab */}
             {activeTab === 'email' && (
               <div className="space-y-4">
@@ -229,11 +231,11 @@ Cordialement`;
             {activeTab === 'whatsapp' && (
               <div className="space-y-4">
                 <div className="text-center">
-                  <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                    <MessageCircle className="h-8 w-8 text-green-600" />
+                  <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
                   </div>
                   <h4 className="text-lg font-medium text-gray-900 mb-2">Partager via WhatsApp</h4>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-600 mb-6 text-sm sm:text-base">
                     Un message pré-rempli sera ouvert dans WhatsApp avec le lien vers le devis.
                   </p>
                 </div>
@@ -247,7 +249,7 @@ Cordialement`;
                       value={whatsappMessage}
                       readOnly
                       rows={6}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 text-sm"
                     />
                     <button
                       onClick={() => copyToClipboard(whatsappMessage)}
@@ -278,11 +280,11 @@ Cordialement`;
             {activeTab === 'print' && (
               <div className="space-y-4">
                 <div className="text-center">
-                  <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                    <Printer className="h-8 w-8 text-purple-600" />
+                  <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                    <Printer className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
                   </div>
                   <h4 className="text-lg font-medium text-gray-900 mb-2">Imprimer ou sauvegarder en PDF</h4>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-600 mb-6 text-sm sm:text-base">
                     Ouvrez l'aperçu d'impression pour imprimer le devis ou le sauvegarder en PDF via votre navigateur.
                   </p>
                 </div>
@@ -293,7 +295,7 @@ Cordialement`;
                       <h5 className="font-medium text-gray-900">{quoteNumber}</h5>
                       <p className="text-sm text-gray-500">Devis formaté pour impression</p>
                     </div>
-                    <Printer className="h-8 w-8 text-gray-400" />
+                    <Printer className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
                   </div>
                 </div>
 
@@ -311,7 +313,7 @@ Cordialement`;
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+          <div className="bg-gray-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
             <button
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
@@ -323,7 +325,7 @@ Cordialement`;
               <button
                 onClick={handleEmailSend}
                 disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <>
@@ -342,7 +344,7 @@ Cordialement`;
             {activeTab === 'whatsapp' && (
               <button
                 onClick={handleWhatsAppShare}
-                className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-200"
+                className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-200"
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Ouvrir WhatsApp
@@ -352,7 +354,7 @@ Cordialement`;
             {activeTab === 'print' && (
               <button
                 onClick={handlePrint}
-                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors duration-200"
+                className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors duration-200"
               >
                 <Printer className="h-4 w-4 mr-2" />
                 Ouvrir l'aperçu d'impression

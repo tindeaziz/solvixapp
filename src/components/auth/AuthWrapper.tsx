@@ -44,24 +44,24 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ onAuthSuccess }) => {
     <div className="min-h-screen bg-gradient-to-br from-solvix-light via-white to-solvix-light flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div className="flex items-center justify-center mb-4">
             <img 
               src="/Logo-Solvix.png" 
               alt="Solvix Logo" 
-              className="h-12 w-auto"
+              className="h-10 sm:h-12 w-auto"
             />
           </div>
-          <p className="text-gray-600 font-inter">Génération de devis professionnels</p>
+          <p className="text-gray-600 font-inter text-sm sm:text-base">Génération de devis professionnels</p>
         </div>
 
         {/* Auth Form */}
-        <div className="bg-white rounded-2xl shadow-solvix-lg border border-gray-100 p-8">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-solvix-lg border border-gray-100 p-6 sm:p-8">
           {renderAuthForm()}
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-sm text-gray-500 font-inter">
+        <div className="text-center mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500 font-inter">
           © 2025 Solvix. Tous droits réservés.
         </div>
       </div>

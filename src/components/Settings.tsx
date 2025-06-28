@@ -45,10 +45,9 @@ const Settings: React.FC = () => {
       console.log('🔍 SETTINGS - Chargement du profil pour User ID:', user.id);
 
       try {
-        // Charger les données depuis Supabase
         const { data, error } = await profileService.getProfile();
         
-        if (error && error.code !== 'PGRST116') { // PGRST116 = pas de données trouvées
+        if (error && error.code !== 'PGRST116') {
           console.error('❌ SETTINGS - Erreur chargement profil:', error);
           setSaveError('Erreur lors du chargement du profil');
           return;
@@ -69,7 +68,6 @@ const Settings: React.FC = () => {
           }
         } else {
           console.log('📝 SETTINGS - Nouveau profil, utilisation des données utilisateur');
-          // Nouveau profil, utiliser les données de l'utilisateur
           setProfile({
             name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
             email: user.email || '',
@@ -97,19 +95,16 @@ const Settings: React.FC = () => {
     setIsUploading(true);
 
     try {
-      // Validation du fichier
       if (!file.type.startsWith('image/')) {
         throw new Error('Veuillez sélectionner un fichier image (JPG, PNG, GIF)');
       }
 
-      if (file.size > 2 * 1024 * 1024) { // 2MB
+      if (file.size > 2 * 1024 * 1024) {
         throw new Error('La taille du fichier ne doit pas dépasser 2MB');
       }
 
-      // Simulation d'un délai d'upload
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Créer un aperçu de l'image
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
@@ -123,7 +118,6 @@ const Settings: React.FC = () => {
       setPhotoError(error instanceof Error ? error.message : 'Erreur lors du chargement de l\'image');
     } finally {
       setIsUploading(false);
-      // Reset input value pour permettre de sélectionner le même fichier
       event.target.value = '';
     }
   };
@@ -146,7 +140,6 @@ const Settings: React.FC = () => {
     console.log('💾 SETTINGS - Sauvegarde du profil pour User ID:', user.id);
 
     try {
-      // Préparer les données à sauvegarder
       const profileData = {
         company_name: profile.name || 'Mon Entreprise',
         company_email: profile.email,
@@ -157,16 +150,13 @@ const Settings: React.FC = () => {
 
       console.log('📝 SETTINGS - Données à sauvegarder:', Object.keys(profileData));
 
-      // Vérifier si un profil existe déjà
       const { data: existingProfile } = await profileService.getProfile();
 
       let result;
       if (existingProfile) {
-        // Mettre à jour le profil existant
         console.log('🔄 SETTINGS - Mise à jour du profil existant');
         result = await profileService.updateProfile(profileData);
       } else {
-        // Créer un nouveau profil
         console.log('🆕 SETTINGS - Création d\'un nouveau profil');
         result = await profileService.createProfile({
           user_id: user.id,
@@ -192,7 +182,6 @@ const Settings: React.FC = () => {
       console.log('✅ SETTINGS - Profil sauvegardé avec succès');
       setShowSuccess(true);
       
-      // Masquer le message de succès après 3 secondes
       setTimeout(() => setShowSuccess(false), 3000);
 
     } catch (error) {
@@ -225,7 +214,7 @@ const Settings: React.FC = () => {
     }
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Success Message */}
         {showSuccess && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
@@ -246,8 +235,8 @@ const Settings: React.FC = () => {
         {user && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="text-sm font-medium text-blue-900 mb-2">Informations de connexion</h4>
-            <div className="text-sm text-blue-800">
-              <div><strong>User ID:</strong> {user.id}</div>
+            <div className="text-sm text-blue-800 space-y-1">
+              <div><strong>User ID:</strong> <span className="font-mono text-xs">{user.id}</span></div>
               <div><strong>Email:</strong> {user.email}</div>
               <div><strong>Dernière connexion:</strong> {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('fr-FR') : 'N/A'}</div>
             </div>
@@ -255,11 +244,11 @@ const Settings: React.FC = () => {
         )}
 
         {/* Photo de profil */}
-        <div className="border-b border-gray-200 pb-8">
-          <h3 className="text-lg font-medium text-gray-900 mb-6">Photo de profil</h3>
-          <div className="flex items-start space-x-6">
-            <div className="flex-shrink-0 relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
+        <div className="border-b border-gray-200 pb-6 sm:pb-8">
+          <h3 className="text-lg font-medium text-gray-900 mb-4 sm:mb-6">Photo de profil</h3>
+          <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+            <div className="flex-shrink-0 relative mx-auto sm:mx-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-blue-600 flex items-center justify-center">
                 {photoPreview || profile.photo ? (
                   <img 
                     src={photoPreview || profile.photo || ''} 
@@ -267,7 +256,7 @@ const Settings: React.FC = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-white text-2xl font-medium">
+                  <span className="text-white text-lg sm:text-2xl font-medium">
                     {getInitials(profile.name || 'U')}
                   </span>
                 )}
@@ -279,11 +268,11 @@ const Settings: React.FC = () => {
               )}
             </div>
             
-            <div className="flex-1">
-              <div className="flex flex-wrap gap-3 mb-3">
+            <div className="flex-1 text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row gap-3 mb-3">
                 <label
                   htmlFor="photo-upload"
-                  className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors duration-200 ${
+                  className={`inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors duration-200 ${
                     isUploading ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
@@ -295,7 +284,7 @@ const Settings: React.FC = () => {
                   <button
                     onClick={removePhoto}
                     disabled={isUploading}
-                    className="inline-flex items-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Supprimer
                   </button>
@@ -328,7 +317,7 @@ const Settings: React.FC = () => {
         {/* Informations personnelles */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Informations personnelles</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
               <input
@@ -495,47 +484,49 @@ const Settings: React.FC = () => {
     <div className="max-w-6xl mx-auto">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="border-b border-gray-200">
-          <div className="px-6 py-4">
-            <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
-            <p className="text-gray-600 mt-1">Gérez vos préférences et paramètres d'application</p>
+          <div className="px-4 sm:px-6 py-4">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Paramètres</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">Gérez vos préférences et paramètres d'application</p>
           </div>
         </div>
 
-        <div className="flex">
-          {/* Sidebar */}
-          <div className="w-64 border-r border-gray-200">
-            <nav className="p-4 space-y-1">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors duration-200 ${
-                      activeTab === tab.id
-                        ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon className={`h-5 w-5 mr-3 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'}`} />
-                    <span className="text-sm font-medium">{tab.name}</span>
-                  </button>
-                );
-              })}
+        <div className="flex flex-col lg:flex-row">
+          {/* Sidebar - Responsive */}
+          <div className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-200">
+            <nav className="p-4 space-y-1 overflow-x-auto lg:overflow-x-visible">
+              <div className="flex lg:flex-col space-x-2 lg:space-x-0 lg:space-y-1 min-w-max lg:min-w-0">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center px-3 py-2 text-left rounded-lg transition-colors duration-200 whitespace-nowrap lg:w-full ${
+                        activeTab === tab.id
+                          ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <Icon className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <span className="text-sm font-medium">{tab.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </nav>
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             {renderTabContent()}
             
             {/* Save Button - Only show for profile tab */}
             {activeTab === 'profile' && (
-              <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
                 <button 
                   onClick={handleSaveProfile}
                   disabled={isSaving || isLoading}
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 >
                   {isSaving ? (
                     <>
@@ -554,8 +545,8 @@ const Settings: React.FC = () => {
 
             {/* Save Button - For other tabs (non-company) */}
             {activeTab !== 'company' && activeTab !== 'profile' && (
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+              <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
+                <button className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                   <Save className="h-4 w-4 mr-2" />
                   Sauvegarder les modifications
                 </button>

@@ -52,7 +52,7 @@ const QuoteManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   
-  // Nouvel état pour la devise par défaut
+  // État pour la devise par défaut
   const [defaultCurrency, setDefaultCurrency] = useState('EUR');
 
   // Charger les devis et la devise par défaut au montage
@@ -71,7 +71,7 @@ const QuoteManagement: React.FC = () => {
         // Charger le profil pour obtenir la devise par défaut
         const { data: profileData, error: profileError } = await profileService.getProfile();
         
-        if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = pas de données trouvées
+        if (profileError && profileError.code !== 'PGRST116') {
           console.error('❌ QUOTE_MANAGEMENT - Erreur chargement profil:', profileError);
         }
 
@@ -154,7 +154,6 @@ const QuoteManagement: React.FC = () => {
       let aValue: any = a[sortField];
       let bValue: any = b[sortField];
 
-      // Gestion spéciale pour le client
       if (sortField === 'client') {
         aValue = a.client?.name || '';
         bValue = b.client?.name || '';
@@ -201,10 +200,8 @@ const QuoteManagement: React.FC = () => {
     console.log('📋 QUOTE_MANAGEMENT - Dupliquer devis:', quote.quote_number);
     
     try {
-      // Générer un nouveau numéro
       const newNumber = await devisService.generateQuoteNumber();
       
-      // Créer une copie du devis
       const duplicatedQuote: Omit<Devis, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
         quote_number: newNumber,
         date_creation: new Date().toISOString().split('T')[0],
@@ -229,7 +226,6 @@ const QuoteManagement: React.FC = () => {
 
       console.log('✅ QUOTE_MANAGEMENT - Devis dupliqué avec succès:', newNumber);
       
-      // Recharger la liste
       const { data: updatedQuotes } = await devisService.getDevis();
       setQuotes(updatedQuotes || []);
       
@@ -261,7 +257,6 @@ const QuoteManagement: React.FC = () => {
 
       console.log('✅ QUOTE_MANAGEMENT - Devis supprimé avec succès');
       
-      // Retirer le devis de la liste locale
       setQuotes(prev => prev.filter(q => q.id !== quoteToDelete.id));
       
     } catch (error) {
@@ -308,7 +303,7 @@ const QuoteManagement: React.FC = () => {
       case 'Refusé':
         return {
           color: 'bg-red-100 text-red-700 border-red-200',
-          icon: AlertCircle,
+          icon: AlertTriangle,
           dotColor: 'bg-red-500'
         };
       default:
@@ -329,7 +324,7 @@ const QuoteManagement: React.FC = () => {
     return sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
   };
 
-  // Pagination
+  // Pagination responsive
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
@@ -347,7 +342,7 @@ const QuoteManagement: React.FC = () => {
     }
 
     return (
-      <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 space-y-3 sm:space-y-0">
         <div className="flex items-center text-sm text-gray-500 font-inter">
           Affichage de {((currentPage - 1) * itemsPerPage) + 1} à {Math.min(currentPage * itemsPerPage, filteredAndSortedQuotes.length)} sur {filteredAndSortedQuotes.length} résultats
         </div>
@@ -359,7 +354,7 @@ const QuoteManagement: React.FC = () => {
             className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-inter hover:shadow-sm"
           >
             <ChevronDown className="h-4 w-4 mr-1 rotate-90" />
-            Précédent
+            <span className="hidden sm:inline">Précédent</span>
           </button>
 
           <div className="flex space-x-1">
@@ -407,7 +402,7 @@ const QuoteManagement: React.FC = () => {
             disabled={currentPage === totalPages}
             className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-inter hover:shadow-sm"
           >
-            Suivant
+            <span className="hidden sm:inline">Suivant</span>
             <ChevronDown className="h-4 w-4 ml-1 -rotate-90" />
           </button>
         </div>
@@ -430,11 +425,11 @@ const QuoteManagement: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      {/* Header - Responsive */}
+      <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <button
               onClick={() => navigate('/')}
               className="p-2 text-gray-400 hover:text-solvix-blue rounded-lg hover:bg-solvix-light transition-colors duration-200"
@@ -443,11 +438,11 @@ const QuoteManagement: React.FC = () => {
             </button>
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-50 rounded-lg">
-                <FileText className="h-6 w-6 text-solvix-blue" />
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-solvix-blue" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-solvix-dark font-poppins">Gestion des devis</h1>
-                <p className="text-gray-600 font-inter">
+                <h1 className="text-xl sm:text-2xl font-bold text-solvix-dark font-poppins">Gestion des devis</h1>
+                <p className="text-gray-600 font-inter text-sm sm:text-base">
                   {filteredAndSortedQuotes.length} devis trouvé{filteredAndSortedQuotes.length > 1 ? 's' : ''}
                 </p>
               </div>
@@ -455,7 +450,7 @@ const QuoteManagement: React.FC = () => {
           </div>
           <button
             onClick={handleNewQuote}
-            className="inline-flex items-center px-6 py-3 bg-solvix-orange text-white rounded-xl font-semibold hover:bg-solvix-orange-dark transition-colors duration-200 font-inter shadow-solvix"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 sm:px-6 py-3 bg-solvix-orange text-white rounded-xl font-semibold hover:bg-solvix-orange-dark transition-colors duration-200 font-inter shadow-solvix"
           >
             <Plus className="h-5 w-5 mr-2" />
             Nouveau devis
@@ -477,9 +472,9 @@ const QuoteManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Filtres */}
-      <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-6">
-        <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4">
+      {/* Filtres - Responsive */}
+      <div className="bg-white rounded-xl shadow-solvix border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4">
           {/* Barre de recherche */}
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -495,7 +490,7 @@ const QuoteManagement: React.FC = () => {
           </div>
 
           {/* Filtres */}
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Filter className="h-4 w-4 text-gray-400" />
@@ -534,11 +529,11 @@ const QuoteManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Tableau des devis */}
+      {/* Tableau des devis - Responsive */}
       <div className="bg-white rounded-xl shadow-solvix border border-gray-200 overflow-hidden">
         {filteredAndSortedQuotes.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[800px]">
               <thead className="bg-gradient-to-r from-gray-50 to-solvix-light">
                 <tr>
                   {[
@@ -552,7 +547,7 @@ const QuoteManagement: React.FC = () => {
                   ].map((header) => (
                     <th 
                       key={header.field}
-                      className={`px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider font-inter ${
+                      className={`px-4 sm:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider font-inter ${
                         header.field !== 'actions' ? 'cursor-pointer hover:bg-gray-100 transition-colors duration-200 group' : ''
                       }`}
                       onClick={() => header.field !== 'actions' && handleSort(header.field)}
@@ -576,7 +571,7 @@ const QuoteManagement: React.FC = () => {
                   
                   return (
                     <tr key={quote.id} className={`group hover:bg-gradient-to-r hover:from-solvix-light hover:to-blue-50 transition-all duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-3">
                           <div className="w-2 h-2 bg-solvix-blue rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                           <div className="text-sm font-semibold text-solvix-dark font-inter group-hover:text-solvix-blue transition-colors duration-200">
@@ -584,7 +579,7 @@ const QuoteManagement: React.FC = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="space-y-1">
                           <div className="text-sm font-medium text-solvix-dark font-inter">
                             {quote.client?.name || 'Client non défini'}
@@ -594,50 +589,50 @@ const QuoteManagement: React.FC = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-solvix-dark font-inter">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-solvix-dark font-inter">
                         {formatDate(quote.date_creation)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-bold text-solvix-dark font-montserrat bg-gray-50 px-3 py-1 rounded-lg inline-block">
                           {formatCurrency(quote.subtotal_ht, quote.currency)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border font-inter ${statusConfig.color}`}>
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <div className={`inline-flex items-center px-2 sm:px-3 py-1 text-xs font-medium rounded-full border font-inter ${statusConfig.color}`}>
                           <div className={`w-2 h-2 rounded-full mr-2 ${statusConfig.dotColor}`}></div>
-                          <StatusIcon className="h-3 w-3 mr-1" />
+                          <StatusIcon className="h-3 w-3 mr-1 hidden sm:inline" />
                           {quote.status}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-inter">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-inter">
                         {formatDate(quote.date_expiration)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-1">
                           <button
                             onClick={() => handleView(quote)}
-                            className="p-2 text-gray-500 hover:text-solvix-blue hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                            className="p-1 sm:p-2 text-gray-500 hover:text-solvix-blue hover:bg-blue-50 rounded-lg transition-colors duration-200"
                             title="Voir / Imprimer"
                           >
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleEdit(quote)}
-                            className="p-2 text-gray-500 hover:text-solvix-blue hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                            className="p-1 sm:p-2 text-gray-500 hover:text-solvix-blue hover:bg-blue-50 rounded-lg transition-colors duration-200"
                             title="Modifier"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDuplicate(quote)}
-                            className="p-2 text-gray-500 hover:text-solvix-blue hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                            className="p-1 sm:p-2 text-gray-500 hover:text-solvix-blue hover:bg-blue-50 rounded-lg transition-colors duration-200"
                             title="Dupliquer"
                           >
                             <Copy className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(quote)}
-                            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                            className="p-1 sm:p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
                             title="Supprimer"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -654,14 +649,14 @@ const QuoteManagement: React.FC = () => {
             {renderPagination()}
           </div>
         ) : (
-          /* État vide */
-          <div className="text-center py-16 bg-gradient-to-b from-white to-gray-50">
+          /* État vide - Responsive */
+          <div className="text-center py-12 sm:py-16 bg-gradient-to-b from-white to-gray-50 px-4">
             <div className="max-w-md mx-auto">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FileText className="h-12 w-12 text-gray-400" />
+              <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <FileText className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-solvix-dark mb-3 font-poppins">Aucun devis trouvé</h3>
-              <p className="text-gray-500 mb-8 font-inter leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-semibold text-solvix-dark mb-2 sm:mb-3 font-poppins">Aucun devis trouvé</h3>
+              <p className="text-gray-500 mb-6 sm:mb-8 font-inter leading-relaxed text-sm sm:text-base">
                 {searchTerm || statusFilter !== 'all' || dateFilter !== 'all'
                   ? 'Aucun devis ne correspond à vos critères de recherche. Essayez de modifier vos filtres.'
                   : 'Vous n\'avez pas encore créé de devis. Commencez par créer votre premier devis professionnel.'
@@ -670,7 +665,7 @@ const QuoteManagement: React.FC = () => {
               {(!searchTerm && statusFilter === 'all' && dateFilter === 'all') && (
                 <button
                   onClick={handleNewQuote}
-                  className="inline-flex items-center px-6 py-3 bg-solvix-orange text-white rounded-xl font-semibold hover:bg-solvix-orange-dark transition-all duration-200 font-inter shadow-solvix"
+                  className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-solvix-orange text-white rounded-xl font-semibold hover:bg-solvix-orange-dark transition-all duration-200 font-inter shadow-solvix"
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Créer mon premier devis
@@ -681,20 +676,20 @@ const QuoteManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Modal de confirmation de suppression */}
+      {/* Modal de confirmation de suppression - Responsive */}
       {showDeleteModal && quoteToDelete && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" onClick={() => !isDeleting && setShowDeleteModal(false)}></div>
             
-            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-solvix-lg transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-6 pt-6 pb-4 sm:p-8 sm:pb-6">
+            <div className="inline-block align-bottom bg-white rounded-xl sm:rounded-2xl text-left overflow-hidden shadow-solvix-lg transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full mx-4">
+              <div className="bg-white px-4 sm:px-6 pt-5 sm:pt-6 pb-4 sm:p-8 sm:pb-6">
                 <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-red-100 sm:mx-0 sm:h-12 sm:w-12">
-                    <Trash2 className="h-8 w-8 text-red-600 sm:h-6 sm:w-6" />
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-12 sm:w-12">
+                    <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-xl leading-6 font-bold text-solvix-dark font-poppins">
+                    <h3 className="text-lg sm:text-xl leading-6 font-bold text-solvix-dark font-poppins">
                       Supprimer le devis
                     </h3>
                     <div className="mt-3">
@@ -708,12 +703,12 @@ const QuoteManagement: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-6 py-4 sm:px-8 sm:flex sm:flex-row-reverse sm:space-x-reverse sm:space-x-3">
+              <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 sm:px-8 sm:flex sm:flex-row-reverse sm:space-x-reverse sm:space-x-3">
                 <button
                   type="button"
                   onClick={confirmDelete}
                   disabled={isDeleting}
-                  className="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-3 bg-red-600 text-base font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm transition-all duration-200 font-inter disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 sm:px-6 py-2 sm:py-3 bg-red-600 text-base font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm transition-all duration-200 font-inter disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isDeleting ? (
                     <>
@@ -728,7 +723,7 @@ const QuoteManagement: React.FC = () => {
                   type="button"
                   onClick={() => setShowDeleteModal(false)}
                   disabled={isDeleting}
-                  className="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-3 bg-white text-base font-medium text-gray-700 hover:bg-solvix-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-solvix-blue sm:mt-0 sm:w-auto sm:text-sm transition-all duration-200 font-inter disabled:opacity-50"
+                  className="mt-3 sm:mt-0 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 sm:px-6 py-2 sm:py-3 bg-white text-base font-medium text-gray-700 hover:bg-solvix-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-solvix-blue sm:w-auto sm:text-sm transition-all duration-200 font-inter disabled:opacity-50"
                 >
                   Annuler
                 </button>

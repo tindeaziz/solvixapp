@@ -34,6 +34,29 @@ const CompanySettings: React.FC = () => {
   const [signatureError, setSignatureError] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 600, height: 200 });
+
+  // Responsive canvas sizing
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const container = canvas.parentElement;
+        if (container) {
+          const containerWidth = container.clientWidth;
+          const newWidth = Math.min(600, containerWidth - 20); // 20px for padding
+          setCanvasSize({
+            width: newWidth,
+            height: Math.floor(newWidth / 3)
+          });
+        }
+      }
+    };
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    return () => window.removeEventListener('resize', updateCanvasSize);
+  }, []);
 
   // Charger les données du profil au montage du composant
   useEffect(() => {
@@ -48,7 +71,7 @@ const CompanySettings: React.FC = () => {
 
       try {
         const { data, error } = await profileService.getProfile();
-        if (error && error.code !== 'PGRST116') { // PGRST116 = pas de données trouvées
+        if (error && error.code !== 'PGRST116') {
           console.error('❌ COMPANY_SETTINGS - Erreur lors du chargement du profil:', error);
           setErrors({ general: 'Erreur lors du chargement du profil' });
           return;
@@ -56,12 +79,6 @@ const CompanySettings: React.FC = () => {
 
         if (data) {
           console.log('✅ COMPANY_SETTINGS - Profil chargé depuis Supabase');
-          console.log('🏢 COMPANY_SETTINGS - Nom entreprise:', data.company_name);
-          console.log('📧 COMPANY_SETTINGS - Email entreprise:', data.company_email);
-          console.log('📱 COMPANY_SETTINGS - Téléphone entreprise:', data.company_phone);
-          console.log('🏠 COMPANY_SETTINGS - Adresse entreprise:', data.company_address);
-          console.log('🖼️ COMPANY_SETTINGS - Logo présent:', data.company_logo ? 'OUI' : 'NON');
-          console.log('✍️ COMPANY_SETTINGS - Signature présente:', data.company_signature ? 'OUI' : 'NON');
           
           setCompanyData({
             company_name: data.company_name || '',
@@ -126,7 +143,7 @@ const CompanySettings: React.FC = () => {
         ctx.lineJoin = 'round';
       }
     }
-  }, []);
+  }, [canvasSize]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -344,15 +361,6 @@ const CompanySettings: React.FC = () => {
 
     try {
       console.log('💾 COMPANY_SETTINGS - Sauvegarde du profil pour User ID:', user?.id);
-      console.log('📝 COMPANY_SETTINGS - Données à sauvegarder:', {
-        company_name: companyData.company_name,
-        company_email: companyData.company_email,
-        company_phone: companyData.company_phone,
-        company_address: companyData.company_address,
-        // Ne pas logger les images base64 complètes
-        company_logo: companyData.company_logo ? '[LOGO DATA]' : '',
-        company_signature: companyData.company_signature ? '[SIGNATURE DATA]' : ''
-      });
       
       const { data, error } = await profileService.updateProfile(companyData);
       
@@ -393,28 +401,28 @@ const CompanySettings: React.FC = () => {
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         {/* Header */}
-        <div className="border-b border-gray-200 px-6 py-4">
+        <div className="border-b border-gray-200 px-4 sm:px-6 py-4">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-50 rounded-lg">
-              <Building className="h-6 w-6 text-blue-600" />
+              <Building className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Paramètres de l'entreprise</h1>
-              <p className="text-gray-600">Configurez les informations de votre entreprise</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Paramètres de l'entreprise</h1>
+              <p className="text-gray-600 text-sm sm:text-base">Configurez les informations de votre entreprise</p>
             </div>
           </div>
         </div>
 
         {/* Success Message */}
         {showSuccess && (
-          <div className="mx-6 mt-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+          <div className="mx-4 sm:mx-6 mt-4 sm:mt-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
             <Check className="h-5 w-5 text-green-600 mr-3" />
             <p className="text-green-800 font-medium">Paramètres sauvegardés avec succès dans la base de données !</p>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6 sm:space-y-8">
           {errors.general && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
               <AlertCircle className="h-5 w-5 text-red-600 mr-3" />
@@ -428,8 +436,8 @@ const CompanySettings: React.FC = () => {
               <Upload className="h-5 w-5 mr-2" />
               Logo de l'entreprise
             </h3>
-            <div className="flex items-start space-x-6">
-              <div className="flex-shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+              <div className="flex-shrink-0 mx-auto sm:mx-0">
                 <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
                   {logoPreview ? (
                     <img src={logoPreview} alt="Logo preview" className="w-full h-full object-contain" />
@@ -438,7 +446,7 @@ const CompanySettings: React.FC = () => {
                   )}
                 </div>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 text-center sm:text-left">
                 <input
                   type="file"
                   id="logo-upload"
@@ -470,7 +478,7 @@ const CompanySettings: React.FC = () => {
               Informations générales
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nom de l'entreprise *
@@ -594,7 +602,7 @@ const CompanySettings: React.FC = () => {
               Informations légales
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Numéro RCCM
@@ -623,7 +631,7 @@ const CompanySettings: React.FC = () => {
             </div>
           </div>
 
-          {/* Signature Section */}
+          {/* Signature Section - Responsive */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
               <PenTool className="h-5 w-5 mr-2" />
@@ -637,11 +645,11 @@ const CompanySettings: React.FC = () => {
             </div>
 
             {/* Signature Mode Selection */}
-            <div className="flex space-x-4 mb-6">
+            <div className="flex flex-wrap gap-3 mb-6">
               <button
                 type="button"
                 onClick={() => setSignatureMode('draw')}
-                className={`flex items-center px-4 py-2 rounded-lg border transition-colors duration-200 ${
+                className={`flex items-center px-3 sm:px-4 py-2 rounded-lg border transition-colors duration-200 ${
                   signatureMode === 'draw'
                     ? 'bg-blue-50 border-blue-300 text-blue-700'
                     : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -653,7 +661,7 @@ const CompanySettings: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSignatureMode('upload')}
-                className={`flex items-center px-4 py-2 rounded-lg border transition-colors duration-200 ${
+                className={`flex items-center px-3 sm:px-4 py-2 rounded-lg border transition-colors duration-200 ${
                   signatureMode === 'upload'
                     ? 'bg-blue-50 border-blue-300 text-blue-700'
                     : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -664,15 +672,15 @@ const CompanySettings: React.FC = () => {
               </button>
             </div>
 
-            {/* Draw Mode */}
+            {/* Draw Mode - Responsive */}
             {signatureMode === 'draw' && (
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
                   <canvas
                     ref={canvasRef}
-                    width={600}
-                    height={200}
-                    className="w-full h-48 bg-white border border-gray-200 rounded cursor-crosshair touch-none"
+                    width={canvasSize.width}
+                    height={canvasSize.height}
+                    className="w-full h-auto bg-white border border-gray-200 rounded cursor-crosshair touch-none"
                     onMouseDown={startDrawing}
                     onMouseMove={draw}
                     onMouseUp={stopDrawing}
@@ -714,10 +722,10 @@ const CompanySettings: React.FC = () => {
               </div>
             )}
 
-            {/* Upload Mode */}
+            {/* Upload Mode - Responsive */}
             {signatureMode === 'upload' && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center bg-gray-50">
                   <input
                     type="file"
                     id="signature-upload"
@@ -729,7 +737,7 @@ const CompanySettings: React.FC = () => {
                     htmlFor="signature-upload"
                     className="cursor-pointer inline-flex flex-col items-center"
                   >
-                    <Upload className="h-12 w-12 text-gray-400 mb-4" />
+                    <Upload className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-4" />
                     <span className="text-sm font-medium text-gray-700 mb-2">
                       Cliquez pour importer une image de signature
                     </span>
@@ -748,7 +756,7 @@ const CompanySettings: React.FC = () => {
               </div>
             )}
 
-            {/* Signature Preview */}
+            {/* Signature Preview - Responsive */}
             {(signaturePreview || companyData.company_signature) && (
               <div className="space-y-4">
                 <h4 className="text-md font-medium text-gray-900">Aperçu de la signature</h4>
@@ -781,7 +789,7 @@ const CompanySettings: React.FC = () => {
             )}
           </div>
 
-          {/* VAT Settings */}
+          {/* VAT Settings - Responsive */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900">Configuration TVA</h3>
             
@@ -803,11 +811,11 @@ const CompanySettings: React.FC = () => {
               </div>
 
               {companyData.vat_enabled && (
-                <div className="ml-4">
+                <div className="ml-0 sm:ml-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Taux de TVA (%)
                   </label>
-                  <div className="relative w-32">
+                  <div className="relative w-full sm:w-32">
                     <input
                       type="number"
                       min="0"
@@ -836,7 +844,7 @@ const CompanySettings: React.FC = () => {
             <button
               type="submit"
               disabled={isSaving}
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>

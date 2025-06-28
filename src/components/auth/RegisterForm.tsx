@@ -89,7 +89,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       );
       
       if (error) {
-        // Gestion des erreurs Supabase
         if (error.message.includes('User already registered')) {
           setGeneralError('Cette adresse email est déjà utilisée');
         } else if (error.message.includes('Password should be at least')) {
@@ -104,11 +103,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
       if (data?.user) {
         console.log('✅ REGISTER - Inscription réussie:', data.user);
-        // Si l'email confirmation est désactivée, on peut directement connecter l'utilisateur
         if (data.session) {
           onSuccess();
         } else {
-          // Sinon, afficher un message de confirmation
           setGeneralError('Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
           setTimeout(() => {
             onSwitchToLogin();
@@ -151,11 +148,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Créer un compte</h2>
-        <p className="text-gray-600">Rejoignez Solvix dès aujourd'hui</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Créer un compte</h2>
+        <p className="text-gray-600 text-sm sm:text-base">Rejoignez Solvix dès aujourd'hui</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {generalError && (
           <div className={`border rounded-lg p-4 ${
             generalError.includes('succès') 

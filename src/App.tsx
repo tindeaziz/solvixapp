@@ -43,10 +43,10 @@ function App() {
   // Afficher un loader pendant la vérification de l'authentification
   if (loading) {
     return (
-      <div className="min-h-screen bg-solvix-light flex items-center justify-center">
+      <div className="min-h-screen bg-solvix-light flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-solvix-blue border-t-transparent mx-auto mb-4"></div>
-          <p className="text-solvix-dark font-inter">Chargement...</p>
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-solvix-blue border-t-transparent mx-auto mb-4"></div>
+          <p className="text-solvix-dark font-inter text-sm sm:text-base">Chargement...</p>
         </div>
       </div>
     );

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Printer, ArrowLeft, FileText } from 'lucide-react';
 import { formatCurrency } from '../types/currency';
 
-// Import des nouveaux modèles
+// Import des modèles
 import DevisModeleCorporate from './templates/DevisModeleCorporate';
 import DevisModeleCreatif from './templates/DevisModeleCreatif';
 import DevisModeleArtisan from './templates/DevisModeleArtisan';
@@ -58,8 +58,22 @@ const QuotePreview: React.FC = () => {
   const location = useLocation();
   const [quote, setQuote] = useState<DevisData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // 3. RÉCEPTION DANS LE COMPOSANT D'IMPRESSION avec useLocation
+  // Détecter si l'appareil est mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+
   useEffect(() => {
     const fetchQuote = async () => {
       try {
@@ -83,7 +97,7 @@ const QuotePreview: React.FC = () => {
         } else {
           console.log("=== AUCUNE DONNÉE REÇUE - UTILISATION DES DONNÉES SIMULÉES ===");
           
-          // 5. GESTION DES CAS D'ERREUR - Données simulées si pas de données reçues
+          // Données simulées si pas de données reçues
           const mockQuote: DevisData = {
             numeroDevis: `DEV-2025-${id?.padStart(3, '0') || '001'}`,
             dateCreation: '2025-01-15',
@@ -137,7 +151,7 @@ const QuotePreview: React.FC = () => {
               address: '123 Rue de la Technologie\n75001 Paris, France',
               phone: '+33 1 23 45 67 89',
               email: 'contact@solvix.com',
-              signature: localStorage.getItem('companySignature') || undefined // Récupérer la signature depuis localStorage
+              signature: localStorage.getItem('companySignature') || undefined
             },
             sousTotal: 22800,
             totalTVA: 4560,
@@ -240,8 +254,8 @@ const QuotePreview: React.FC = () => {
         color: '#1f2937',
         backgroundColor: 'white',
         minHeight: '100vh',
-        padding: '30px',
-        maxWidth: '210mm',
+        padding: '20px',
+        maxWidth: '100%',
         margin: '0 auto',
         position: 'relative'
       }}>
@@ -249,8 +263,8 @@ const QuotePreview: React.FC = () => {
         <div style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           borderRadius: '12px',
-          padding: '25px',
-          marginBottom: '25px',
+          padding: '20px',
+          marginBottom: '20px',
           color: 'white',
           position: 'relative',
           overflow: 'hidden'
@@ -268,25 +282,32 @@ const QuotePreview: React.FC = () => {
 
           <div style={{
             display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
             justifyContent: 'space-between',
-            alignItems: 'center',
+            alignItems: isMobile ? 'flex-start' : 'center',
             position: 'relative',
-            zIndex: 2
+            zIndex: 2,
+            gap: isMobile ? '15px' : '0'
           }}>
             {/* Logo et entreprise */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '15px',
+              width: isMobile ? '100%' : 'auto'
+            }}>
               {quote.entreprise.logo && (
                 <div style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  padding: '10px',
-                  borderRadius: '12px',
+                  padding: '8px',
+                  borderRadius: '8px',
                   backdropFilter: 'blur(10px)'
                 }}>
                   <img 
                     src={quote.entreprise.logo} 
                     alt="Logo" 
                     style={{ 
-                      maxHeight: '45px', 
+                      maxHeight: '40px', 
                       width: 'auto',
                       filter: 'brightness(0) invert(1)'
                     }} 
@@ -295,7 +316,7 @@ const QuotePreview: React.FC = () => {
               )}
               <div>
                 <div style={{
-                  fontSize: '22px',
+                  fontSize: isMobile ? '18px' : '22px',
                   fontWeight: '700',
                   marginBottom: '5px',
                   textShadow: '0 2px 4px rgba(0,0,0,0.1)'
@@ -313,9 +334,9 @@ const QuotePreview: React.FC = () => {
             </div>
 
             {/* Section DEVIS */}
-            <div style={{ textAlign: 'right' }}>
+            <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
               <div style={{
-                fontSize: '32px',
+                fontSize: isMobile ? '24px' : '32px',
                 fontWeight: '800',
                 marginBottom: '5px',
                 textShadow: '0 2px 4px rgba(0,0,0,0.2)',
@@ -325,11 +346,12 @@ const QuotePreview: React.FC = () => {
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '8px 15px',
+                padding: '6px 12px',
                 borderRadius: '20px',
                 fontSize: '14px',
                 fontWeight: '600',
-                backdropFilter: 'blur(10px)'
+                backdropFilter: 'blur(10px)',
+                display: 'inline-block'
               }}>
                 {quote.numeroDevis}
               </div>
@@ -340,15 +362,15 @@ const QuotePreview: React.FC = () => {
         {/* Informations date et client - Cards modernes */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 2fr',
-          gap: '20px',
-          marginBottom: '25px'
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 2fr',
+          gap: '15px',
+          marginBottom: '20px'
         }}>
           {/* Card dates */}
           <div style={{
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             borderRadius: '12px',
-            padding: '20px',
+            padding: '15px',
             color: 'white',
             boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
           }}>
@@ -380,7 +402,7 @@ const QuotePreview: React.FC = () => {
             backgroundColor: '#f8fafc',
             border: '2px solid #e2e8f0',
             borderRadius: '12px',
-            padding: '20px',
+            padding: '15px',
             position: 'relative',
             overflow: 'hidden'
           }}>
@@ -442,12 +464,12 @@ const QuotePreview: React.FC = () => {
           borderRadius: '15px',
           overflow: 'hidden',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          marginBottom: '25px'
+          marginBottom: '20px'
         }}>
           <div style={{
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
-            padding: '15px 20px',
+            padding: '12px 15px',
             fontSize: '14px',
             fontWeight: '700',
             textTransform: 'uppercase',
@@ -456,134 +478,136 @@ const QuotePreview: React.FC = () => {
             💼 Prestations Modernes
           </div>
           
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            fontSize: '11px'
-          }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f8fafc' }}>
-                <th style={{
-                  padding: '15px 12px',
-                  textAlign: 'left',
-                  fontWeight: '600',
-                  fontSize: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  color: '#667eea'
-                }}>
-                  Description
-                </th>
-                <th style={{
-                  padding: '15px 12px',
-                  textAlign: 'center',
-                  fontWeight: '600',
-                  fontSize: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  color: '#667eea',
-                  width: '70px'
-                }}>
-                  Qté
-                </th>
-                <th style={{
-                  padding: '15px 12px',
-                  textAlign: 'right',
-                  fontWeight: '600',
-                  fontSize: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  color: '#667eea',
-                  width: '100px'
-                }}>
-                  Prix Unit.
-                </th>
-                <th style={{
-                  padding: '15px 12px',
-                  textAlign: 'center',
-                  fontWeight: '600',
-                  fontSize: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  color: '#667eea',
-                  width: '60px'
-                }}>
-                  TVA
-                </th>
-                <th style={{
-                  padding: '15px 12px',
-                  textAlign: 'right',
-                  fontWeight: '600',
-                  fontSize: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  color: '#667eea',
-                  width: '100px'
-                }}>
-                  Total HT
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {quote.articles.map((item, index) => (
-                <tr key={item.id} style={{
-                  backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafbfc',
-                  borderLeft: index % 2 === 0 ? '3px solid #667eea' : '3px solid #764ba2'
-                }}>
-                  <td style={{
+          <div className="overflow-x-auto">
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '11px'
+            }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f8fafc' }}>
+                  <th style={{
                     padding: '12px',
-                    fontSize: '11px',
-                    lineHeight: '1.4',
-                    color: '#1f2937'
-                  }}>
-                    {item.designation}
-                  </td>
-                  <td style={{
-                    padding: '12px',
-                    textAlign: 'center',
-                    fontWeight: '700',
+                    textAlign: 'left',
+                    fontWeight: '600',
+                    fontSize: '10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
                     color: '#667eea'
                   }}>
-                    {item.quantity}
-                  </td>
-                  <td style={{
-                    padding: '12px',
-                    textAlign: 'right',
-                    fontWeight: '600',
-                    color: '#1f2937'
-                  }}>
-                    {formatCurrency(item.unitPrice, quote.devise)}
-                  </td>
-                  <td style={{
+                    Description
+                  </th>
+                  <th style={{
                     padding: '12px',
                     textAlign: 'center',
                     fontWeight: '600',
-                    color: '#764ba2'
+                    fontSize: '10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    color: '#667eea',
+                    width: '70px'
                   }}>
-                    {item.vatRate}%
-                  </td>
-                  <td style={{
+                    Qté
+                  </th>
+                  <th style={{
                     padding: '12px',
                     textAlign: 'right',
-                    fontWeight: '700',
+                    fontWeight: '600',
+                    fontSize: '10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
                     color: '#667eea',
-                    fontSize: '12px'
+                    width: '100px'
                   }}>
-                    {formatCurrency(calculateItemTotal(item), quote.devise)}
-                  </td>
+                    Prix Unit.
+                  </th>
+                  <th style={{
+                    padding: '12px',
+                    textAlign: 'center',
+                    fontWeight: '600',
+                    fontSize: '10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    color: '#667eea',
+                    width: '60px'
+                  }}>
+                    TVA
+                  </th>
+                  <th style={{
+                    padding: '12px',
+                    textAlign: 'right',
+                    fontWeight: '600',
+                    fontSize: '10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    color: '#667eea',
+                    width: '100px'
+                  }}>
+                    Total HT
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {quote.articles.map((item, index) => (
+                  <tr key={item.id} style={{
+                    backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafbfc',
+                    borderLeft: index % 2 === 0 ? '3px solid #667eea' : '3px solid #764ba2'
+                  }}>
+                    <td style={{
+                      padding: '10px 12px',
+                      fontSize: '11px',
+                      lineHeight: '1.4',
+                      color: '#1f2937'
+                    }}>
+                      {item.designation}
+                    </td>
+                    <td style={{
+                      padding: '10px 12px',
+                      textAlign: 'center',
+                      fontWeight: '700',
+                      color: '#667eea'
+                    }}>
+                      {item.quantity}
+                    </td>
+                    <td style={{
+                      padding: '10px 12px',
+                      textAlign: 'right',
+                      fontWeight: '600',
+                      color: '#1f2937'
+                    }}>
+                      {formatCurrency(item.unitPrice, quote.devise)}
+                    </td>
+                    <td style={{
+                      padding: '10px 12px',
+                      textAlign: 'center',
+                      fontWeight: '600',
+                      color: '#764ba2'
+                    }}>
+                      {item.vatRate}%
+                    </td>
+                    <td style={{
+                      padding: '10px 12px',
+                      textAlign: 'right',
+                      fontWeight: '700',
+                      color: '#667eea',
+                      fontSize: '12px'
+                    }}>
+                      {formatCurrency(calculateItemTotal(item), quote.devise)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Section Totaux - Style moderne avec gradient */}
         <div style={{
           display: 'flex',
           justifyContent: 'flex-end',
-          marginBottom: '25px'
+          marginBottom: '20px'
         }}>
-          <div style={{ width: '320px' }}>
+          <div style={{ width: isMobile ? '100%' : '320px' }}>
             <div style={{
               backgroundColor: 'white',
               borderRadius: '15px',
@@ -591,7 +615,7 @@ const QuotePreview: React.FC = () => {
               boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
             }}>
               <div style={{
-                padding: '15px 20px',
+                padding: '15px',
                 borderBottom: '1px solid #e2e8f0'
               }}>
                 <div style={{
@@ -616,7 +640,7 @@ const QuotePreview: React.FC = () => {
               </div>
               <div style={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                padding: '20px',
+                padding: '15px',
                 color: 'white'
               }}>
                 <div style={{
@@ -625,7 +649,7 @@ const QuotePreview: React.FC = () => {
                   alignItems: 'center'
                 }}>
                   <span style={{
-                    fontSize: '16px',
+                    fontSize: '14px',
                     fontWeight: '700',
                     textTransform: 'uppercase',
                     letterSpacing: '1px'
@@ -633,7 +657,7 @@ const QuotePreview: React.FC = () => {
                     Total TTC
                   </span>
                   <span style={{
-                    fontSize: '20px',
+                    fontSize: '18px',
                     fontWeight: '800'
                   }}>
                     {formatCurrency(calculateTotal(), quote.devise)}
@@ -649,8 +673,8 @@ const QuotePreview: React.FC = () => {
           <div style={{
             backgroundColor: '#f8fafc',
             borderRadius: '15px',
-            padding: '20px',
-            marginBottom: '25px',
+            padding: '15px',
+            marginBottom: '20px',
             border: '2px solid #e2e8f0',
             position: 'relative'
           }}>
@@ -684,11 +708,13 @@ const QuotePreview: React.FC = () => {
         {/* Footer moderne avec signature */}
         <div style={{
           display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
           justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          marginTop: '30px',
-          paddingTop: '20px',
-          borderTop: '2px solid #e2e8f0'
+          alignItems: isMobile ? 'center' : 'flex-end',
+          marginTop: '20px',
+          paddingTop: '15px',
+          borderTop: '2px solid #e2e8f0',
+          gap: isMobile ? '15px' : '0'
         }}>
           <div style={{
             fontSize: '10px',
@@ -748,15 +774,15 @@ const QuotePreview: React.FC = () => {
         color: '#2d3748',
         backgroundColor: 'white',
         minHeight: '100vh',
-        padding: '40px',
-        maxWidth: '210mm',
+        padding: '20px',
+        maxWidth: '100%',
         margin: '0 auto',
         position: 'relative'
       }}>
         {/* Header minimaliste */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '40px',
+          marginBottom: '30px',
           borderBottom: '1px solid #e2e8f0',
           paddingBottom: '20px'
         }}>
@@ -782,7 +808,7 @@ const QuotePreview: React.FC = () => {
           marginBottom: '30px'
         }}>
           <div style={{
-            fontSize: '28px',
+            fontSize: '24px',
             fontWeight: '300',
             color: '#2d3748',
             marginBottom: '10px',
@@ -832,28 +858,87 @@ const QuotePreview: React.FC = () => {
           }}>
             PRESTATIONS:
           </h3>
-          {quote.articles.map((item, index) => (
-            <div key={item.id} style={{
-              marginBottom: '15px',
-              paddingBottom: '10px',
-              borderBottom: '1px solid #f0f0f0'
+          <div className="overflow-x-auto">
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '12px'
             }}>
-              <div style={{
-                fontSize: '14px',
-                color: '#2d3748',
-                marginBottom: '5px'
-              }}>
-                {index + 1}. {item.designation}
-              </div>
-              <div style={{
-                fontSize: '12px',
-                color: '#718096',
-                marginLeft: '20px'
-              }}>
-                {item.quantity} × {formatCurrency(item.unitPrice, quote.devise)} = {formatCurrency(calculateItemTotal(item), quote.devise)}
-              </div>
-            </div>
-          ))}
+              <thead>
+                <tr>
+                  <th style={{
+                    textAlign: 'left',
+                    padding: '8px 12px',
+                    borderBottom: '1px solid #edf2f7',
+                    color: '#718096',
+                    fontWeight: 'normal',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>Description</th>
+                  <th style={{
+                    textAlign: 'center',
+                    padding: '8px 12px',
+                    borderBottom: '1px solid #edf2f7',
+                    color: '#718096',
+                    fontWeight: 'normal',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    width: '60px'
+                  }}>Qté</th>
+                  <th style={{
+                    textAlign: 'right',
+                    padding: '8px 12px',
+                    borderBottom: '1px solid #edf2f7',
+                    color: '#718096',
+                    fontWeight: 'normal',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    width: '100px'
+                  }}>Prix</th>
+                  <th style={{
+                    textAlign: 'right',
+                    padding: '8px 12px',
+                    borderBottom: '1px solid #edf2f7',
+                    color: '#718096',
+                    fontWeight: 'normal',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    width: '80px'
+                  }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quote.articles.map((item, index) => (
+                  <tr key={item.id}>
+                    <td style={{
+                      padding: '12px',
+                      borderBottom: '1px solid #f7fafc',
+                      color: '#2d3748'
+                    }}>{item.designation}</td>
+                    <td style={{
+                      padding: '12px',
+                      textAlign: 'center',
+                      borderBottom: '1px solid #f7fafc',
+                      color: '#2d3748'
+                    }}>{item.quantity}</td>
+                    <td style={{
+                      padding: '12px',
+                      textAlign: 'right',
+                      borderBottom: '1px solid #f7fafc',
+                      color: '#2d3748'
+                    }}>{formatCurrency(item.unitPrice, quote.devise)}</td>
+                    <td style={{
+                      padding: '12px',
+                      textAlign: 'right',
+                      borderBottom: '1px solid #f7fafc',
+                      color: '#2d3748',
+                      fontWeight: '500'
+                    }}>{formatCurrency(calculateItemTotal(item), quote.devise)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Totaux minimalistes */}
@@ -906,11 +991,13 @@ const QuotePreview: React.FC = () => {
         {/* Footer minimaliste */}
         <div style={{
           display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
           justifyContent: 'space-between',
-          alignItems: 'flex-end',
+          alignItems: isMobile ? 'center' : 'flex-end',
           marginTop: '40px',
           paddingTop: '20px',
-          borderTop: '1px solid #e2e8f0'
+          borderTop: '1px solid #e2e8f0',
+          gap: isMobile ? '15px' : '0'
         }}>
           <div style={{
             fontSize: '10px',
@@ -957,21 +1044,23 @@ const QuotePreview: React.FC = () => {
         color: '#1e293b',
         backgroundColor: 'white',
         minHeight: '100vh',
-        padding: '30px',
-        maxWidth: '210mm',
+        padding: '20px',
+        maxWidth: '100%',
         margin: '0 auto',
         boxSizing: 'border-box',
         position: 'relative',
-        paddingBottom: '120px'
+        paddingBottom: '100px'
       }}>
         {/* Header */}
         <div style={{
           display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '25px',
+          alignItems: isMobile ? 'flex-start' : 'flex-start',
+          marginBottom: '20px',
           borderBottom: '3px solid #8b5cf6',
-          paddingBottom: '15px'
+          paddingBottom: '15px',
+          gap: isMobile ? '15px' : '0'
         }}>
           <div>
             {quote.entreprise.logo && (
@@ -986,7 +1075,7 @@ const QuotePreview: React.FC = () => {
               />
             )}
             <div style={{
-              fontSize: '22px',
+              fontSize: isMobile ? '18px' : '22px',
               fontWeight: 'bold',
               color: '#1e293b',
               marginBottom: '8px'
@@ -1006,9 +1095,9 @@ const QuotePreview: React.FC = () => {
             </div>
           </div>
           
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
             <div style={{
-              fontSize: '28px',
+              fontSize: isMobile ? '24px' : '28px',
               fontWeight: 'bold',
               color: '#1e293b',
               marginBottom: '8px'
@@ -1034,7 +1123,6 @@ const QuotePreview: React.FC = () => {
 
         {/* Section Client */}
         <div className="section-client" style={{
-          maxHeight: '80px',
           fontSize: '10px',
           lineHeight: '1.1',
           padding: '8px',
@@ -1096,130 +1184,132 @@ const QuotePreview: React.FC = () => {
             Détail des prestations:
           </div>
           
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            border: '1px solid #e5e7eb',
-            borderRadius: '6px',
-            overflow: 'hidden',
-            fontSize: '11px'
-          }}>
-            <thead>
-              <tr style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
-                <th style={{
-                  color: '#1e293b',
-                  padding: '10px 8px',
-                  textAlign: 'left',
-                  borderBottom: '2px solid #8b5cf6',
-                  fontWeight: 'bold',
-                  fontSize: '11px'
-                }}>
-                  Description
-                </th>
-                <th style={{
-                  color: '#1e293b',
-                  padding: '10px 8px',
-                  textAlign: 'right',
-                  borderBottom: '2px solid #8b5cf6',
-                  fontWeight: 'bold',
-                  fontSize: '11px',
-                  width: '60px'
-                }}>
-                  Qté
-                </th>
-                <th style={{
-                  color: '#1e293b',
-                  padding: '10px 8px',
-                  textAlign: 'right',
-                  borderBottom: '2px solid #8b5cf6',
-                  fontWeight: 'bold',
-                  fontSize: '11px',
-                  width: '90px'
-                }}>
-                  Prix unitaire
-                </th>
-                <th style={{
-                  color: '#1e293b',
-                  padding: '10px 8px',
-                  textAlign: 'right',
-                  borderBottom: '2px solid #8b5cf6',
-                  fontWeight: 'bold',
-                  fontSize: '11px',
-                  width: '50px'
-                }}>
-                  TVA %
-                </th>
-                <th style={{
-                  color: '#1e293b',
-                  padding: '10px 8px',
-                  textAlign: 'right',
-                  borderBottom: '2px solid #8b5cf6',
-                  fontWeight: 'bold',
-                  fontSize: '11px',
-                  width: '90px'
-                }}>
-                  Total HT
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {quote.articles.map((item, index) => (
-                <tr key={item.id} style={{
-                  backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb'
-                }}>
-                  <td style={{
-                    padding: '8px',
-                    borderBottom: '1px solid #e5e7eb',
-                    color: '#374151',
-                    fontSize: '10px',
-                    lineHeight: '1.3'
-                  }}>
-                    {item.designation}
-                  </td>
-                  <td style={{
-                    padding: '8px',
-                    borderBottom: '1px solid #e5e7eb',
-                    color: '#374151',
-                    fontSize: '10px',
-                    textAlign: 'right',
-                    fontWeight: 'bold'
-                  }}>
-                    {item.quantity}
-                  </td>
-                  <td style={{
-                    padding: '8px',
-                    borderBottom: '1px solid #e5e7eb',
-                    color: '#374151',
-                    fontSize: '10px',
-                    textAlign: 'right',
-                    fontWeight: 'bold'
-                  }}>
-                    {formatCurrency(item.unitPrice, quote.devise)}
-                  </td>
-                  <td style={{
-                    padding: '8px',
-                    borderBottom: '1px solid #e5e7eb',
-                    color: '#374151',
-                    fontSize: '10px',
-                    textAlign: 'right',
-                    fontWeight: 'bold'
-                  }}>
-                    {item.vatRate}%
-                  </td>
-                  <td style={{
-                    padding: '8px',
-                    borderBottom: '1px solid #e5e7eb',
+          <div className="overflow-x-auto">
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              overflow: 'hidden',
+              fontSize: '11px'
+            }}>
+              <thead>
+                <tr style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
+                  <th style={{
                     color: '#1e293b',
-                    fontSize: '10px',
-                    textAlign: 'right',
-                    fontWeight: 'bold'
+                    padding: '10px 8px',
+                    textAlign: 'left',
+                    borderBottom: '2px solid #8b5cf6',
+                    fontWeight: 'bold',
+                    fontSize: '11px'
                   }}>
-                    {formatCurrency(calculateItemTotal(item), quote.devise)}
-                  </td>
+                    Description
+                  </th>
+                  <th style={{
+                    color: '#1e293b',
+                    padding: '10px 8px',
+                    textAlign: 'right',
+                    borderBottom: '2px solid #8b5cf6',
+                    fontWeight: 'bold',
+                    fontSize: '11px',
+                    width: '60px'
+                  }}>
+                    Qté
+                  </th>
+                  <th style={{
+                    color: '#1e293b',
+                    padding: '10px 8px',
+                    textAlign: 'right',
+                    borderBottom: '2px solid #8b5cf6',
+                    fontWeight: 'bold',
+                    fontSize: '11px',
+                    width: '90px'
+                  }}>
+                    Prix unitaire
+                  </th>
+                  <th style={{
+                    color: '#1e293b',
+                    padding: '10px 8px',
+                    textAlign: 'right',
+                    borderBottom: '2px solid #8b5cf6',
+                    fontWeight: 'bold',
+                    fontSize: '11px',
+                    width: '50px'
+                  }}>
+                    TVA %
+                  </th>
+                  <th style={{
+                    color: '#1e293b',
+                    padding: '10px 8px',
+                    textAlign: 'right',
+                    borderBottom: '2px solid #8b5cf6',
+                    fontWeight: 'bold',
+                    fontSize: '11px',
+                    width: '90px'
+                  }}>
+                    Total HT
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {quote.articles.map((item, index) => (
+                  <tr key={item.id} style={{
+                    backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb'
+                  }}>
+                    <td style={{
+                      padding: '8px',
+                      borderBottom: '1px solid #e5e7eb',
+                      color: '#374151',
+                      fontSize: '10px',
+                      lineHeight: '1.3'
+                    }}>
+                      {item.designation}
+                    </td>
+                    <td style={{
+                      padding: '8px',
+                      borderBottom: '1px solid #e5e7eb',
+                      color: '#374151',
+                      fontSize: '10px',
+                      textAlign: 'right',
+                      fontWeight: 'bold'
+                    }}>
+                      {item.quantity}
+                    </td>
+                    <td style={{
+                      padding: '8px',
+                      borderBottom: '1px solid #e5e7eb',
+                      color: '#374151',
+                      fontSize: '10px',
+                      textAlign: 'right',
+                      fontWeight: 'bold'
+                    }}>
+                      {formatCurrency(item.unitPrice, quote.devise)}
+                    </td>
+                    <td style={{
+                      padding: '8px',
+                      borderBottom: '1px solid #e5e7eb',
+                      color: '#374151',
+                      fontSize: '10px',
+                      textAlign: 'right',
+                      fontWeight: 'bold'
+                    }}>
+                      {item.vatRate}%
+                    </td>
+                    <td style={{
+                      padding: '8px',
+                      borderBottom: '1px solid #e5e7eb',
+                      color: '#1e293b',
+                      fontSize: '10px',
+                      textAlign: 'right',
+                      fontWeight: 'bold'
+                    }}>
+                      {formatCurrency(calculateItemTotal(item), quote.devise)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Section Totaux */}
@@ -1228,7 +1318,7 @@ const QuotePreview: React.FC = () => {
           display: 'flex',
           justifyContent: 'flex-end'
         }}>
-          <div style={{ width: '280px' }}>
+          <div style={{ width: isMobile ? '100%' : '280px' }}>
             <table style={{
               width: '100%',
               backgroundColor: '#f8f9fa',
@@ -1306,9 +1396,7 @@ const QuotePreview: React.FC = () => {
         {quote.notes && (
           <div className="notes-conditions" style={{
             fontSize: '9px',
-            maxHeight: '60px',
             padding: '5px',
-            overflow: 'hidden',
             marginTop: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '6px',
@@ -1326,9 +1414,7 @@ const QuotePreview: React.FC = () => {
               whiteSpace: 'pre-line',
               color: '#64748b',
               fontSize: '9px',
-              lineHeight: '1.2',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
+              lineHeight: '1.2'
             }}>
               {quote.notes}
             </div>
@@ -1337,10 +1423,8 @@ const QuotePreview: React.FC = () => {
 
         {/* SECTION SIGNATURE AUTOMATIQUE */}
         <div className="signature-footer" style={{
-          position: 'absolute',
-          bottom: '60px',
-          right: '30px',
-          textAlign: 'center',
+          textAlign: 'right',
+          marginTop: '30px',
           fontSize: '10px',
           fontStyle: 'italic',
           color: '#64748b'
@@ -1356,7 +1440,8 @@ const QuotePreview: React.FC = () => {
               style={{ 
                 maxHeight: '60px', 
                 maxWidth: '150px',
-                marginTop: '5px'
+                marginTop: '5px',
+                marginLeft: 'auto'
               }} 
             />
           )}
@@ -1366,8 +1451,8 @@ const QuotePreview: React.FC = () => {
         <div style={{
           position: 'absolute',
           bottom: '20px',
-          left: '30px',
-          right: '30px',
+          left: '20px',
+          right: '20px',
           textAlign: 'center',
           color: '#64748b',
           fontSize: '10px',
@@ -1444,65 +1529,30 @@ const QuotePreview: React.FC = () => {
     );
   }
 
-  console.log("=== RENDU FINAL DU DEVIS ===");
-  console.log("Quote à afficher:", quote);
-  console.log("Articles à afficher:", quote.articles);
-  console.log("Template sélectionné:", quote.template);
-  console.log("Signature à afficher:", quote.entreprise.signature ? "OUI" : "NON");
-
   return (
     <>
       {/* Boutons d'action - Cachés à l'impression */}
-      <div className="print:hidden" style={{
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        zIndex: 1000,
-        display: 'flex',
-        gap: '12px'
-      }}>
+      <div className="print:hidden fixed top-4 right-4 z-10 flex flex-col sm:flex-row gap-2 sm:gap-4">
         <button
           onClick={handleBack}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '12px 16px',
-            backgroundColor: '#6b7280',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}
+          className="flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors duration-200 shadow-lg"
         >
-          <ArrowLeft style={{ width: '16px', height: '16px', marginRight: '8px' }} />
-          Retour
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Retour</span>
         </button>
         <button
           onClick={handlePrint}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '12px 16px',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}
+          className="flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200 shadow-lg"
         >
-          <Printer style={{ width: '16px', height: '16px', marginRight: '8px' }} />
-          Imprimer / PDF
+          <Printer className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Imprimer / PDF</span>
         </button>
       </div>
 
       {/* Rendu du template sélectionné */}
-      {renderTemplate()}
+      <div className="max-w-4xl mx-auto">
+        {renderTemplate()}
+      </div>
 
       {/* Styles pour l'impression */}
       <style>{`
@@ -1527,66 +1577,9 @@ const QuotePreview: React.FC = () => {
             margin: 12mm;
           }
           
-          .section-client,
-          .tableau-produits,
-          .notes-conditions,
-          .signature-footer {
-            page-break-inside: avoid;
-          }
-          
-          .page-break {
-            page-break-before: always;
-          }
-          
           * {
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
-          }
-          
-          .section-client {
-            max-height: 80px !important;
-            font-size: 10px !important;
-            line-height: 1.1 !important;
-            padding: 8px !important;
-          }
-
-          .notes-conditions {
-            font-size: 9px !important;
-            max-height: 60px !important;
-            padding: 5px !important;
-            overflow: hidden !important;
-          }
-
-          .tableau-produits {
-            margin: 10px 0 !important;
-          }
-
-          .signature-footer {
-            position: absolute !important;
-            bottom: 60px !important;
-            right: 30px !important;
-            text-align: center !important;
-            font-size: 10px !important;
-            font-style: italic !important;
-            page-break-inside: avoid !important;
-          }
-
-          .signature-image {
-            max-height: 60px !important;
-            max-width: 150px !important;
-            margin-top: 5px !important;
-          }
-
-          /* Styles spécifiques pour les nouveaux templates */
-          .corporate-template,
-          .creatif-template,
-          .artisan-template,
-          .elegant-template,
-          .professionnel-template,
-          .minimaliste-template {
-            margin: 0 !important;
-            padding: 20px !important;
-            background: white !important;
           }
         }
       `}</style>

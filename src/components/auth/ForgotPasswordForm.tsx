@@ -72,10 +72,10 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
     return (
       <div className="text-center">
         <div className="mb-6">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Email envoyé !</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Email envoyé !</h2>
           <p className="text-gray-600">
             Nous avons envoyé un lien de réinitialisation à
           </p>
@@ -116,13 +116,13 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Mot de passe oublié</h2>
-        <p className="text-gray-600">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Mot de passe oublié</h2>
+        <p className="text-gray-600 text-sm sm:text-base">
           Entrez votre adresse email pour recevoir un lien de réinitialisation
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-sm text-red-800">{error}</p>

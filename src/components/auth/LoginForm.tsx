@@ -58,7 +58,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
       const { data, error } = await signIn(formData.email, formData.password);
       
       if (error) {
-        // Gestion des erreurs Supabase
         if (error.message.includes('Invalid login credentials')) {
           console.error('❌ LOGIN - Identifiants invalides');
           setGeneralError('Email ou mot de passe incorrect');
@@ -97,8 +96,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-solvix-dark mb-2 font-poppins">Connexion</h2>
-        <p className="text-gray-600 font-inter">Accédez à votre espace Solvix</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-solvix-dark mb-2 font-poppins">Connexion</h2>
+        <p className="text-gray-600 font-inter text-sm sm:text-base">Accédez à votre espace Solvix</p>
       </div>
 
       {/* Demo credentials info */}
@@ -107,7 +106,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <p className="text-sm text-solvix-blue font-inter">Créez votre compte ou utilisez vos identifiants</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {generalError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-sm text-solvix-error font-inter">{generalError}</p>
@@ -174,7 +173,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
           )}
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
           <label className="flex items-center">
             <input
               type="checkbox"
