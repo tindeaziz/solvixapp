@@ -186,6 +186,23 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('fr-FR');
 };
 
+// Dimensions standardisées pour tous les templates
+const standardDimensions = {
+  // En-tête
+  headerHeight: '120px',
+  // Section client
+  clientSectionHeight: '100px',
+  // Tableau des articles (hauteur variable selon contenu)
+  // Section totaux
+  totalsSectionWidth: '280px',
+  // Notes
+  notesSectionHeight: '80px',
+  // Signature
+  signatureSectionHeight: '80px',
+  // Footer
+  footerHeight: '60px'
+};
+
 const generateClassicTemplate = (devisData: DevisData): string => {
   const logoHTML = devisData.entreprise.logo 
     ? `<img src="${devisData.entreprise.logo}" alt="Logo" style="max-height: 60px; width: auto; margin-bottom: 15px;" />`
@@ -193,7 +210,7 @@ const generateClassicTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #666;">
           Fait le ${formatDate(new Date().toISOString().split('T')[0])}, ${devisData.entreprise.name}
         </p>
@@ -205,7 +222,7 @@ const generateClassicTemplate = (devisData: DevisData): string => {
   return `
     <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #333;">
       <!-- En-tête Classique -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 3px solid #8b5cf6; padding-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 3px solid #8b5cf6; padding-bottom: 20px; height: ${standardDimensions.headerHeight};">
         <div style="flex: 1;">
           ${logoHTML}
           <h1 style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0 0 10px 0;">${devisData.entreprise.name}</h1>
@@ -228,7 +245,7 @@ const generateClassicTemplate = (devisData: DevisData): string => {
       </div>
 
       <!-- Client -->
-      <div style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-left: 4px solid #8b5cf6;">
+      <div style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-left: 4px solid #8b5cf6; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
         <h3 style="font-size: 14px; font-weight: bold; color: #1e293b; margin: 0 0 10px 0;">Facturé à:</h3>
         <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">${devisData.client.name}</div>
         ${devisData.client.company ? `<div style="font-size: 14px; margin-bottom: 5px;">${devisData.client.company}</div>` : ''}
@@ -263,7 +280,7 @@ const generateClassicTemplate = (devisData: DevisData): string => {
 
       <!-- Totaux -->
       <div style="display: flex; justify-content: flex-end; margin-top: 30px;">
-        <table style="width: 300px;">
+        <table style="width: ${standardDimensions.totalsSectionWidth};">
           <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; font-size: 14px;">Sous-total HT:</td>
             <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: bold; font-size: 14px;">${formatCurrency(devisData.sousTotal, devisData.devise)}</td>
@@ -280,7 +297,7 @@ const generateClassicTemplate = (devisData: DevisData): string => {
       </div>
 
       ${devisData.notes ? `
-        <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">
           <h4 style="font-weight: bold; color: #1e293b; margin-bottom: 10px; font-size: 14px;">Notes et conditions:</h4>
           <div style="white-space: pre-line; color: #64748b; font-size: 12px;">${devisData.notes}</div>
         </div>
@@ -288,7 +305,7 @@ const generateClassicTemplate = (devisData: DevisData): string => {
 
       ${signatureHTML}
 
-      <div style="margin-top: 50px; text-align: center; color: #64748b; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+      <div style="margin-top: 30px; text-align: center; color: #64748b; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 20px; height: ${standardDimensions.footerHeight};">
         <div>Devis généré le ${formatDate(new Date().toISOString().split('T')[0])}</div>
         <div style="margin-top: 3px;">Solvix - Génération de devis professionnels</div>
       </div>
@@ -303,7 +320,7 @@ const generateCreatifTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #718096;">
           Fait le ${formatDate(new Date().toISOString().split('T')[0])}, ${devisData.entreprise.name}
         </p>
@@ -315,7 +332,7 @@ const generateCreatifTemplate = (devisData: DevisData): string => {
   return `
     <div style="font-family: 'Poppins', sans-serif; font-size: 14px; line-height: 1.5; color: #2D3748;">
       <!-- Header Créatif avec gradient -->
-      <div style="background: linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%); border-radius: 15px; padding: 25px; margin-bottom: 25px; color: white; position: relative; overflow: hidden;">
+      <div style="background: linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%); border-radius: 15px; padding: 25px; margin-bottom: 25px; color: white; position: relative; overflow: hidden; height: ${standardDimensions.headerHeight};">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2;">
           <div style="display: flex; align-items: flex-start; gap: 20px;">
             ${logoHTML ? `<div style="background: rgba(255, 255, 255, 0.15); padding: 10px; border-radius: 12px;">${logoHTML}</div>` : ''}
@@ -342,7 +359,7 @@ const generateCreatifTemplate = (devisData: DevisData): string => {
       </div>
 
       <!-- Client -->
-      <div style="margin-bottom: 25px; background: linear-gradient(135deg, #F7FAFC 0%, #E2E8F0 100%); border-left: 4px solid #FF6B35; border-radius: 0 6px 6px 0; padding: 15px;">
+      <div style="margin-bottom: 25px; background: linear-gradient(135deg, #F7FAFC 0%, #E2E8F0 100%); border-left: 4px solid #FF6B35; border-radius: 0 6px 6px 0; padding: 15px; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
         <h3 style="font-weight: bold; color: #6F42C1; margin: 0 0 10px 0; font-size: 14px;">Facturé à:</h3>
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #2D3748;">${devisData.client.name}</div>
         ${devisData.client.company ? `<div style="font-size: 12px; margin-bottom: 5px; color: #FF6B35;">${devisData.client.company}</div>` : ''}
@@ -381,7 +398,7 @@ const generateCreatifTemplate = (devisData: DevisData): string => {
 
       <!-- Totaux -->
       <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-        <table style="width: 280px; border-collapse: collapse; border-radius: 6px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
+        <table style="width: ${standardDimensions.totalsSectionWidth}; border-collapse: collapse; border-radius: 6px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
           <tr>
             <td style="padding: 8px 15px; font-size: 12px; color: #718096; background: #F7FAFC;">Sous-total HT:</td>
             <td style="padding: 8px 15px; text-align: right; font-size: 12px; font-weight: bold; color: #2D3748; background: #F7FAFC;">${formatCurrency(devisData.sousTotal, devisData.devise)}</td>
@@ -398,7 +415,7 @@ const generateCreatifTemplate = (devisData: DevisData): string => {
       </div>
 
       ${devisData.notes ? `
-        <div style="margin-bottom: 25px; background: linear-gradient(135deg, #F7FAFC 0%, #E2E8F0 100%); border-radius: 6px; border: 2px solid #E2E8F0; padding: 15px;">
+        <div style="margin-bottom: 25px; background: linear-gradient(135deg, #F7FAFC 0%, #E2E8F0 100%); border-radius: 6px; border: 2px solid #E2E8F0; padding: 15px; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">
           <h4 style="font-weight: bold; color: #6F42C1; margin-bottom: 8px; font-size: 12px;">📝 Notes et conditions:</h4>
           <div style="white-space: pre-line; color: #4A5568; font-size: 11px; line-height: 1.2;">${devisData.notes}</div>
         </div>
@@ -406,7 +423,7 @@ const generateCreatifTemplate = (devisData: DevisData): string => {
 
       ${signatureHTML}
 
-      <div style="margin-top: 40px; text-align: center; color: #718096; font-size: 12px; border-top: 1px solid #E2E8F0; padding-top: 20px;">
+      <div style="margin-top: 30px; text-align: center; color: #718096; font-size: 12px; border-top: 1px solid #E2E8F0; padding-top: 20px; height: ${standardDimensions.footerHeight};">
         <div>Devis généré le ${formatDate(new Date().toISOString().split('T')[0])}</div>
         <div style="margin-top: 3px;">Solvix - Génération de devis professionnels</div>
       </div>
@@ -421,7 +438,7 @@ const generateCorporateTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #6C757D;">
           Fait le ${formatDate(new Date().toISOString().split('T')[0])}, ${devisData.entreprise.name}
         </p>
@@ -433,7 +450,7 @@ const generateCorporateTemplate = (devisData: DevisData): string => {
   return `
     <div style="font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5; color: #1B4B8C;">
       <!-- Header Corporate -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #1B4B8C; padding-bottom: 15px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #1B4B8C; padding-bottom: 15px; height: ${standardDimensions.headerHeight};">
         <div style="display: flex; align-items: flex-start; gap: 20px;">
           ${logoHTML}
           <div>
@@ -458,7 +475,7 @@ const generateCorporateTemplate = (devisData: DevisData): string => {
       </div>
 
       <!-- Client -->
-      <div style="margin-bottom: 25px; background: #F8F9FA; border: 1px solid #E9ECEF; border-radius: 4px; padding: 15px;">
+      <div style="margin-bottom: 25px; background: #F8F9FA; border: 1px solid #E9ECEF; border-radius: 4px; padding: 15px; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
         <h3 style="font-weight: bold; color: #1B4B8C; margin: 0 0 10px 0; font-size: 14px;">Facturé à:</h3>
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #1B4B8C;">${devisData.client.name}</div>
         ${devisData.client.company ? `<div style="font-size: 12px; margin-bottom: 5px; color: #6C757D;">${devisData.client.company}</div>` : ''}
@@ -497,7 +514,7 @@ const generateCorporateTemplate = (devisData: DevisData): string => {
 
       <!-- Totaux -->
       <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-        <table style="width: 280px; background: #F8F9FA; border: 2px solid #1B4B8C; border-radius: 6px; overflow: hidden;">
+        <table style="width: ${standardDimensions.totalsSectionWidth}; background: #F8F9FA; border: 2px solid #1B4B8C; border-radius: 6px; overflow: hidden;">
           <tr>
             <td style="padding: 8px 15px; border-bottom: 1px solid #E9ECEF; font-size: 12px; color: #6C757D;">Sous-total HT:</td>
             <td style="padding: 8px 15px; border-bottom: 1px solid #E9ECEF; text-align: right; font-size: 12px; font-weight: bold; color: #1B4B8C;">${formatCurrency(devisData.sousTotal, devisData.devise)}</td>
@@ -514,7 +531,7 @@ const generateCorporateTemplate = (devisData: DevisData): string => {
       </div>
 
       ${devisData.notes ? `
-        <div style="margin-bottom: 25px; background: #F8F9FA; border-radius: 6px; border: 1px solid #E9ECEF; padding: 15px;">
+        <div style="margin-bottom: 25px; background: #F8F9FA; border-radius: 6px; border: 1px solid #E9ECEF; padding: 15px; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">
           <h4 style="font-weight: bold; color: #1B4B8C; margin-bottom: 8px; font-size: 12px;">Notes et conditions:</h4>
           <div style="white-space: pre-line; color: #6C757D; font-size: 11px; line-height: 1.2;">${devisData.notes}</div>
         </div>
@@ -522,7 +539,7 @@ const generateCorporateTemplate = (devisData: DevisData): string => {
 
       ${signatureHTML}
 
-      <div style="margin-top: 40px; text-align: center; color: #6C757D; font-size: 12px; border-top: 1px solid #E9ECEF; padding-top: 20px;">
+      <div style="margin-top: 30px; text-align: center; color: #6C757D; font-size: 12px; border-top: 1px solid #E9ECEF; padding-top: 20px; height: ${standardDimensions.footerHeight};">
         <div>Devis généré le ${formatDate(new Date().toISOString().split('T')[0])}</div>
         <div style="margin-top: 3px;">Solvix - Génération de devis professionnels</div>
       </div>
@@ -537,7 +554,7 @@ const generateArtisanTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #6B8E23;">
           Fait le ${formatDate(new Date().toISOString().split('T')[0])}, ${devisData.entreprise.name}
         </p>
@@ -554,7 +571,7 @@ const generateArtisanTemplate = (devisData: DevisData): string => {
       <!-- Contenu avec marge -->
       <div style="margin: 25px; position: relative; z-index: 1;">
         <!-- Header Artisan -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px double #8B4513; padding-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px double #8B4513; padding-bottom: 15px; height: ${standardDimensions.headerHeight};">
           <div>
             ${logoHTML}
             <h1 style="font-size: 22px; font-weight: bold; color: #8B4513; margin: 0 0 8px 0; text-shadow: 1px 1px 2px rgba(139, 69, 19, 0.3);">${devisData.entreprise.name}</h1>
@@ -577,7 +594,7 @@ const generateArtisanTemplate = (devisData: DevisData): string => {
         </div>
 
         <!-- Client -->
-        <div style="margin-bottom: 25px; background: #F5F5DC; border-left: 4px solid #8B4513; border-radius: 0 6px 6px 0; padding: 15px;">
+        <div style="margin-bottom: 25px; background: #F5F5DC; border-left: 4px solid #8B4513; border-radius: 0 6px 6px 0; padding: 15px; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
           <h3 style="font-weight: bold; color: #8B4513; margin: 0 0 10px 0; font-size: 14px; font-style: italic;">Facturé à:</h3>
           <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #8B4513;">${devisData.client.name}</div>
           ${devisData.client.company ? `<div style="font-size: 12px; margin-bottom: 5px; color: #6B8E23; font-style: italic;">${devisData.client.company}</div>` : ''}
@@ -616,7 +633,7 @@ const generateArtisanTemplate = (devisData: DevisData): string => {
 
         <!-- Totaux -->
         <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-          <table style="width: 280px; background: #F5F5DC; border: 3px solid #8B4513; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 8px rgba(139, 69, 19, 0.2);">
+          <table style="width: ${standardDimensions.totalsSectionWidth}; background: #F5F5DC; border: 3px solid #8B4513; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 8px rgba(139, 69, 19, 0.2);">
             <tr>
               <td style="padding: 8px 15px; border-bottom: 2px solid #D2B48C; font-size: 12px; color: #6B8E23; font-weight: bold;">Sous-total HT:</td>
               <td style="padding: 8px 15px; border-bottom: 2px solid #D2B48C; text-align: right; font-size: 12px; font-weight: bold; color: #3C2415;">${formatCurrency(devisData.sousTotal, devisData.devise)}</td>
@@ -633,7 +650,7 @@ const generateArtisanTemplate = (devisData: DevisData): string => {
         </div>
 
         ${devisData.notes ? `
-          <div style="margin-bottom: 25px; background: #F5F5DC; border-radius: 6px; border: 2px solid #D2B48C; padding: 15px;">
+          <div style="margin-bottom: 25px; background: #F5F5DC; border-radius: 6px; border: 2px solid #D2B48C; padding: 15px; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">
             <h4 style="font-weight: bold; color: #8B4513; margin-bottom: 8px; font-size: 12px; font-style: italic;">📜 Conditions Artisanales:</h4>
             <div style="white-space: pre-line; color: #3C2415; font-size: 11px; line-height: 1.2; font-style: italic;">${devisData.notes}</div>
           </div>
@@ -641,7 +658,7 @@ const generateArtisanTemplate = (devisData: DevisData): string => {
 
         ${signatureHTML}
 
-        <div style="margin-top: 40px; text-align: center; color: #6B8E23; font-size: 12px; border-top: 3px double #8B4513; padding-top: 20px;">
+        <div style="margin-top: 30px; text-align: center; color: #6B8E23; font-size: 12px; border-top: 3px double #8B4513; padding-top: 20px; height: ${standardDimensions.footerHeight};">
           <div>Devis généré le ${formatDate(new Date().toISOString().split('T')[0])}</div>
           <div style="margin-top: 3px;">Solvix - Génération de devis professionnels</div>
         </div>
@@ -657,7 +674,7 @@ const generateElegantTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #8A6D3B; font-style: italic;">
           Fait le ${formatDate(new Date().toISOString().split('T')[0])}, ${devisData.entreprise.name}
         </p>
@@ -669,7 +686,7 @@ const generateElegantTemplate = (devisData: DevisData): string => {
   return `
     <div style="font-family: 'Garamond', serif; font-size: 14px; line-height: 1.5; color: #333333; background: #FFFCF7; border: 1px solid #E8E0D0; padding: 30px;">
       <!-- Header Élégant -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #D4B78F; padding-bottom: 15px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #D4B78F; padding-bottom: 15px; height: ${standardDimensions.headerHeight};">
         <div style="display: flex; align-items: flex-start; gap: 20px;">
           ${logoHTML}
           <div>
@@ -694,7 +711,7 @@ const generateElegantTemplate = (devisData: DevisData): string => {
       </div>
 
       <!-- Client -->
-      <div style="margin-bottom: 25px; background: #F9F5ED; border: 1px solid #E8E0D0; border-radius: 0 6px 6px 0; padding: 15px;">
+      <div style="margin-bottom: 25px; background: #F9F5ED; border: 1px solid #E8E0D0; border-radius: 0 6px 6px 0; padding: 15px; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
         <h3 style="font-weight: bold; color: #8A6D3B; margin: 0 0 10px 0; font-size: 14px; font-style: italic;">À l'attention de:</h3>
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #8A6D3B;">${devisData.client.name}</div>
         ${devisData.client.company ? `<div style="font-size: 12px; margin-bottom: 5px; color: #8A6D3B; font-style: italic;">${devisData.client.company}</div>` : ''}
@@ -733,7 +750,7 @@ const generateElegantTemplate = (devisData: DevisData): string => {
 
       <!-- Totaux -->
       <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-        <table style="width: 280px; border-collapse: collapse; border: 1px solid #E8E0D0; border-radius: 6px; overflow: hidden;">
+        <table style="width: ${standardDimensions.totalsSectionWidth}; border-collapse: collapse; border: 1px solid #E8E0D0; border-radius: 6px; overflow: hidden;">
           <tr style="background: #F9F5ED;">
             <td style="padding: 8px 15px; font-size: 12px; color: #8A6D3B; font-style: italic;">Sous-total HT:</td>
             <td style="padding: 8px 15px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">${formatCurrency(devisData.sousTotal, devisData.devise)}</td>
@@ -750,7 +767,7 @@ const generateElegantTemplate = (devisData: DevisData): string => {
       </div>
 
       ${devisData.notes ? `
-        <div style="margin-bottom: 25px; background: #F9F5ED; border-radius: 6px; border: 1px solid #E8E0D0; padding: 15px;">
+        <div style="margin-bottom: 25px; background: #F9F5ED; border-radius: 6px; border: 1px solid #E8E0D0; padding: 15px; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">
           <h4 style="font-weight: bold; color: #8A6D3B; margin-bottom: 8px; font-size: 12px; font-style: italic;">Conditions & Notes:</h4>
           <div style="white-space: pre-line; color: #333; font-size: 11px; line-height: 1.2;">${devisData.notes}</div>
         </div>
@@ -758,7 +775,7 @@ const generateElegantTemplate = (devisData: DevisData): string => {
 
       ${signatureHTML}
 
-      <div style="margin-top: 40px; text-align: center; color: #8A6D3B; font-size: 12px; border-top: 1px solid #E8E0D0; padding-top: 20px; font-style: italic;">
+      <div style="margin-top: 30px; text-align: center; color: #8A6D3B; font-size: 12px; border-top: 1px solid #E8E0D0; padding-top: 20px; height: ${standardDimensions.footerHeight}; font-style: italic;">
         <div>Devis généré le ${formatDate(new Date().toISOString().split('T')[0])}</div>
         <div style="margin-top: 3px;">Solvix - Génération de devis professionnels</div>
       </div>
@@ -773,7 +790,7 @@ const generateProfessionnelTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #7F8C8D;">
           Fait le ${formatDate(new Date().toISOString().split('T')[0])}, ${devisData.entreprise.name}
         </p>
@@ -788,7 +805,7 @@ const generateProfessionnelTemplate = (devisData: DevisData): string => {
       <div style="position: absolute; top: 0; left: 0; right: 0; height: 15px; background: #2C3E50;"></div>
       
       <!-- Header Professionnel -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; padding-top: 20px; border-bottom: 3px solid #2C3E50; padding-bottom: 15px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; padding-top: 20px; border-bottom: 3px solid #2C3E50; padding-bottom: 15px; height: ${standardDimensions.headerHeight};">
         <div>
           ${logoHTML}
           <h1 style="font-size: 22px; font-weight: bold; color: #2C3E50; margin: 0 0 8px 0;">${devisData.entreprise.name}</h1>
@@ -811,7 +828,7 @@ const generateProfessionnelTemplate = (devisData: DevisData): string => {
       </div>
 
       <!-- Client -->
-      <div style="margin-bottom: 25px; background: #F8F9FA; border-left: 4px solid #3498DB; border-radius: 0 6px 6px 0; padding: 15px;">
+      <div style="margin-bottom: 25px; background: #F8F9FA; border-left: 4px solid #3498DB; border-radius: 0 6px 6px 0; padding: 15px; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
         <h3 style="font-weight: bold; color: #2C3E50; margin: 0 0 10px 0; font-size: 14px;">Facturé à:</h3>
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #2C3E50;">${devisData.client.name}</div>
         ${devisData.client.company ? `<div style="font-size: 12px; margin-bottom: 5px; color: #3498DB;">${devisData.client.company}</div>` : ''}
@@ -850,7 +867,7 @@ const generateProfessionnelTemplate = (devisData: DevisData): string => {
 
       <!-- Totaux -->
       <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-        <table style="width: 280px; border-collapse: collapse; border: 1px solid #E9ECEF; border-radius: 6px; overflow: hidden;">
+        <table style="width: ${standardDimensions.totalsSectionWidth}; border-collapse: collapse; border: 1px solid #E9ECEF; border-radius: 6px; overflow: hidden;">
           <tr>
             <td style="padding: 8px 15px; background: #F8F9FA; color: #7F8C8D; font-size: 12px; font-weight: bold;">SOUS-TOTAL HT:</td>
             <td style="padding: 8px 15px; background: #F8F9FA; text-align: right; font-size: 12px; font-weight: bold; color: #2C3E50;">${formatCurrency(devisData.sousTotal, devisData.devise)}</td>
@@ -867,7 +884,7 @@ const generateProfessionnelTemplate = (devisData: DevisData): string => {
       </div>
 
       ${devisData.notes ? `
-        <div style="margin-bottom: 25px; background: #F8F9FA; border-radius: 6px; border: 1px solid #E9ECEF; padding: 15px;">
+        <div style="margin-bottom: 25px; background: #F8F9FA; border-radius: 6px; border: 1px solid #E9ECEF; padding: 15px; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">
           <h4 style="font-weight: bold; color: #2C3E50; margin-bottom: 8px; font-size: 12px;">CONDITIONS & NOTES:</h4>
           <div style="white-space: pre-line; color: #7F8C8D; font-size: 11px; line-height: 1.2;">${devisData.notes}</div>
         </div>
@@ -875,7 +892,7 @@ const generateProfessionnelTemplate = (devisData: DevisData): string => {
 
       ${signatureHTML}
 
-      <div style="margin-top: 40px; text-align: center; color: #7F8C8D; font-size: 12px; border-top: 1px solid #E9ECEF; padding-top: 20px;">
+      <div style="margin-top: 30px; text-align: center; color: #7F8C8D; font-size: 12px; border-top: 1px solid #E9ECEF; padding-top: 20px; height: ${standardDimensions.footerHeight};">
         <div>Devis généré le ${formatDate(new Date().toISOString().split('T')[0])}</div>
         <div style="margin-top: 3px;">Solvix - Génération de devis professionnels</div>
       </div>
@@ -893,7 +910,7 @@ const generateMinimalisteTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #888; font-style: italic;">
           Fait le ${formatDate(new Date().toISOString().split('T')[0])}, ${devisData.entreprise.name}
         </p>
@@ -905,7 +922,7 @@ const generateMinimalisteTemplate = (devisData: DevisData): string => {
   return `
     <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #333333; background: white; padding: 30px;">
       <!-- Header Ultra Minimaliste -->
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #eee; padding-bottom: 15px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #eee; padding-bottom: 15px; height: ${standardDimensions.headerHeight};">
         <div>
           ${logoHTML}
           <h1 style="font-size: 22px; font-weight: 500; color: #333; margin: 0 0 8px 0; letter-spacing: 0.5px;">${devisData.entreprise.name}</h1>
@@ -928,7 +945,7 @@ const generateMinimalisteTemplate = (devisData: DevisData): string => {
       </div>
 
       <!-- Client -->
-      <div style="margin-bottom: 25px; background: #f9f9f9; border-left: 4px solid #eee; border-radius: 0 6px 6px 0; padding: 15px;">
+      <div style="margin-bottom: 25px; background: #f9f9f9; border-left: 4px solid #eee; border-radius: 0 6px 6px 0; padding: 15px; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
         <h3 style="font-weight: bold; color: #888; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Client:</h3>
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px; color: #333;">${devisData.client.name}</div>
         ${devisData.client.company ? `<div style="font-size: 12px; margin-bottom: 5px; color: #555;">${devisData.client.company}</div>` : ''}
@@ -967,7 +984,7 @@ const generateMinimalisteTemplate = (devisData: DevisData): string => {
 
       <!-- Totaux -->
       <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-        <table style="width: 280px;">
+        <table style="width: ${standardDimensions.totalsSectionWidth};">
           <tr>
             <td style="padding: 8px 15px; border-bottom: 1px solid #f5f5f5; font-size: 12px; color: #888;">Sous-total HT:</td>
             <td style="padding: 8px 15px; border-bottom: 1px solid #f5f5f5; text-align: right; font-size: 12px; color: #333;">${formatCurrency(devisData.sousTotal, devisData.devise)}</td>
@@ -984,7 +1001,7 @@ const generateMinimalisteTemplate = (devisData: DevisData): string => {
       </div>
 
       ${devisData.notes ? `
-        <div style="margin-bottom: 25px; background: #f9f9f9; border-radius: 6px; border-left: 2px solid #eee; padding: 15px;">
+        <div style="margin-bottom: 25px; background: #f9f9f9; border-radius: 6px; border-left: 2px solid #eee; padding: 15px; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">
           <h4 style="font-weight: bold; color: #888; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Notes:</h4>
           <div style="white-space: pre-line; color: #555; font-size: 11px; line-height: 1.2;">${devisData.notes}</div>
         </div>
@@ -992,7 +1009,7 @@ const generateMinimalisteTemplate = (devisData: DevisData): string => {
 
       ${signatureHTML}
 
-      <div style="margin-top: 40px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid #eee; padding-top: 20px;">
+      <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid #eee; padding-top: 20px; height: ${standardDimensions.footerHeight};">
         <div>Devis généré le ${formatDate(new Date().toISOString().split('T')[0])}</div>
         <div style="margin-top: 3px;">Solvix - Génération de devis professionnels</div>
       </div>
@@ -1007,7 +1024,7 @@ const generateModernTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #64748b;">
           Fait le ${formatDate(new Date().toISOString().split('T')[0])}, ${devisData.entreprise.name}
         </p>
@@ -1019,7 +1036,7 @@ const generateModernTemplate = (devisData: DevisData): string => {
   return `
     <div style="font-family: 'Poppins', sans-serif; font-size: 14px; line-height: 1.5; color: #1e293b;">
       <!-- Header avec gradient -->
-      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; margin: -40px -40px 30px -40px; border-radius: 0;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; margin: -40px -40px 30px -40px; border-radius: 0; height: ${standardDimensions.headerHeight};">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 20px;">
             ${logoHTML ? `<div style="background: rgba(255, 255, 255, 0.15); padding: 10px; border-radius: 12px; backdrop-filter: blur(10px);">${logoHTML}</div>` : ''}
@@ -1056,7 +1073,7 @@ const generateModernTemplate = (devisData: DevisData): string => {
       <!-- Client -->
       <div style="margin-bottom: 30px;">
         <h3 style="font-size: 16px; font-weight: 600; color: #667eea; margin: 0 0 15px 0; padding-bottom: 5px; border-bottom: 2px solid #667eea;">Client</h3>
-        <div style="background: #f7fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea;">
+        <div style="background: #f7fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
           <div style="font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 5px;">${devisData.client.name}</div>
           ${devisData.client.company ? `<div style="font-size: 14px; color: #667eea; margin-bottom: 8px;">${devisData.client.company}</div>` : ''}
           <div style="font-size: 12px; color: #64748b; margin-bottom: 5px;">
@@ -1097,7 +1114,7 @@ const generateModernTemplate = (devisData: DevisData): string => {
 
       <!-- Totaux -->
       <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
-        <div style="width: 350px; background: #f8f9ff; border: 2px solid #667eea; border-radius: 8px; padding: 20px;">
+        <div style="width: ${standardDimensions.totalsSectionWidth}; background: #f8f9ff; border: 2px solid #667eea; border-radius: 8px; padding: 20px;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #64748b;">
             <span>Sous-total HT</span>
             <span>${formatCurrency(devisData.sousTotal, devisData.devise)}</span>
@@ -1116,13 +1133,13 @@ const generateModernTemplate = (devisData: DevisData): string => {
       ${devisData.notes ? `
         <div style="margin-bottom: 30px;">
           <h3 style="font-size: 16px; font-weight: 600; color: #667eea; margin: 0 0 15px 0; padding-bottom: 5px; border-bottom: 2px solid #667eea;">Notes</h3>
-          <div style="background: #f8f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; white-space: pre-line; font-size: 12px; color: #64748b;">${devisData.notes}</div>
+          <div style="background: #f8f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; white-space: pre-line; font-size: 12px; color: #64748b; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">${devisData.notes}</div>
         </div>
       ` : ''}
 
       ${signatureHTML}
 
-      <div style="margin-top: 40px; text-align: center; color: #64748b; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+      <div style="margin-top: 30px; text-align: center; color: #64748b; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 20px; height: ${standardDimensions.footerHeight};">
         <div>Généré le ${formatDate(new Date().toISOString().split('T')[0])} avec Solvix</div>
       </div>
     </div>
@@ -1136,7 +1153,7 @@ const generateMinimalTemplate = (devisData: DevisData): string => {
 
   const signatureHTML = devisData.entreprise.signature
     ? `
-      <div style="margin-top: 40px; text-align: right;">
+      <div style="margin-top: 20px; text-align: right; height: ${standardDimensions.signatureSectionHeight};">
         <p style="margin-bottom: 10px; font-size: 12px; color: #888;">
           ${formatDate(new Date().toISOString().split('T')[0])}
         </p>
@@ -1148,7 +1165,7 @@ const generateMinimalTemplate = (devisData: DevisData): string => {
   return `
     <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #333333; background: white; padding: 30px;">
       <!-- Header Minimal -->
-      <div style="text-align: center; margin-bottom: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px;">
+      <div style="text-align: center; margin-bottom: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px; height: ${standardDimensions.headerHeight};">
         ${logoHTML}
         <h1 style="font-size: 20px; font-weight: 300; color: #1e293b; margin: 0 0 5px 0;">${devisData.entreprise.name}</h1>
         <div style="font-size: 12px; color: #64748b;">${devisData.entreprise.email} | ${devisData.entreprise.phone}</div>
@@ -1161,9 +1178,12 @@ const generateMinimalTemplate = (devisData: DevisData): string => {
       </div>
 
       <!-- Client -->
-      <div style="margin-bottom: 30px;">
+      <div style="margin-bottom: 30px; height: ${standardDimensions.clientSectionHeight}; overflow: hidden;">
         <div style="font-weight: bold; color: #1e293b; margin-bottom: 5px;">Pour: ${devisData.client.name}</div>
         ${devisData.client.company ? `<div style="color: #64748b; margin-bottom: 5px;">(${devisData.client.company})</div>` : ''}
+        ${devisData.client.email ? `<div style="color: #64748b; margin-bottom: 3px;">${devisData.client.email}</div>` : ''}
+        ${devisData.client.phone ? `<div style="color: #64748b; margin-bottom: 3px;">${devisData.client.phone}</div>` : ''}
+        ${devisData.client.address ? `<div style="color: #64748b;">${devisData.client.address.replace(/\n/g, '<br>')}</div>` : ''}
       </div>
 
       <!-- Items -->
@@ -1182,18 +1202,18 @@ const generateMinimalTemplate = (devisData: DevisData): string => {
       <div style="margin: 30px 0; text-align: right; border-top: 1px solid #e5e7eb; padding-top: 20px;">
         <div style="font-size: 14px; color: #64748b; margin-bottom: 8px;">TOTAL HT: ${formatCurrency(devisData.sousTotal, devisData.devise)}</div>
         <div style="font-size: 14px; color: #64748b; margin-bottom: 8px;">TVA: ${formatCurrency(devisData.totalTVA, devisData.devise)}</div>
-        <div style="font-size: 18px; font-weight: bold; color: #1e293b; border-top: 2px solid #1e293b; padding-top: 10px; margin-top: 10px;">TOTAL TTC: ${formatCurrency(devisData.totalTTC, devisData.devise)}</div>
+        <div style="font-size: 18px; font-weight: bold; color: #1e293b; border-top: 2px solid #1e293b; padding-top: 10px; margin-top: 10px; width: ${standardDimensions.totalsSectionWidth}; margin-left: auto;">TOTAL TTC: ${formatCurrency(devisData.totalTTC, devisData.devise)}</div>
       </div>
 
       ${devisData.notes ? `
-        <div style="margin: 30px 0; padding: 20px 0; border-top: 1px solid #e5e7eb; font-size: 12px; color: #64748b; white-space: pre-line;">
+        <div style="margin: 30px 0; padding: 20px 0; border-top: 1px solid #e5e7eb; font-size: 12px; color: #64748b; white-space: pre-line; height: ${standardDimensions.notesSectionHeight}; overflow: hidden;">
           ${devisData.notes}
         </div>
       ` : ''}
 
       ${signatureHTML}
 
-      <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #64748b; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+      <div style="margin-top: 30px; text-align: center; font-size: 10px; color: #64748b; border-top: 1px solid #e5e7eb; padding-top: 20px; height: ${standardDimensions.footerHeight};">
         Solvix - ${formatDate(new Date().toISOString().split('T')[0])}
       </div>
     </div>
