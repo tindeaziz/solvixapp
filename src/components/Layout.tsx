@@ -37,7 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
   // Détecter si on est sur mobile
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 1024;
+      const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
       // Fermer automatiquement la sidebar sur mobile
       if (mobile) {
@@ -57,17 +57,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
     }
   }, [activeSection, isMobile]);
 
-  // Fermer les menus quand on clique ailleurs
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuOpen) {
-        setUserMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [userMenuOpen]);
+  // Toggle du menu mobile
+  const toggleMobileMenu = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   // Charger les informations utilisateur réelles
   useEffect(() => {
@@ -171,7 +164,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
       {/* Mobile sidebar overlay */}
       {sidebarOpen && isMobile && (
         <div 
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden transition-opacity duration-300"
+          className="mobile-overlay fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -260,10 +253,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
           <div className="p-4 border-t border-gray-200">
             <div className="relative">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setUserMenuOpen(!userMenuOpen);
-                }}
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-solvix-light transition-colors duration-200"
                 disabled={loadingUserInfo}
               >
@@ -348,8 +338,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
 
       {/* Mobile Sidebar - Overlay */}
       {isMobile && (
-        <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-solvix-lg transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        <div className={`sidebar mobile-open fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-solvix-lg transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? 'active translate-x-0' : '-translate-x-full'
         } flex flex-col`}>
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-solvix-blue">
             <div className="flex items-center">
@@ -446,15 +436,15 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
       )}
 
       {/* Main content */}
-      <div className={`flex-1 flex flex-col min-h-screen ${!isMobile ? 'ml-80' : ''}`}>
+      <div className={`app-layout flex-1 flex flex-col min-h-screen ${!isMobile ? 'ml-80' : ''}`}>
         {/* Mobile Header avec hamburger */}
         {isMobile && (
-          <header className="bg-white shadow-solvix border-b border-gray-200 flex-shrink-0 sticky top-0 z-30">
+          <header className="mobile-header bg-solvix-blue text-white shadow-solvix border-b border-gray-200 flex-shrink-0 sticky top-0 z-30">
             <div className="flex items-center justify-between h-16 px-4">
               <div className="flex items-center space-x-3">
                 <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="p-2 rounded-md text-gray-400 hover:text-solvix-blue hover:bg-solvix-light transition-colors duration-200"
+                  onClick={toggleMobileMenu}
+                  className="hamburger-menu p-2 rounded-md text-white hover:bg-solvix-blue-dark transition-colors duration-200"
                 >
                   <Menu className="h-6 w-6" />
                 </button>
@@ -465,7 +455,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
                     alt="Solvix Logo" 
                     className="h-6 w-auto"
                   />
-                  <h1 className="text-lg font-semibold text-solvix-dark font-poppins">
+                  <h1 className="text-lg font-semibold text-white font-poppins">
                     {getCurrentSectionTitle()}
                   </h1>
                 </div>
@@ -474,10 +464,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
               <div className="flex items-center space-x-2">
                 {!loadingUserInfo && (
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setUserMenuOpen(!userMenuOpen);
-                    }}
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="relative"
                   >
                     {renderUserAvatar('sm')}
@@ -552,7 +539,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
         )}
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6">
+        <main className="main-content flex-1 p-4 lg:p-6">
           <div className="w-full max-w-none">
             {children}
           </div>
@@ -585,6 +572,14 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
           </nav>
         )}
       </div>
+
+      {/* Click outside handler for user menu */}
+      {userMenuOpen && (
+        <div 
+          className="fixed inset-0 z-20" 
+          onClick={() => setUserMenuOpen(false)}
+        />
+      )}
     </div>
   );
 };

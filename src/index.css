@@ -39,6 +39,30 @@ html, body {
   flex-shrink: 0;
 }
 
+/* MASQUAGE SIDEBAR SUR MOBILE */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none !important;
+  }
+
+  .sidebar-container {
+    display: none !important;
+  }
+}
+
+/* AJUSTEMENT CONTENU PRINCIPAL MOBILE */
+@media (max-width: 768px) {
+  .main-content {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 0 16px;
+  }
+
+  .app-layout {
+    flex-direction: column;
+  }
+}
+
 /* Contenu principal adaptatif */
 .main-content {
   width: 100%;
@@ -55,6 +79,77 @@ html, body {
   box-sizing: border-box;
 }
 
+/* HEADER MOBILE AVEC HAMBURGER */
+.mobile-header {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #1B4B8C;
+  color: white;
+}
+
+.hamburger-menu {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.hamburger-menu:hover {
+  transform: scale(1.05);
+}
+
+.hamburger-menu:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+  }
+}
+
+/* SIDEBAR MOBILE OVERLAY */
+@media (max-width: 768px) {
+  .sidebar.mobile-open {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    background: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.mobile-open.active {
+    transform: translateX(0);
+  }
+}
+
+/* OVERLAY POUR FERMER LA SIDEBAR */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.mobile-overlay.active {
+  display: block;
+}
+
 /* Navigation mobile responsive */
 .mobile-header {
   display: flex;
@@ -66,14 +161,6 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 30;
-}
-
-.hamburger-menu {
-  display: block;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  padding: 8px;
 }
 
 /* Bannière principale - Welcome Card */
@@ -581,7 +668,7 @@ input, select, textarea {
     top: 0;
     z-index: 30;
     backdrop-filter: blur(8px);
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(27, 75, 140, 0.95);
   }
 }
 
@@ -596,6 +683,31 @@ input, select, textarea {
 
 .hover\:-translate-y-1:hover {
   transform: translateY(-4px);
+}
+
+/* User menu dropdown animations */
+.user-menu-dropdown {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Bottom navigation animations */
+.bottom-nav-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.95);
 }
 
 /* Corrections pour Safari mobile */
@@ -633,6 +745,18 @@ input, select, textarea {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  
+  .sidebar {
+    transition: none;
+  }
+  
+  .hamburger-menu {
+    transition: none;
+  }
+  
+  .user-menu-dropdown {
+    animation: none;
+  }
 }
 
 /* Focus visible pour l'accessibilité */
@@ -653,78 +777,6 @@ input, select, textarea {
   }
 }
 
-/* Hamburger menu animations */
-.hamburger-menu {
-  transition: transform 0.2s ease-in-out;
-}
-
-.hamburger-menu:hover {
-  transform: scale(1.05);
-}
-
-.hamburger-menu:active {
-  transform: scale(0.95);
-}
-
-/* Sidebar overlay animations */
-.sidebar-overlay {
-  transition: opacity 0.3s ease-in-out;
-}
-
-/* Mobile sidebar slide animation */
-@media (max-width: 1023px) {
-  .sidebar {
-    transition: transform 0.3s ease-in-out;
-  }
-}
-
-/* User menu dropdown animations */
-.user-menu-dropdown {
-  animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Bottom navigation animations */
-.bottom-nav-item {
-  transition: all 0.2s ease-in-out;
-}
-
-.bottom-nav-item:active {
-  transform: scale(0.95);
-}
-
-/* Header sticky effect */
-.sticky-header {
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.95);
-  transition: all 0.3s ease-in-out;
-}
-
-/* Responsive text scaling */
-@media (max-width: 320px) {
-  .welcome-card h1 {
-    font-size: 1.25rem;
-  }
-  
-  .welcome-card p {
-    font-size: 0.8rem;
-  }
-  
-  .stat-value {
-    font-size: 1.25rem;
-  }
-}
-
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .sidebar {
@@ -737,20 +789,5 @@ input, select, textarea {
   
   .bottom-nav {
     border-top: 2px solid #000;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .sidebar {
-    transition: none;
-  }
-  
-  .hamburger-menu {
-    transition: none;
-  }
-  
-  .user-menu-dropdown {
-    animation: none;
   }
 }
