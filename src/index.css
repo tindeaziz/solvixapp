@@ -1,3 +1,50 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Styles globaux pour le responsive */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Styles pour les tableaux responsives */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Styles pour les images responsives */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Styles pour les boutons tactiles */
+button, 
+[role="button"],
+input[type="submit"],
+input[type="button"] {
+  touch-action: manipulation;
+}
+
+/* Styles pour l'impression */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* Styles pour les modèles de devis */
+.print-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}

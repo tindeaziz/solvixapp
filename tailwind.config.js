@@ -30,6 +30,20 @@ export default {
         'solvix': '0 4px 6px -1px rgba(27, 75, 140, 0.1), 0 2px 4px -1px rgba(27, 75, 140, 0.06)',
         'solvix-lg': '0 10px 15px -3px rgba(27, 75, 140, 0.1), 0 4px 6px -2px rgba(27, 75, 140, 0.05)',
       },
+      animation: {
+        'in': 'fadeIn 0.3s ease-out',
+        'zoom-in-95': 'zoomIn95 0.2s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        zoomIn95: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
     },
   },
   plugins: [],
