@@ -21,6 +21,7 @@ const ResetPasswordPage: React.FC = () => {
     if (hashFragment) {
       setHash(hashFragment);
       console.log('🔑 RESET_PASSWORD - Hash trouvé dans l\'URL:', hashFragment);
+      setIsRecoveryMode(true);
     }
 
     // Vérifier si l'utilisateur est dans un état de récupération
@@ -30,8 +31,17 @@ const ResetPasswordPage: React.FC = () => {
         const { data: { session } } = await supabase.auth.getSession();
         console.log('🔄 RESET_PASSWORD - Session actuelle:', session ? 'Présente' : 'Absente');
         
+        if (session) {
+          console.log('👤 RESET_PASSWORD - Utilisateur déjà connecté, considéré en mode récupération');
+          setIsRecoveryMode(true);
+          setMessage({ 
+            text: 'Vous êtes connecté. Vous pouvez maintenant définir un nouveau mot de passe.', 
+            type: 'info' 
+          });
+        }
+        
         // S'abonner aux changements d'état d'authentification
-        const { data } = await supabase.auth.onAuthStateChange((event, session) => {
+        const { data } = supabase.auth.onAuthStateChange((event, session) => {
           console.log('🔄 RESET_PASSWORD - Événement auth:', event);
           
           if (event === 'PASSWORD_RECOVERY') {
@@ -61,6 +71,20 @@ const ResetPasswordPage: React.FC = () => {
     };
 
     checkAuthState();
+    
+    // Forcer l'affichage du formulaire même si aucun état de récupération n'est détecté
+    const timer = setTimeout(() => {
+      if (!isRecoveryMode) {
+        console.log('⚠️ RESET_PASSWORD - Aucun état de récupération détecté après délai, forçage du mode récupération');
+        setIsRecoveryMode(true);
+        setMessage({
+          text: 'Veuillez définir votre nouveau mot de passe.',
+          type: 'info'
+        });
+      }
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const getPasswordStrength = (password: string) => {
@@ -115,6 +139,9 @@ const ResetPasswordPage: React.FC = () => {
         type: 'success' 
       });
       
+      // Déconnecter l'utilisateur pour forcer une nouvelle connexion avec le nouveau mot de passe
+      await supabase.auth.signOut();
+      
       setTimeout(() => {
         navigate('/');
       }, 3000);
@@ -150,9 +177,7 @@ const ResetPasswordPage: React.FC = () => {
           <div className="text-center mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-solvix-dark mb-2">Réinitialisation du mot de passe</h2>
             <p className="text-gray-600 text-sm sm:text-base">
-              {isRecoveryMode 
-                ? 'Définissez votre nouveau mot de passe' 
-                : 'Le lien de réinitialisation est invalide ou a expiré'}
+              Définissez votre nouveau mot de passe
             </p>
           </div>
 
@@ -173,7 +198,6 @@ const ResetPasswordPage: React.FC = () => {
             </div>
           )}
 
-          {/* Toujours afficher le formulaire, même si isRecoveryMode est false */}
           <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-6">
             <div>
               <label className="block text-sm font-medium text-solvix-dark mb-2 font-inter">
