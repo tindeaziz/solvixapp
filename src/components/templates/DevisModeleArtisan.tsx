@@ -70,12 +70,12 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
   return (
     <div className="artisan-template" style={{
       fontFamily: 'Georgia, serif',
-      fontSize: '14px',
+      fontSize: '12px',
       lineHeight: '1.5',
       color: '#3C2415',
       backgroundColor: '#FEFCF8',
       minHeight: '100vh',
-      padding: '30px',
+      padding: '20px',
       maxWidth: '210mm',
       margin: '0 auto',
       position: 'relative',
@@ -141,34 +141,34 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
               />
             )}
             <div style={{
-              fontSize: '22px',
+              fontSize: '20px',
               fontWeight: 'bold',
               color: '#8B4513',
-              marginBottom: '8px',
+              marginBottom: '5px',
               textShadow: '1px 1px 2px rgba(139, 69, 19, 0.3)',
               fontFamily: 'Georgia, serif'
             }}>
               {entrepriseData.name}
             </div>
             <div style={{
-              fontSize: '11px',
+              fontSize: '10px',
               color: '#8B4513',
               lineHeight: '1.4',
               whiteSpace: 'pre-line'
             }}>
               {entrepriseData.address}
             </div>
-            <div style={{ color: '#8B4513', fontSize: '11px', marginTop: '3px' }}>
+            <div style={{ color: '#8B4513', fontSize: '10px', marginTop: '3px' }}>
               {entrepriseData.phone} | {entrepriseData.email}
             </div>
           </div>
           
           <div style={{ textAlign: 'right' }}>
             <div style={{
-              fontSize: '28px',
+              fontSize: '24px',
               fontWeight: 'bold',
               color: '#8B4513',
-              marginBottom: '8px',
+              marginBottom: '5px',
               textShadow: '2px 2px 4px rgba(139, 69, 19, 0.2)',
               letterSpacing: '3px'
             }}>
@@ -178,25 +178,25 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
               fontSize: '16px',
               color: '#6B8E23',
               fontWeight: 'bold',
-              marginBottom: '12px'
+              marginBottom: '10px'
             }}>
               {devisData.numeroDevis}
             </div>
-            <div style={{ color: '#8B4513', fontSize: '11px' }}>
+            <div style={{ color: '#8B4513', fontSize: '10px' }}>
               Date: {formatDate(devisData.dateCreation)}
             </div>
-            <div style={{ color: '#8B4513', fontSize: '11px' }}>
+            <div style={{ color: '#8B4513', fontSize: '10px' }}>
               Valide jusqu'au: {formatDate(devisData.dateExpiration)}
             </div>
           </div>
         </div>
 
-        {/* Section Client - Dimensions standardisées */}
+        {/* Section Client */}
         <div className="section-client" style={{
           maxHeight: '80px',
           fontSize: '10px',
-          lineHeight: '1.1',
-          padding: '8px',
+          lineHeight: '1.2',
+          padding: '10px',
           margin: '15px 0',
           backgroundColor: '#F5F5DC',
           borderLeft: '4px solid #8B4513',
@@ -244,12 +244,12 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
           </div>
         </div>
 
-        {/* Tableau des prestations - Dimensions standardisées */}
-        <div className="tableau-produits" style={{ margin: '10px 0' }}>
+        {/* Tableau des prestations */}
+        <div className="tableau-produits" style={{ margin: '15px 0' }}>
           <div style={{
             fontWeight: 'bold',
             color: '#8B4513',
-            marginBottom: '12px',
+            marginBottom: '10px',
             fontSize: '14px'
           }}>
             🔨 Détail des Travaux Artisanaux:
@@ -267,7 +267,7 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
             <thead>
               <tr style={{ backgroundColor: '#DEB887' }}>
                 <th style={{
-                  padding: '10px 8px',
+                  padding: '8px',
                   textAlign: 'left',
                   fontWeight: 'bold',
                   fontSize: '11px',
@@ -276,7 +276,7 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
                   Description des Travaux
                 </th>
                 <th style={{
-                  padding: '10px 8px',
+                  padding: '8px',
                   textAlign: 'right',
                   fontWeight: 'bold',
                   fontSize: '11px',
@@ -286,7 +286,7 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
                   Qté
                 </th>
                 <th style={{
-                  padding: '10px 8px',
+                  padding: '8px',
                   textAlign: 'right',
                   fontWeight: 'bold',
                   fontSize: '11px',
@@ -296,7 +296,7 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
                   Prix Unit.
                 </th>
                 <th style={{
-                  padding: '10px 8px',
+                  padding: '8px',
                   textAlign: 'right',
                   fontWeight: 'bold',
                   fontSize: '11px',
@@ -306,7 +306,7 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
                   TVA %
                 </th>
                 <th style={{
-                  padding: '10px 8px',
+                  padding: '8px',
                   textAlign: 'right',
                   fontWeight: 'bold',
                   fontSize: '11px',
@@ -378,7 +378,7 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
           </table>
         </div>
 
-        {/* Section Totaux - Dimensions standardisées */}
+        {/* Section Totaux */}
         <div style={{
           marginTop: '20px',
           display: 'flex',
@@ -461,12 +461,12 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
           </div>
         </div>
 
-        {/* Notes - Dimensions standardisées */}
+        {/* Notes */}
         {devisData.notes && (
           <div className="notes-conditions" style={{
             fontSize: '9px',
             maxHeight: '60px',
-            padding: '5px',
+            padding: '8px',
             overflow: 'hidden',
             marginTop: '20px',
             backgroundColor: '#F5F5DC',

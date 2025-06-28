@@ -70,12 +70,12 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
   return (
     <div className="professionnel-template" style={{
       fontFamily: 'Helvetica, Arial, sans-serif',
-      fontSize: '14px',
+      fontSize: '12px',
       lineHeight: '1.5',
       color: '#333333',
       backgroundColor: 'white',
       minHeight: '100vh',
-      padding: '30px',
+      padding: '20px',
       maxWidth: '210mm',
       margin: '0 auto',
       position: 'relative',
@@ -115,16 +115,16 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
             />
           )}
           <div style={{
-            fontSize: '22px',
+            fontSize: '20px',
             fontWeight: 'bold',
             color: '#2C3E50',
-            marginBottom: '8px'
+            marginBottom: '5px'
           }}>
             {entrepriseData.name}
           </div>
           <div style={{
             color: '#7F8C8D',
-            fontSize: '11px',
+            fontSize: '10px',
             lineHeight: '1.4',
             whiteSpace: 'pre-line'
           }}>
@@ -132,7 +132,7 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
           </div>
           <div style={{
             color: '#7F8C8D',
-            fontSize: '11px',
+            fontSize: '10px',
             marginTop: '3px'
           }}>
             {entrepriseData.phone} | {entrepriseData.email}
@@ -147,10 +147,10 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
           border: '1px solid #E9ECEF'
         }}>
           <div style={{
-            fontSize: '28px',
+            fontSize: '24px',
             fontWeight: 'bold',
             color: '#2C3E50',
-            marginBottom: '8px'
+            marginBottom: '5px'
           }}>
             DEVIS
           </div>
@@ -158,25 +158,25 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
             fontSize: '16px',
             color: '#3498DB',
             fontWeight: 'bold',
-            marginBottom: '12px'
+            marginBottom: '10px'
           }}>
             {devisData.numeroDevis}
           </div>
-          <div style={{ fontSize: '11px', color: '#7F8C8D' }}>
+          <div style={{ fontSize: '10px', color: '#7F8C8D' }}>
             Date: {formatDate(devisData.dateCreation)}
           </div>
-          <div style={{ fontSize: '11px', color: '#7F8C8D' }}>
+          <div style={{ fontSize: '10px', color: '#7F8C8D' }}>
             Valide jusqu'au: {formatDate(devisData.dateExpiration)}
           </div>
         </div>
       </div>
 
-      {/* Section Client - Dimensions standardisées */}
+      {/* Section Client */}
       <div className="section-client" style={{
         maxHeight: '80px',
         fontSize: '10px',
-        lineHeight: '1.1',
-        padding: '8px',
+        lineHeight: '1.2',
+        padding: '10px',
         margin: '15px 0',
         backgroundColor: '#F8F9FA',
         borderLeft: '4px solid #3498DB',
@@ -224,12 +224,12 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
         </div>
       </div>
 
-      {/* Tableau des prestations - Dimensions standardisées */}
-      <div className="tableau-produits" style={{ margin: '10px 0' }}>
+      {/* Tableau des prestations */}
+      <div className="tableau-produits" style={{ margin: '15px 0' }}>
         <div style={{
           fontWeight: 'bold',
           color: '#2C3E50',
-          marginBottom: '12px',
+          marginBottom: '10px',
           fontSize: '14px'
         }}>
           DÉTAIL DES PRESTATIONS:
@@ -246,7 +246,7 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
           <thead>
             <tr style={{ backgroundColor: '#F8F9FA' }}>
               <th style={{
-                padding: '10px 8px',
+                padding: '8px',
                 textAlign: 'left',
                 borderBottom: '2px solid #3498DB',
                 color: '#2C3E50',
@@ -256,7 +256,7 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
                 DESCRIPTION
               </th>
               <th style={{
-                padding: '10px 8px',
+                padding: '8px',
                 textAlign: 'right',
                 borderBottom: '2px solid #3498DB',
                 color: '#2C3E50',
@@ -267,7 +267,7 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
                 QTÉ
               </th>
               <th style={{
-                padding: '10px 8px',
+                padding: '8px',
                 textAlign: 'right',
                 borderBottom: '2px solid #3498DB',
                 color: '#2C3E50',
@@ -278,7 +278,7 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
                 PRIX UNIT.
               </th>
               <th style={{
-                padding: '10px 8px',
+                padding: '8px',
                 textAlign: 'right',
                 borderBottom: '2px solid #3498DB',
                 color: '#2C3E50',
@@ -289,7 +289,7 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
                 TVA %
               </th>
               <th style={{
-                padding: '10px 8px',
+                padding: '8px',
                 textAlign: 'right',
                 borderBottom: '2px solid #3498DB',
                 color: '#2C3E50',
@@ -354,7 +354,7 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
         </table>
       </div>
 
-      {/* Section Totaux - Dimensions standardisées */}
+      {/* Section Totaux */}
       <div style={{
         marginTop: '20px',
         display: 'flex',
@@ -414,19 +414,17 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
                   {formatCurrency(calculateVAT(), devisData.devise)}
                 </td>
               </tr>
-              <tr>
+              <tr style={{ backgroundColor: '#2C3E50' }}>
                 <td style={{
                   padding: '12px 15px',
-                  backgroundColor: '#2C3E50',
-                  color: 'white',
                   fontSize: '16px',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  color: 'white'
                 }}>
                   TOTAL TTC:
                 </td>
                 <td style={{
                   padding: '12px 15px',
-                  backgroundColor: '#2C3E50',
                   textAlign: 'right',
                   fontSize: '16px',
                   fontWeight: 'bold',
@@ -440,12 +438,12 @@ const DevisModeleProfessionnel: React.FC<DevisModeleProfessionnelProps> = ({
         </div>
       </div>
 
-      {/* Notes - Dimensions standardisées */}
+      {/* Notes */}
       {devisData.notes && (
         <div className="notes-conditions" style={{
           fontSize: '9px',
           maxHeight: '60px',
-          padding: '5px',
+          padding: '8px',
           overflow: 'hidden',
           marginTop: '20px',
           backgroundColor: '#F8F9FA',
