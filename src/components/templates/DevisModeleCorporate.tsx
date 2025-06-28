@@ -70,28 +70,29 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
   return (
     <div className="corporate-template" style={{
       fontFamily: 'Inter, sans-serif',
-      fontSize: '12px',
+      fontSize: '14px',
       lineHeight: '1.5',
       color: '#1B4B8C',
       backgroundColor: 'white',
       minHeight: '100vh',
-      padding: '20px',
+      padding: '30px',
       maxWidth: '210mm',
       margin: '0 auto',
       position: 'relative',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      paddingBottom: '120px'
     }}>
       {/* Header Corporate - Très structuré */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: '20px',
+        marginBottom: '25px',
         borderBottom: '3px solid #1B4B8C',
         paddingBottom: '15px'
       }}>
         {/* Logo et infos entreprise - Alignement gauche */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
           {entrepriseData.logo && (
             <img 
               src={entrepriseData.logo} 
@@ -104,17 +105,17 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
           )}
           <div>
             <div style={{
-              fontSize: '20px',
+              fontSize: '22px',
               fontWeight: '700',
               color: '#1B4B8C',
-              marginBottom: '5px',
+              marginBottom: '8px',
               letterSpacing: '0.5px'
             }}>
               {entrepriseData.name}
             </div>
             <div style={{
               color: '#6C757D',
-              fontSize: '10px',
+              fontSize: '11px',
               lineHeight: '1.3',
               whiteSpace: 'pre-line'
             }}>
@@ -122,7 +123,7 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
             </div>
             <div style={{ 
               color: '#6C757D', 
-              fontSize: '10px', 
+              fontSize: '11px', 
               marginTop: '3px'
             }}>
               {entrepriseData.phone} | {entrepriseData.email}
@@ -131,12 +132,12 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
         </div>
         
         {/* Section devis - Alignement droite */}
-        <div style={{ textAlign: 'right', minWidth: '180px' }}>
+        <div style={{ textAlign: 'right', minWidth: '200px' }}>
           <div style={{
-            fontSize: '24px',
+            fontSize: '28px',
             fontWeight: '700',
             color: '#1B4B8C',
-            marginBottom: '5px',
+            marginBottom: '8px',
             letterSpacing: '1px'
           }}>
             DEVIS
@@ -145,25 +146,25 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
             fontSize: '16px',
             color: '#6C757D',
             fontWeight: '600',
-            marginBottom: '10px'
+            marginBottom: '12px'
           }}>
             {devisData.numeroDevis}
           </div>
-          <div style={{ color: '#6C757D', fontSize: '10px' }}>
+          <div style={{ color: '#6C757D', fontSize: '11px' }}>
             Date: {formatDate(devisData.dateCreation)}
           </div>
-          <div style={{ color: '#6C757D', fontSize: '10px' }}>
+          <div style={{ color: '#6C757D', fontSize: '11px' }}>
             Valide jusqu'au: {formatDate(devisData.dateExpiration)}
           </div>
         </div>
       </div>
 
-      {/* Section Client */}
+      {/* Section Client - Dimensions standardisées */}
       <div className="section-client" style={{
         maxHeight: '80px',
         fontSize: '10px',
-        lineHeight: '1.2',
-        padding: '10px',
+        lineHeight: '1.1',
+        padding: '8px',
         margin: '15px 0',
         backgroundColor: '#F8F9FA',
         border: '1px solid #E9ECEF',
@@ -211,12 +212,12 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
         </div>
       </div>
 
-      {/* Tableau des prestations */}
-      <div className="tableau-produits" style={{ margin: '15px 0' }}>
+      {/* Tableau des prestations - Dimensions standardisées */}
+      <div className="tableau-produits" style={{ margin: '10px 0' }}>
         <div style={{
           fontWeight: 'bold',
           color: '#1B4B8C',
-          marginBottom: '10px',
+          marginBottom: '12px',
           fontSize: '14px'
         }}>
           Détail des prestations:
@@ -234,7 +235,7 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
             <tr style={{ backgroundColor: '#F8F9FA' }}>
               <th style={{
                 color: '#1B4B8C',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'left',
                 fontWeight: 'bold',
                 fontSize: '11px'
@@ -243,7 +244,7 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
               </th>
               <th style={{
                 color: '#1B4B8C',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 fontWeight: 'bold',
                 fontSize: '11px',
@@ -253,7 +254,7 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
               </th>
               <th style={{
                 color: '#1B4B8C',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 fontWeight: 'bold',
                 fontSize: '11px',
@@ -263,7 +264,7 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
               </th>
               <th style={{
                 color: '#1B4B8C',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 fontWeight: 'bold',
                 fontSize: '11px',
@@ -273,7 +274,7 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
               </th>
               <th style={{
                 color: '#1B4B8C',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 fontWeight: 'bold',
                 fontSize: '11px',
@@ -343,7 +344,7 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
         </table>
       </div>
 
-      {/* Section Totaux */}
+      {/* Section Totaux - Dimensions standardisées */}
       <div style={{
         marginTop: '20px',
         display: 'flex',
@@ -423,12 +424,12 @@ const DevisModeleCorporate: React.FC<DevisModeleCorporateProps> = ({
         </div>
       </div>
 
-      {/* Notes */}
+      {/* Notes - Dimensions standardisées */}
       {devisData.notes && (
         <div className="notes-conditions" style={{
           fontSize: '9px',
           maxHeight: '60px',
-          padding: '8px',
+          padding: '5px',
           overflow: 'hidden',
           marginTop: '20px',
           backgroundColor: '#F8F9FA',

@@ -70,12 +70,12 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
   return (
     <div className="minimaliste-template" style={{
       fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif',
-      fontSize: '12px',
+      fontSize: '14px',
       lineHeight: '1.5',
       color: '#333333',
       backgroundColor: 'white',
       minHeight: '100vh',
-      padding: '20px',
+      padding: '30px',
       maxWidth: '210mm',
       margin: '0 auto',
       position: 'relative',
@@ -104,17 +104,17 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
             />
           )}
           <div style={{
-            fontSize: '20px',
+            fontSize: '22px',
             fontWeight: '500',
             color: '#333',
-            marginBottom: '5px',
+            marginBottom: '8px',
             letterSpacing: '0.5px'
           }}>
             {entrepriseData.name}
           </div>
           <div style={{
             color: '#888',
-            fontSize: '10px',
+            fontSize: '11px',
             lineHeight: '1.4',
             whiteSpace: 'pre-line'
           }}>
@@ -122,7 +122,7 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
           </div>
           <div style={{
             color: '#888',
-            fontSize: '10px',
+            fontSize: '11px',
             marginTop: '3px'
           }}>
             {entrepriseData.phone} | {entrepriseData.email}
@@ -131,10 +131,10 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
         
         <div style={{ textAlign: 'right' }}>
           <div style={{
-            fontSize: '24px',
+            fontSize: '28px',
             fontWeight: '300',
             color: '#333',
-            marginBottom: '5px',
+            marginBottom: '8px',
             letterSpacing: '1px'
           }}>
             DEVIS
@@ -142,25 +142,25 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
           <div style={{
             fontSize: '16px',
             color: '#888',
-            marginBottom: '10px'
+            marginBottom: '12px'
           }}>
             {devisData.numeroDevis}
           </div>
-          <div style={{ fontSize: '10px', color: '#888' }}>
+          <div style={{ fontSize: '11px', color: '#888' }}>
             Date: {formatDate(devisData.dateCreation)}
           </div>
-          <div style={{ fontSize: '10px', color: '#888' }}>
+          <div style={{ fontSize: '11px', color: '#888' }}>
             Valide jusqu'au: {formatDate(devisData.dateExpiration)}
           </div>
         </div>
       </div>
 
-      {/* Section client */}
+      {/* Section client - Dimensions standardisées */}
       <div className="section-client" style={{
         maxHeight: '80px',
         fontSize: '10px',
-        lineHeight: '1.2',
-        padding: '10px',
+        lineHeight: '1.1',
+        padding: '8px',
         margin: '15px 0',
         backgroundColor: '#f9f9f9',
         borderLeft: '4px solid #eee',
@@ -210,12 +210,12 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
         </div>
       </div>
 
-      {/* Tableau des prestations */}
-      <div className="tableau-produits" style={{ margin: '15px 0' }}>
+      {/* Tableau des prestations - Dimensions standardisées */}
+      <div className="tableau-produits" style={{ margin: '10px 0' }}>
         <div style={{
           fontWeight: 'bold',
           color: '#333',
-          marginBottom: '10px',
+          marginBottom: '12px',
           fontSize: '14px'
         }}>
           Prestations:
@@ -229,7 +229,7 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
           <thead>
             <tr>
               <th style={{
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'left',
                 borderBottom: '2px solid #eee',
                 color: '#888',
@@ -241,7 +241,7 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
                 Description
               </th>
               <th style={{
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 borderBottom: '2px solid #eee',
                 color: '#888',
@@ -254,7 +254,7 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
                 Qté
               </th>
               <th style={{
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 borderBottom: '2px solid #eee',
                 color: '#888',
@@ -267,7 +267,7 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
                 Prix
               </th>
               <th style={{
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 borderBottom: '2px solid #eee',
                 color: '#888',
@@ -280,7 +280,7 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
                 TVA
               </th>
               <th style={{
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 borderBottom: '2px solid #eee',
                 color: '#888',
@@ -349,7 +349,7 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
         </table>
       </div>
 
-      {/* Section Totaux */}
+      {/* Section Totaux - Dimensions standardisées */}
       <div style={{
         marginTop: '20px',
         display: 'flex',
@@ -425,12 +425,12 @@ const DevisModeleMinimaliste: React.FC<DevisModeleMinimalisteProps> = ({
         </div>
       </div>
 
-      {/* Notes */}
+      {/* Notes - Dimensions standardisées */}
       {devisData.notes && (
         <div className="notes-conditions" style={{
           fontSize: '9px',
           maxHeight: '60px',
-          padding: '8px',
+          padding: '5px',
           overflow: 'hidden',
           marginTop: '20px',
           backgroundColor: '#f9f9f9',

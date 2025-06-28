@@ -70,12 +70,12 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
   return (
     <div className="creatif-template" style={{
       fontFamily: 'Poppins, sans-serif',
-      fontSize: '12px',
+      fontSize: '14px',
       lineHeight: '1.5',
       color: '#2D3748',
       backgroundColor: 'white',
       minHeight: '100vh',
-      padding: '20px',
+      padding: '30px',
       maxWidth: '210mm',
       margin: '0 auto',
       position: 'relative',
@@ -85,9 +85,9 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       {/* Header Créatif - Design moderne avec gradient */}
       <div style={{
         background: 'linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%)',
-        borderRadius: '10px',
-        padding: '20px',
-        marginBottom: '20px',
+        borderRadius: '15px',
+        padding: '25px',
+        marginBottom: '25px',
         color: 'white',
         position: 'relative',
         overflow: 'hidden'
@@ -120,19 +120,19 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
           zIndex: 2
         }}>
           {/* Logo et entreprise */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
             {entrepriseData.logo && (
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                padding: '8px',
-                borderRadius: '8px',
+                padding: '10px',
+                borderRadius: '12px',
                 backdropFilter: 'blur(10px)'
               }}>
                 <img 
                   src={entrepriseData.logo} 
                   alt="Logo" 
                   style={{ 
-                    maxHeight: '40px', 
+                    maxHeight: '50px', 
                     width: 'auto',
                     filter: 'brightness(0) invert(1)'
                   }} 
@@ -141,22 +141,22 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
             )}
             <div>
               <div style={{
-                fontSize: '18px',
+                fontSize: '22px',
                 fontWeight: '700',
-                marginBottom: '5px',
+                marginBottom: '8px',
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
                 {entrepriseData.name}
               </div>
               <div style={{
-                fontSize: '10px',
+                fontSize: '11px',
                 opacity: '0.9',
                 lineHeight: '1.3',
                 whiteSpace: 'pre-line'
               }}>
                 {entrepriseData.address}
               </div>
-              <div style={{ fontSize: '10px', opacity: '0.9', marginTop: '3px' }}>
+              <div style={{ fontSize: '11px', opacity: '0.9', marginTop: '3px' }}>
                 {entrepriseData.phone} | {entrepriseData.email}
               </div>
             </div>
@@ -165,9 +165,9 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
           {/* Section DEVIS */}
           <div style={{ textAlign: 'right' }}>
             <div style={{
-              fontSize: '24px',
+              fontSize: '28px',
               fontWeight: '800',
-              marginBottom: '5px',
+              marginBottom: '8px',
               textShadow: '0 2px 4px rgba(0,0,0,0.2)',
               letterSpacing: '2px'
             }}>
@@ -175,32 +175,31 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
             </div>
             <div style={{
               backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              padding: '6px 12px',
+              padding: '8px 15px',
               borderRadius: '20px',
-              fontSize: '14px',
+              fontSize: '16px',
               fontWeight: '600',
               backdropFilter: 'blur(10px)',
-              marginBottom: '10px',
-              display: 'inline-block'
+              marginBottom: '12px'
             }}>
               {devisData.numeroDevis}
             </div>
-            <div style={{ fontSize: '10px', opacity: '0.9' }}>
+            <div style={{ fontSize: '11px', opacity: '0.9' }}>
               Date: {formatDate(devisData.dateCreation)}
             </div>
-            <div style={{ fontSize: '10px', opacity: '0.9' }}>
+            <div style={{ fontSize: '11px', opacity: '0.9' }}>
               Valide jusqu'au: {formatDate(devisData.dateExpiration)}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Section Client */}
+      {/* Section Client - Dimensions standardisées */}
       <div className="section-client" style={{
         maxHeight: '80px',
         fontSize: '10px',
-        lineHeight: '1.2',
-        padding: '10px',
+        lineHeight: '1.1',
+        padding: '8px',
         margin: '15px 0',
         background: 'linear-gradient(135deg, #F7FAFC 0%, #E2E8F0 100%)',
         borderLeft: '4px solid #FF6B35',
@@ -248,12 +247,12 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
         </div>
       </div>
 
-      {/* Tableau des prestations */}
-      <div className="tableau-produits" style={{ margin: '15px 0' }}>
+      {/* Tableau des prestations - Dimensions standardisées */}
+      <div className="tableau-produits" style={{ margin: '10px 0' }}>
         <div style={{
           fontWeight: 'bold',
           color: '#2D3748',
-          marginBottom: '10px',
+          marginBottom: '12px',
           fontSize: '14px'
         }}>
           🎨 Prestations Créatives:
@@ -265,13 +264,13 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
           borderRadius: '6px',
           overflow: 'hidden',
           fontSize: '11px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
         }}>
           <thead>
             <tr style={{ background: 'linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%)' }}>
               <th style={{
                 color: 'white',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'left',
                 fontWeight: 'bold',
                 fontSize: '11px'
@@ -280,7 +279,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
               </th>
               <th style={{
                 color: 'white',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 fontWeight: 'bold',
                 fontSize: '11px',
@@ -290,7 +289,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
               </th>
               <th style={{
                 color: 'white',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 fontWeight: 'bold',
                 fontSize: '11px',
@@ -300,7 +299,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
               </th>
               <th style={{
                 color: 'white',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 fontWeight: 'bold',
                 fontSize: '11px',
@@ -310,7 +309,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
               </th>
               <th style={{
                 color: 'white',
-                padding: '8px',
+                padding: '10px 8px',
                 textAlign: 'right',
                 fontWeight: 'bold',
                 fontSize: '11px',
@@ -376,7 +375,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
         </table>
       </div>
 
-      {/* Section Totaux */}
+      {/* Section Totaux - Dimensions standardisées */}
       <div style={{
         marginTop: '20px',
         display: 'flex',
@@ -389,7 +388,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
             borderRadius: '6px',
             overflow: 'hidden',
             fontSize: '12px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
           }}>
             <tbody>
               <tr>
@@ -456,12 +455,12 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
         </div>
       </div>
 
-      {/* Notes */}
+      {/* Notes - Dimensions standardisées */}
       {devisData.notes && (
         <div className="notes-conditions" style={{
           fontSize: '9px',
           maxHeight: '60px',
-          padding: '8px',
+          padding: '5px',
           overflow: 'hidden',
           marginTop: '20px',
           background: 'linear-gradient(135deg, #F7FAFC 0%, #E2E8F0 100%)',
