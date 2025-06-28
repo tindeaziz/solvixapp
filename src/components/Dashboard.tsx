@@ -470,7 +470,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   return (
     <div className="w-full-safe space-y-8">
       {/* Welcome Section */}
-      <div className="relative bg-gradient-to-br from-solvix-blue via-solvix-blue-dark to-solvix-blue rounded-2xl p-8 text-white shadow-solvix-lg overflow-hidden">
+      <div className="relative bg-gradient-to-br from-solvix-blue via-solvix-blue-dark to-solvix-blue rounded-2xl p-6 sm:p-8 text-white shadow-solvix-lg overflow-hidden">
         {/* Motif de fond décoratif */}
         <div className="absolute top-0 right-0 w-64 h-64 opacity-10">
           <div className="w-full h-full bg-gradient-to-br from-white to-transparent rounded-full transform translate-x-16 -translate-y-16"></div>
@@ -479,21 +479,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           <div className="w-full h-full bg-gradient-to-tr from-white to-transparent rounded-full transform -translate-x-8 translate-y-8"></div>
         </div>
         
-        <div className="relative flex-container-safe lg:items-center lg:justify-between">
-          <div className="space-y-4 flex-item-safe">
+        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
+          <div className="space-y-4 flex-1">
             <div className="flex items-center space-x-3">
               <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                <Zap className="h-8 w-8 text-white" />
+                <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold font-poppins">Bienvenue sur Solvix</h1>
-                <p className="text-blue-100 text-lg font-inter mt-1">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-poppins">Bienvenue sur Solvix</h1>
+                <p className="text-blue-100 text-sm sm:text-base lg:text-lg font-inter mt-1">
                   Gérez vos devis facilement et efficacement
                 </p>
               </div>
             </div>
             
-            <div className="flex flex-wrap items-center gap-6 text-sm">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm">
               <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm">
                 <Calendar className="h-4 w-4" />
                 <span className="font-inter">{new Date().toLocaleDateString('fr-FR', { 
@@ -510,10 +510,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
           </div>
           
-          <div className="lg:ml-8 mt-6 lg:mt-0">
+          {/* Bouton Nouveau devis - Optimisé pour mobile */}
+          <div className="flex justify-center lg:justify-end">
             <button
               onClick={handleNewQuoteClick}
-              className="group bg-solvix-orange hover:bg-solvix-orange-dark text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-inter flex items-center space-x-3"
+              className="group bg-solvix-orange hover:bg-solvix-orange-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-inter flex items-center space-x-3 w-full sm:w-auto justify-center"
             >
               <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
               <span>Nouveau devis</span>
@@ -619,8 +620,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       {/* Quotes Management */}
       <div className="bg-white rounded-xl shadow-solvix border border-gray-200 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-6 border-b border-gray-200">
-          <div className="flex-container-safe lg:items-center lg:justify-between">
+        <div className="bg-gradient-to-r from-gray-50 to-white px-4 sm:px-6 py-6 border-b border-gray-200">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-solvix-blue rounded-xl">
                 <FileText className="h-6 w-6 text-white" />
@@ -632,7 +633,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-4 lg:mt-0">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={handleViewAllQuotes}
                 className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
