@@ -523,7 +523,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </div>
 
       {/* Compteurs - Responsive Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 w-full stats-container">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 w-full">
         {[
           { label: 'Total', value: counters.total, icon: FileText, color: 'blue' },
           { label: 'En attente', value: counters.pending, icon: Clock, color: 'yellow' },
@@ -534,7 +534,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         ].map((item, index) => {
           const Icon = item.icon;
           return (
-            <div key={item.label} className="group bg-white rounded-lg sm:rounded-xl shadow-solvix border border-gray-200 p-3 sm:p-4 hover:shadow-solvix-lg transition-all duration-300 hover:-translate-y-1 stat-card">
+            <div key={item.label} className="group bg-white rounded-lg sm:rounded-xl shadow-solvix border border-gray-200 p-3 sm:p-4 hover:shadow-solvix-lg transition-all duration-300 hover:-translate-y-1">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-gray-600 font-inter">{item.label}</p>
@@ -562,7 +562,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </div>
 
       {/* Stats Grid - Responsive */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 w-full monthly-stats">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 w-full">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
