@@ -34,8 +34,8 @@ html, body {
 
 /* Sidebar - Desktop uniquement */
 .sidebar {
-  width: 320px;
-  min-width: 320px;
+  width: 280px;
+  min-width: 280px;
   flex-shrink: 0;
 }
 
@@ -63,15 +63,16 @@ html, body {
   }
 }
 
-/* Contenu principal adaptatif */
+/* Contenu principal adaptatif - CORRECTION DESKTOP */
 .main-content {
   width: 100%;
-  padding: 24px;
+  max-width: calc(100vw - 280px); /* Largeur écran - sidebar */
+  padding: 20px;
   box-sizing: border-box;
   overflow-x: hidden;
 }
 
-/* Container dashboard */
+/* Container dashboard - CORRECTION DESKTOP */
 .dashboard-container {
   width: 100%;
   max-width: 100%;
@@ -163,31 +164,31 @@ html, body {
   z-index: 30;
 }
 
-/* Bannière principale - Welcome Card */
+/* Bannière principale - Welcome Card - CORRECTION DESKTOP */
 .welcome-card {
   width: 100%;
   max-width: 100%;
   margin: 0 0 24px 0;
-  padding: 24px;
+  padding: 32px;
   box-sizing: border-box;
   border-radius: 16px;
 }
 
 .welcome-card h1 {
-  font-size: 1.75rem;
+  font-size: 2rem;
   line-height: 1.3;
   margin-bottom: 12px;
 }
 
 .welcome-card p {
-  font-size: 1rem;
+  font-size: 1.125rem;
   line-height: 1.4;
   margin-bottom: 16px;
 }
 
-/* Bouton nouveau devis */
+/* Bouton nouveau devis - CORRECTION DESKTOP */
 .new-quote-btn {
-  width: 100%;
+  width: auto;
   max-width: 280px;
   padding: 16px 24px;
   font-size: 1rem;
@@ -195,7 +196,7 @@ html, body {
   margin-top: 16px;
 }
 
-/* Section info (date et version) */
+/* Section info (date et version) - CORRECTION DESKTOP */
 .info-section {
   display: flex;
   flex-direction: row;
@@ -211,10 +212,10 @@ html, body {
   opacity: 0.9;
 }
 
-/* Grille de statistiques optimisée */
+/* Grille de statistiques optimisée - CORRECTION DESKTOP */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 20px;
   width: 100%;
   max-width: 100%;
@@ -228,10 +229,10 @@ html, body {
   box-sizing: border-box;
 }
 
-/* Section inférieure optimisée */
+/* Section inférieure optimisée - CORRECTION DESKTOP */
 .bottom-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   width: 100%;
   margin-bottom: 32px;
@@ -243,16 +244,16 @@ html, body {
   box-sizing: border-box;
 }
 
-/* Textes adaptatifs */
+/* Textes adaptatifs - CORRECTION DESKTOP */
 .stat-card h3 {
-  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  font-size: 0.875rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .stat-value {
-  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-size: 1.875rem;
   line-height: 1.2;
 }
 
@@ -351,7 +352,95 @@ html, body {
   box-sizing: border-box;
 }
 
-/* RESPONSIVE BREAKPOINTS */
+/* RESPONSIVE BREAKPOINTS - DESKTOP OPTIMISÉ */
+
+/* Large Desktop - CORRECTION PRINCIPALE */
+@media (min-width: 1400px) {
+  .main-content {
+    padding: 32px;
+    max-width: calc(100vw - 280px);
+  }
+
+  .welcome-card {
+    padding: 40px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 24px;
+  }
+
+  .bottom-stats {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+  }
+}
+
+/* Desktop Standard - CORRECTION PRINCIPALE */
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .main-content {
+    padding: 28px;
+    max-width: calc(100vw - 280px);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+  }
+
+  .bottom-stats {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .welcome-card {
+    padding: 32px;
+  }
+
+  .welcome-card h1 {
+    font-size: 1.875rem;
+  }
+
+  .welcome-card p {
+    font-size: 1rem;
+  }
+
+  .new-quote-btn {
+    max-width: 240px;
+  }
+
+  /* Masquer la navigation mobile */
+  .mobile-bottom-nav {
+    display: none;
+  }
+}
+
+/* Tablet Landscape - CORRECTION */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .main-content {
+    padding: 24px;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .bottom-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .welcome-card {
+    padding: 28px;
+  }
+
+  .new-quote-btn {
+    max-width: 240px;
+  }
+}
 
 /* Mobile Portrait - Très petits écrans */
 @media (max-width: 480px) {
@@ -432,98 +521,6 @@ html, body {
   .info-section {
     flex-direction: row;
     justify-content: space-between;
-  }
-}
-
-/* Tablet Portrait */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .main-content {
-    padding: 24px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-
-  .bottom-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-  }
-
-  .welcome-card {
-    padding: 28px;
-  }
-
-  .new-quote-btn {
-    max-width: 240px;
-  }
-}
-
-/* Desktop et Tablet Landscape */
-@media (min-width: 1024px) {
-  .main-content {
-    padding: 32px;
-    margin-left: 0; /* Géré par le layout */
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 24px;
-  }
-
-  .bottom-stats {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 28px;
-  }
-
-  .welcome-card {
-    padding: 32px;
-  }
-
-  .welcome-card h1 {
-    font-size: 2rem;
-  }
-
-  .welcome-card p {
-    font-size: 1.125rem;
-  }
-
-  .new-quote-btn {
-    max-width: 280px;
-  }
-
-  /* Masquer la navigation mobile */
-  .mobile-bottom-nav {
-    display: none;
-  }
-}
-
-/* Large Desktop */
-@media (min-width: 1400px) {
-  .main-content {
-    padding: 40px;
-  }
-
-  .welcome-card {
-    padding: 40px;
-  }
-
-  .stats-grid {
-    gap: 28px;
-  }
-
-  .bottom-stats {
-    gap: 32px;
-  }
-}
-
-/* Ultra Wide */
-@media (min-width: 1600px) {
-  .main-content {
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
   }
 }
 
