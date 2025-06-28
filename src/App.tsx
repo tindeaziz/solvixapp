@@ -8,6 +8,7 @@ import EditQuote from './components/EditQuote';
 import Settings from './components/Settings';
 import AuthWrapper from './components/auth/AuthWrapper';
 import QuotePreview from './components/QuotePreview';
+import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import { useAuth } from './hooks/useAuth';
 
 export type ActiveSection = 'dashboard' | 'create-quote' | 'quote-management' | 'settings';
@@ -52,31 +53,33 @@ function App() {
     );
   }
 
-  // Si l'utilisateur n'est pas connecté, afficher l'interface d'authentification
-  if (!user) {
-    return <AuthWrapper onAuthSuccess={() => {}} />;
-  }
-
   return (
     <Routes>
+      {/* Route pour la réinitialisation du mot de passe - accessible sans authentification */}
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      
       {/* Route pour la prévisualisation d'impression */}
       <Route path="/devis/preview/:id" element={<QuotePreview />} />
       <Route path="/devis/preview/new" element={<QuotePreview />} />
       <Route path="/devis/preview/edit" element={<QuotePreview />} />
       
       {/* Route pour la gestion des devis */}
-      <Route path="/devis" element={<QuoteManagement />} />
-      <Route path="/devis/edit/:id" element={<EditQuote />} />
+      <Route path="/devis" element={user ? <QuoteManagement /> : <AuthWrapper onAuthSuccess={() => {}} />} />
+      <Route path="/devis/edit/:id" element={user ? <EditQuote /> : <AuthWrapper onAuthSuccess={() => {}} />} />
       
       {/* Routes principales de l'application */}
       <Route path="/*" element={
-        <Layout 
-          activeSection={activeSection} 
-          setActiveSection={setActiveSection}
-          onLogout={handleLogout}
-        >
-          {renderContent()}
-        </Layout>
+        user ? (
+          <Layout 
+            activeSection={activeSection} 
+            setActiveSection={setActiveSection}
+            onLogout={handleLogout}
+          >
+            {renderContent()}
+          </Layout>
+        ) : (
+          <AuthWrapper onAuthSuccess={() => {}} />
+        )
       } />
     </Routes>
   );

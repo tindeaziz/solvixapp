@@ -145,7 +145,13 @@ export const authService = {
 
   // Réinitialiser le mot de passe
   async resetPassword(email: string) {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    });
+    
+    console.log('📧 RESET_PASSWORD - Email envoyé à:', email);
+    console.log('🔗 RESET_PASSWORD - URL de redirection:', `${window.location.origin}/reset-password`);
+    
     return { data, error };
   }
 };
