@@ -14,6 +14,7 @@ import ProtectedRoute from './components/premium/ProtectedRoute';
 import AdminPanel from './components/admin/AdminPanel';
 import { useAuth } from './hooks/useAuth';
 import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage } from './utils/security';
+import { Star } from 'lucide-react';
 
 export type ActiveSection = 'dashboard' | 'create-quote' | 'quote-management' | 'settings';
 
