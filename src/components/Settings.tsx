@@ -3,6 +3,8 @@ import { Save, User, Building, Palette, Bell, Lock, Globe, Upload, Check, AlertC
 import CompanySettings from './CompanySettings';
 import { useAuth } from '../hooks/useAuth';
 import { profileService } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
+import { validatePassword } from '../utils/sanitizer';
 
 const Settings: React.FC = () => {
   const { user } = useAuth();
@@ -23,6 +25,16 @@ const Settings: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+
+  // États pour le changement de mot de passe
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   const tabs = [
     { id: 'profile', name: 'Profil utilisateur', icon: User },
@@ -189,6 +201,89 @@ const Settings: React.FC = () => {
       setSaveError('Une erreur est survenue lors de la sauvegarde');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Gestion du changement de mot de passe
+  const handlePasswordChange = async () => {
+    // Réinitialiser les états
+    setPasswordErrors({});
+    setPasswordSuccess(false);
+    
+    // Validation
+    const errors: Record<string, string> = {};
+    
+    if (!passwordData.currentPassword) {
+      errors.currentPassword = 'Le mot de passe actuel est requis';
+    }
+    
+    if (!passwordData.newPassword) {
+      errors.newPassword = 'Le nouveau mot de passe est requis';
+    } else {
+      const validation = validatePassword(passwordData.newPassword);
+      if (!validation.isValid) {
+        errors.newPassword = validation.errors[0] || 'Mot de passe invalide';
+      }
+    }
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      errors.confirmPassword = 'Les mots de passe ne correspondent pas';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setPasswordErrors(errors);
+      return;
+    }
+    
+    setIsChangingPassword(true);
+    
+    try {
+      console.log('🔐 SETTINGS - Tentative de changement de mot de passe');
+      
+      // Vérifier d'abord le mot de passe actuel
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: passwordData.currentPassword
+      });
+      
+      if (signInError) {
+        console.error('❌ SETTINGS - Mot de passe actuel incorrect:', signInError);
+        setPasswordErrors({
+          currentPassword: 'Mot de passe actuel incorrect'
+        });
+        return;
+      }
+      
+      // Changer le mot de passe
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+      
+      if (updateError) {
+        console.error('❌ SETTINGS - Erreur changement mot de passe:', updateError);
+        setPasswordErrors({
+          general: 'Erreur lors du changement de mot de passe: ' + updateError.message
+        });
+        return;
+      }
+      
+      console.log('✅ SETTINGS - Mot de passe changé avec succès');
+      setPasswordSuccess(true);
+      
+      // Réinitialiser le formulaire
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      
+    } catch (error) {
+      console.error('❌ SETTINGS - Exception changement mot de passe:', error);
+      setPasswordErrors({
+        general: 'Une erreur est survenue lors du changement de mot de passe'
+      });
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -366,6 +461,113 @@ const Settings: React.FC = () => {
     );
   };
 
+  const renderSecuritySettings = () => {
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-medium text-gray-900">Sécurité</h3>
+        
+        {/* Messages de statut */}
+        {passwordErrors.general && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-600 mr-3" />
+            <p className="text-red-800">{passwordErrors.general}</p>
+          </div>
+        )}
+        
+        {passwordSuccess && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+            <Check className="h-5 w-5 text-green-600 mr-3" />
+            <p className="text-green-800">Mot de passe modifié avec succès !</p>
+          </div>
+        )}
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mot de passe actuel
+            </label>
+            <input
+              type="password"
+              value={passwordData.currentPassword}
+              onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                passwordErrors.currentPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+            />
+            {passwordErrors.currentPassword && (
+              <p className="mt-1 text-sm text-red-600">{passwordErrors.currentPassword}</p>
+            )}
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nouveau mot de passe
+            </label>
+            <input
+              type="password"
+              value={passwordData.newPassword}
+              onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                passwordErrors.newPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+            />
+            {passwordErrors.newPassword && (
+              <p className="mt-1 text-sm text-red-600">{passwordErrors.newPassword}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.
+            </p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Confirmer le mot de passe
+            </label>
+            <input
+              type="password"
+              value={passwordData.confirmPassword}
+              onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                passwordErrors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+            />
+            {passwordErrors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-600">{passwordErrors.confirmPassword}</p>
+            )}
+          </div>
+          
+          <button
+            onClick={handlePasswordChange}
+            disabled={isChangingPassword}
+            className="mt-2 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isChangingPassword ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Modification en cours...
+              </>
+            ) : (
+              <>
+                <Lock className="h-4 w-4 mr-2" />
+                Changer le mot de passe
+              </>
+            )}
+          </button>
+        </div>
+        
+        <div className="mt-6 bg-blue-50 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-blue-900 mb-2">Conseils de sécurité</h4>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>• Utilisez un mot de passe unique pour chaque service</li>
+            <li>• Incluez des caractères spéciaux et des chiffres</li>
+            <li>• Évitez d'utiliser des informations personnelles facilement devinables</li>
+            <li>• Changez régulièrement votre mot de passe</li>
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -425,34 +627,7 @@ const Settings: React.FC = () => {
           </div>
         );
       case 'security':
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Sécurité</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe</label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-            </div>
-          </div>
-        );
+        return renderSecuritySettings();
       case 'language':
         return (
           <div className="space-y-6">
@@ -544,7 +719,7 @@ const Settings: React.FC = () => {
             )}
 
             {/* Save Button - For other tabs (non-company) */}
-            {activeTab !== 'company' && activeTab !== 'profile' && (
+            {activeTab !== 'company' && activeTab !== 'profile' && activeTab !== 'security' && (
               <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
                 <button className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                   <Save className="h-4 w-4 mr-2" />
