@@ -73,6 +73,16 @@ export interface ArticleDevis {
   created_at: string;
 }
 
+export interface NotificationPreferences {
+  id: string;
+  user_id: string;
+  email_notifications: boolean;
+  new_quotes_notifications: boolean;
+  accepted_quotes_notifications: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // Services d'authentification
 export const authService = {
   // Connexion
@@ -247,6 +257,69 @@ export const profileService = {
     
     if (error) console.error('❌ ERREUR CRÉATION PROFIL:', error);
     else console.log('✅ PROFIL CRÉÉ AVEC SUCCÈS');
+    
+    return { data, error };
+  }
+};
+
+// Services pour les préférences de notification
+export const notificationService = {
+  // Récupérer les préférences de notification
+  async getNotificationPreferences() {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('❌ ERREUR RÉCUPÉRATION UTILISATEUR:', userError);
+      return { data: null, error: userError };
+    }
+    
+    if (!user) {
+      console.log('❌ AUCUN UTILISATEUR CONNECTÉ pour récupérer les préférences');
+      return { data: null, error: new Error('Utilisateur non connecté') };
+    }
+    
+    console.log('🔍 RÉCUPÉRATION PRÉFÉRENCES pour User ID:', user.id);
+    
+    const { data, error } = await supabase
+      .from('user_notification_preferences')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    
+    console.log('📊 PRÉFÉRENCES RÉCUPÉRÉES:', data ? 'Trouvées' : 'Non trouvées');
+    if (error && error.code !== 'PGRST116') console.error('❌ ERREUR PRÉFÉRENCES:', error);
+    
+    return { data, error };
+  },
+
+  // Mettre à jour les préférences de notification
+  async updateNotificationPreferences(updates: Partial<NotificationPreferences>) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('❌ ERREUR RÉCUPÉRATION UTILISATEUR:', userError);
+      return { data: null, error: userError };
+    }
+    
+    if (!user) {
+      console.error('❌ ERREUR CRITIQUE: Aucun utilisateur connecté pour mettre à jour les préférences');
+      return { data: null, error: new Error('Utilisateur non connecté') };
+    }
+    
+    console.log('💾 MISE À JOUR PRÉFÉRENCES pour User ID:', user.id);
+    
+    const { data, error } = await supabase
+      .from('user_notification_preferences')
+      .upsert({
+        user_id: user.id,
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (error) console.error('❌ ERREUR MISE À JOUR PRÉFÉRENCES:', error);
+    else console.log('✅ PRÉFÉRENCES MISES À JOUR AVEC SUCCÈS');
     
     return { data, error };
   }
@@ -641,6 +714,85 @@ export const devisService = {
     }
 
     return `DEV-${year}-001`;
+  },
+  
+  // Mettre à jour le statut d'un devis avec notification
+  async updateDevisStatus(id: string, newStatus: 'Brouillon' | 'Envoyé' | 'En attente' | 'Accepté' | 'Refusé') {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('❌ ERREUR RÉCUPÉRATION UTILISATEUR:', userError);
+      return { data: null, error: userError };
+    }
+    
+    if (!user) {
+      console.error('❌ ERREUR CRITIQUE: Aucun utilisateur connecté pour mettre à jour le statut');
+      return { data: null, error: new Error('Utilisateur non connecté') };
+    }
+    
+    console.log('🔄 MISE À JOUR STATUT DEVIS ID:', id, 'pour User ID:', user.id, 'Nouveau statut:', newStatus);
+    
+    // Récupérer d'abord le devis pour connaître l'ancien statut
+    const { data: devis, error: getError } = await supabase
+      .from('devis')
+      .select(`
+        *,
+        client:clients(*)
+      `)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single();
+    
+    if (getError) {
+      console.error('❌ ERREUR RÉCUPÉRATION DEVIS:', getError);
+      return { data: null, error: getError };
+    }
+    
+    const oldStatus = devis.status;
+    
+    // Mettre à jour le statut
+    const { data, error } = await supabase
+      .from('devis')
+      .update({
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('❌ ERREUR MISE À JOUR STATUT:', error);
+      return { data: null, error };
+    }
+    
+    console.log('✅ STATUT MIS À JOUR AVEC SUCCÈS:', oldStatus, '->', newStatus);
+    
+    // Envoyer une notification si le statut a changé
+    if (oldStatus !== newStatus) {
+      try {
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            type: 'quote_status_changed',
+            userId: user.id,
+            data: {
+              quoteNumber: devis.quote_number,
+              clientName: devis.client?.name || 'Client',
+              amount: devis.total_ttc || 0,
+              currency: devis.currency || 'FCFA',
+              oldStatus,
+              newStatus
+            }
+          }
+        });
+        console.log('✅ NOTIFICATION DE CHANGEMENT DE STATUT ENVOYÉE');
+      } catch (notifError) {
+        console.error('❌ ERREUR ENVOI NOTIFICATION:', notifError);
+      }
+    }
+    
+    return { data, error: null };
   }
 };
 

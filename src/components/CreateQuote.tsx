@@ -26,6 +26,7 @@ import { generateDevisPDF } from '../utils/pdfGenerator';
 import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage } from '../utils/security';
 import { sanitizeFormData } from '../utils/sanitizer';
 import { useSecureForm } from '../hooks/useSecureForm';
+import { notifyNewQuote } from '../utils/notifications';
 import ShareModal from './ShareModal';
 import QuotaDisplay from './premium/QuotaDisplay';
 
@@ -111,6 +112,7 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
 
   const [showPreview, setShowPreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [notificationSent, setNotificationSent] = useState(false);
 
   // Vérification périodique du quota
   useEffect(() => {
@@ -255,6 +257,7 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
     setSaving(true);
     setError('');
     setSaveSuccess(false);
+    setNotificationSent(false);
 
     try {
       console.log('💾 CREATE_QUOTE - Sauvegarde du devis:', quoteData.number);
@@ -330,6 +333,27 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
             onQuoteCreated();
           }
         }
+      }
+
+      // 5. Envoyer une notification par email
+      try {
+        if (newDevis) {
+          const notificationResult = await notifyNewQuote({
+            ...newDevis,
+            client: {
+              name: sanitizedData.client.name,
+              company: sanitizedData.client.company
+            }
+          });
+          
+          if (notificationResult.success) {
+            console.log('✅ CREATE_QUOTE - Notification email envoyée');
+            setNotificationSent(true);
+          }
+        }
+      } catch (notifError) {
+        console.error('⚠️ CREATE_QUOTE - Erreur notification (non bloquante):', notifError);
+        // Ne pas bloquer la sauvegarde si la notification échoue
       }
 
       console.log('✅ CREATE_QUOTE - Devis créé avec succès');
@@ -458,7 +482,9 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
             {saveSuccess && (
               <div className="bg-green-50 border border-green-200 rounded-lg px-3 sm:px-4 py-2 flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                <span className="text-sm text-green-800 font-inter">Devis sauvegardé !</span>
+                <span className="text-sm text-green-800 font-inter">
+                  {notificationSent ? 'Devis sauvegardé et notification envoyée !' : 'Devis sauvegardé !'}
+                </span>
               </div>
             )}
             {error && (
