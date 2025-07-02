@@ -11,6 +11,7 @@ import QuotePreview from './components/QuotePreview';
 import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import PremiumActivation from './components/premium/PremiumActivation';
 import ProtectedRoute from './components/premium/ProtectedRoute';
+import AdminPanel from './components/admin/AdminPanel';
 import { useAuth } from './hooks/useAuth';
 import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage } from './utils/security';
 
@@ -24,6 +25,7 @@ function App() {
   const [isPremium, setIsPremium] = useState(isPremiumActive());
   const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   // Vérification périodique du statut Premium
   useEffect(() => {
@@ -43,6 +45,18 @@ function App() {
     const interval = setInterval(checkPremiumStatus, 60000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Raccourci clavier pour accès admin (Ctrl+Shift+A)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        setShowAdminPanel(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
   const renderContent = () => {
@@ -135,12 +149,31 @@ function App() {
         } />
       </Routes>
 
+      {/* Bouton Premium flottant pour les utilisateurs non premium */}
+      {user && !isPremium && !showPremiumModal && (
+        <button
+          onClick={() => setShowPremiumModal(true)}
+          className="fixed bottom-4 right-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 z-40 flex items-center"
+        >
+          <Star className="h-5 w-5 mr-2 text-yellow-100" />
+          <span className="font-medium font-inter">Passer au Premium</span>
+        </button>
+      )}
+
       {/* Modal d'activation Premium */}
       {showPremiumModal && (
         <PremiumActivation
           isOpen={showPremiumModal}
           onClose={() => setShowPremiumModal(false)}
           onSuccess={handlePremiumActivation}
+        />
+      )}
+
+      {/* Panel d'administration */}
+      {showAdminPanel && (
+        <AdminPanel
+          isOpen={showAdminPanel}
+          onClose={() => setShowAdminPanel(false)}
         />
       )}
     </>

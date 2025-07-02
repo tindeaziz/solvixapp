@@ -110,12 +110,12 @@ export const validateActivationCode = (code: string): boolean => {
   
   const cleanCode = code.trim().toUpperCase();
   
-  // Format attendu: SOLVIX2025-XXX-XXX
-  const codeRegex = /^SOLVIX2025-[A-Z0-9]+-[A-Z0-9]+$/;
+  // Format attendu: SOLVIX-XXXXXXXX
+  const codeRegex = /^SOLVIX-[A-Z0-9]{8}$/;
   
   return codeRegex.test(cleanCode) && 
          cleanCode.length >= 10 && 
-         cleanCode.length <= 30;
+         cleanCode.length <= 20;
 };
 
 // Nettoyer les données de formulaire
@@ -125,6 +125,17 @@ export const sanitizeFormData = <T extends Record<string, any>>(data: T): T => {
   Object.entries(data).forEach(([key, value]) => {
     if (typeof value === 'string') {
       sanitized[key as keyof T] = sanitizeInput(value) as T[keyof T];
+    } else if (Array.isArray(value)) {
+      // Traiter les tableaux (comme les items de devis)
+      sanitized[key as keyof T] = value.map(item => {
+        if (typeof item === 'object' && item !== null) {
+          return sanitizeFormData(item);
+        }
+        return item;
+      }) as T[keyof T];
+    } else if (typeof value === 'object' && value !== null) {
+      // Traiter les objets imbriqués (comme client)
+      sanitized[key as keyof T] = sanitizeFormData(value) as T[keyof T];
     } else {
       sanitized[key as keyof T] = value;
     }

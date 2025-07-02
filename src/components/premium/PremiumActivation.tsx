@@ -72,7 +72,7 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
     }
 
     if (!validateActivationCode(code)) {
-      setMessage('Format de code invalide. Format attendu: SOLVIX2025-XXX-XXX');
+      setMessage('Format de code invalide. Format attendu: SOLVIX-XXXXXXXX');
       setMessageType('error');
       return;
     }
@@ -197,7 +197,7 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
               </label>
               <input
                 type="text"
-                placeholder="SOLVIX2025-XXX-XXX"
+                placeholder="SOLVIX-XXXXXXXX"
                 value={code}
                 onChange={(e) => handleCodeChange(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -280,7 +280,7 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
             {showDeviceInfo && (
               <div className="mt-2 p-3 bg-gray-50 rounded-lg">
                 <p className="text-xs text-gray-600 font-inter mb-1">
-                  <strong>ID Dispositif:</strong> {getDeviceFingerprint()}
+                  <strong>ID Dispositif:</strong> {getDeviceFingerprint().substring(0, 16)}...
                 </p>
                 <p className="text-xs text-gray-500 font-inter">
                   Cet identifiant unique sécurise votre licence Premium sur cet appareil.

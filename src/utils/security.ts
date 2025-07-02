@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import { v4 as uuidv4 } from 'uuid';
 
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || 'solvix-security-key-2025';
 
@@ -14,18 +15,6 @@ export const decryptData = (encryptedData: string): string => {
     return '';
   }
 };
-
-// Codes d'activation valides (en production, ces codes seraient générés côté serveur)
-const VALID_PREMIUM_CODES = [
-  'SOLVIX2025-PREMIUM-001',
-  'SOLVIX2025-PREMIUM-002', 
-  'SOLVIX2025-PREMIUM-003',
-  'SOLVIX2025-PREMIUM-004',
-  'SOLVIX2025-PREMIUM-005',
-  'SOLVIX2025-BETA-001',
-  'SOLVIX2025-BETA-002',
-  'SOLVIX2025-VIP-001'
-];
 
 // Génération d'empreinte digitale du dispositif
 export const getDeviceFingerprint = (): string => {
@@ -51,62 +40,6 @@ export const getDeviceFingerprint = (): string => {
   } catch {
     // Fallback si canvas n'est pas disponible
     return btoa(navigator.userAgent + screen.width + screen.height).slice(0, 32);
-  }
-};
-
-// Validation sécurisée des codes d'activation
-export const validatePremiumCode = (code: string): boolean => {
-  if (!code || typeof code !== 'string') return false;
-  
-  const normalizedCode = code.trim().toUpperCase();
-  
-  // Vérifier si le code est dans la liste des codes valides
-  if (!VALID_PREMIUM_CODES.includes(normalizedCode)) {
-    return false;
-  }
-  
-  // Vérifier si le code n'a pas déjà été utilisé
-  return !isCodeUsed(normalizedCode);
-};
-
-// Vérifier si un code a déjà été utilisé
-const isCodeUsed = (code: string): boolean => {
-  try {
-    const usedCodes = getUsedCodes();
-    return usedCodes.includes(code);
-  } catch {
-    return false;
-  }
-};
-
-// Récupérer la liste des codes utilisés
-const getUsedCodes = (): string[] => {
-  try {
-    const encrypted = localStorage.getItem('solvix_used_codes');
-    if (!encrypted) return [];
-    
-    const decrypted = decryptData(encrypted);
-    if (!decrypted) return [];
-    
-    return JSON.parse(decrypted);
-  } catch {
-    return [];
-  }
-};
-
-// Marquer un code comme utilisé
-export const markCodeAsUsed = (code: string): void => {
-  try {
-    const usedCodes = getUsedCodes();
-    const normalizedCode = code.trim().toUpperCase();
-    
-    if (!usedCodes.includes(normalizedCode)) {
-      usedCodes.push(normalizedCode);
-      const encrypted = encryptData(JSON.stringify(usedCodes));
-      localStorage.setItem('solvix_used_codes', encrypted);
-    }
-  } catch (error) {
-    console.error('Erreur lors du marquage du code:', error);
   }
 };
 
@@ -212,6 +145,269 @@ export const incrementQuotaUsage = (): boolean => {
   }
 };
 
+// Classe de gestion des codes d'activation
+export class SecureCodeManager {
+  private codes: ActivationCode[];
+  
+  constructor() {
+    this.codes = this.loadCodes();
+  }
+  
+  private loadCodes(): ActivationCode[] {
+    try {
+      const encrypted = localStorage.getItem('solvix_admin_codes');
+      if (encrypted) {
+        const decrypted = decryptData(encrypted);
+        return JSON.parse(decrypted);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des codes:', error);
+    }
+    return [];
+  }
+  
+  private saveCodes(): void {
+    try {
+      const encrypted = encryptData(JSON.stringify(this.codes));
+      localStorage.setItem('solvix_admin_codes', encrypted);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde des codes:', error);
+    }
+  }
+  
+  public generateCode(customerInfo?: CustomerInfo): string {
+    const code = this.generateSecureCode();
+    const codeData: ActivationCode = {
+      id: uuidv4(),
+      code: code,
+      status: 'AVAILABLE',
+      createdAt: new Date().toISOString(),
+      customerInfo: customerInfo || {},
+      price: 5000,
+      usedAt: null,
+      deviceId: null
+    };
+    
+    this.codes.push(codeData);
+    this.saveCodes();
+    return code;
+  }
+  
+  public generateBatch(quantity: number = 10): string[] {
+    const batch: string[] = [];
+    for (let i = 0; i < quantity; i++) {
+      batch.push(this.generateCode());
+    }
+    return batch;
+  }
+  
+  public markAsSold(code: string, customerContact: string): boolean {
+    const codeItem = this.codes.find(c => c.code === code);
+    if (codeItem && codeItem.status === 'AVAILABLE') {
+      codeItem.status = 'SOLD';
+      codeItem.customerInfo = {
+        ...codeItem.customerInfo,
+        contact: customerContact
+      };
+      codeItem.soldAt = new Date().toISOString();
+      this.saveCodes();
+      return true;
+    }
+    return false;
+  }
+  
+  public validateAndActivateCode(inputCode: string, deviceId: string): ActivationResult {
+    const code = inputCode.trim().toUpperCase();
+    const codeItem = this.codes.find(c => c.code === code);
+    
+    if (!codeItem) {
+      return { success: false, message: 'Code invalide' };
+    }
+    
+    if (codeItem.status === 'USED') {
+      return { success: false, message: 'Code déjà utilisé' };
+    }
+    
+    if (codeItem.status !== 'SOLD' && codeItem.status !== 'AVAILABLE') {
+      return { success: false, message: 'Code non disponible' };
+    }
+    
+    // Activer le code
+    codeItem.status = 'USED';
+    codeItem.usedAt = new Date().toISOString();
+    codeItem.deviceId = deviceId;
+    this.saveCodes();
+    
+    return { success: true, message: 'Code activé avec succès!' };
+  }
+  
+  public getStats(): CodeStats {
+    const available = this.codes.filter(c => c.status === 'AVAILABLE').length;
+    const sold = this.codes.filter(c => c.status === 'SOLD').length;
+    const used = this.codes.filter(c => c.status === 'USED').length;
+    const revenue = (sold + used) * 5000;
+    
+    return { 
+      available, 
+      sold, 
+      used, 
+      revenue, 
+      total: this.codes.length 
+    };
+  }
+  
+  public getAllCodes(): ActivationCode[] {
+    return [...this.codes];
+  }
+  
+  public exportToCSV(): string {
+    const headers = ['Code', 'Status', 'Created', 'Sold', 'Used', 'Customer', 'Price'];
+    const rows = this.codes.map(c => [
+      c.code,
+      c.status,
+      c.createdAt,
+      c.soldAt || '',
+      c.usedAt || '',
+      c.customerInfo?.contact || '',
+      c.price.toString()
+    ]);
+    
+    const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+    return csv;
+  }
+  
+  private generateSecureCode(): string {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Évite confusion 0,O,1,I
+    const codeLength = 8;
+    
+    // Utiliser crypto.getRandomValues pour vraie randomness
+    const randomValues = new Uint8Array(codeLength);
+    crypto.getRandomValues(randomValues);
+    
+    let code = 'SOLVIX-';
+    for (let i = 0; i < codeLength; i++) {
+      code += alphabet[randomValues[i] % alphabet.length];
+    }
+    
+    return code;
+  }
+}
+
+// Types pour les codes d'activation
+interface CustomerInfo {
+  name?: string;
+  contact?: string;
+  email?: string;
+  notes?: string;
+}
+
+interface ActivationCode {
+  id: string;
+  code: string;
+  status: 'AVAILABLE' | 'SOLD' | 'USED' | 'REVOKED';
+  createdAt: string;
+  soldAt?: string | null;
+  usedAt?: string | null;
+  deviceId?: string | null;
+  customerInfo: CustomerInfo;
+  price: number;
+}
+
+interface ActivationResult {
+  success: boolean;
+  message: string;
+}
+
+interface CodeStats {
+  available: number;
+  sold: number;
+  used: number;
+  revenue: number;
+  total: number;
+}
+
+// Singleton pour la gestion des codes
+export const codeManager = new SecureCodeManager();
+
+// Liste des codes valides (en production, ces codes seraient générés dynamiquement)
+const VALID_PREMIUM_CODES = [
+  'SOLVIX-ABCD1234',
+  'SOLVIX-EFGH5678',
+  'SOLVIX-IJKL9012',
+  'SOLVIX-MNOP3456',
+  'SOLVIX-QRST7890',
+  'SOLVIX-UVWX1234',
+  'SOLVIX-YZAB5678',
+  'SOLVIX-CDEF9012',
+  'SOLVIX-GHIJ3456',
+  'SOLVIX-KLMN7890'
+];
+
+// Validation sécurisée des codes d'activation
+export const validatePremiumCode = (code: string): boolean => {
+  if (!code || typeof code !== 'string') return false;
+  
+  const normalizedCode = code.trim().toUpperCase();
+  
+  // Vérifier si le code est dans la liste des codes valides
+  if (!VALID_PREMIUM_CODES.includes(normalizedCode)) {
+    // Vérifier avec le gestionnaire de codes
+    const allCodes = codeManager.getAllCodes();
+    const codeExists = allCodes.some(c => 
+      c.code === normalizedCode && 
+      (c.status === 'AVAILABLE' || c.status === 'SOLD')
+    );
+    
+    if (!codeExists) {
+      return false;
+    }
+  }
+  
+  // Vérifier si le code n'a pas déjà été utilisé
+  return !isCodeUsed(normalizedCode);
+};
+
+// Vérifier si un code a déjà été utilisé
+const isCodeUsed = (code: string): boolean => {
+  try {
+    const usedCodes = getUsedCodes();
+    return usedCodes.includes(code);
+  } catch {
+    return false;
+  }
+};
+
+// Récupérer la liste des codes utilisés
+const getUsedCodes = (): string[] => {
+  try {
+    const encrypted = localStorage.getItem('solvix_used_codes');
+    if (!encrypted) return [];
+    
+    const decrypted = decryptData(encrypted);
+    if (!decrypted) return [];
+    
+    return JSON.parse(decrypted);
+  } catch {
+    return [];
+  }
+};
+
+// Marquer un code comme utilisé
+export const markCodeAsUsed = (code: string): void => {
+  try {
+    const usedCodes = getUsedCodes();
+    const normalizedCode = code.trim().toUpperCase();
+    
+    if (!usedCodes.includes(normalizedCode)) {
+      usedCodes.push(normalizedCode);
+      const encrypted = encryptData(JSON.stringify(usedCodes));
+      localStorage.setItem('solvix_used_codes', encrypted);
+    }
+  } catch (error) {
+    console.error('Erreur lors du marquage du code:', error);
+  }
+};
+
 // Interface pour les données Premium
 interface PremiumData {
   status: 'active' | 'inactive';
@@ -242,8 +438,7 @@ export const isPremiumActive = (): boolean => {
       return false;
     }
 
-    // Vérifier que le code est toujours valide
-    return VALID_PREMIUM_CODES.includes(premiumData.code);
+    return true;
   } catch (error) {
     console.error('Erreur lors de la vérification Premium:', error);
     return false;
@@ -271,6 +466,9 @@ export const activatePremium = (code: string): boolean => {
     
     // Marquer le code comme utilisé
     markCodeAsUsed(code);
+    
+    // Activer le code dans le gestionnaire de codes
+    codeManager.validateAndActivateCode(code, getDeviceFingerprint());
     
     return true;
   } catch (error) {
@@ -302,7 +500,7 @@ export const getPremiumInfo = () => {
     return {
       isActive: isPremiumActive(),
       activationDate: new Date(premiumData.activationTimestamp),
-      code: premiumData.code.slice(-3), // Afficher seulement les 3 derniers caractères
+      code: premiumData.code.slice(-4), // Afficher seulement les 4 derniers caractères
       version: premiumData.version
     };
   } catch {
