@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, User, Loader2, Check, Building } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, Loader2, Check, AlertCircle, Building, MapPin, Phone } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 interface RegisterFormProps {
@@ -18,24 +18,25 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     password: '',
     confirmPassword: '',
     companyName: '',
+    companyAddress: '',
+    companyPhone: '',
+    companyEmail: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState('');
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
-  const validateForm = () => {
+  const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Le nom est requis';
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Le nom doit contenir au moins 2 caractères';
-    }
-
-    if (!formData.companyName.trim()) {
-      newErrors.companyName = 'Le nom de l\'entreprise est requis';
     }
 
     if (!formData.email) {
@@ -62,11 +63,53 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateStep2 = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.companyName.trim()) {
+      newErrors.companyName = 'Le nom de l\'entreprise est requis';
+    }
+
+    if (!formData.companyAddress.trim()) {
+      newErrors.companyAddress = 'L\'adresse de l\'entreprise est requise';
+    }
+
+    if (!formData.companyPhone.trim()) {
+      newErrors.companyPhone = 'Le téléphone de l\'entreprise est requis';
+    }
+
+    // L'email de l'entreprise est optionnel, mais s'il est fourni, il doit être valide
+    if (formData.companyEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyEmail)) {
+      newErrors.companyEmail = 'Format d\'email invalide';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const nextStep = () => {
+    if (currentStep === 1 && validateStep1()) {
+      setCurrentStep(2);
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep(1);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setGeneralError('');
+    setFormSubmitted(true);
 
-    if (!validateForm()) {
+    if (currentStep === 1) {
+      if (validateStep1()) {
+        setCurrentStep(2);
+      }
+      return;
+    }
+
+    if (!validateStep2()) {
       return;
     }
 
@@ -76,7 +119,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       console.log('📝 REGISTER - Tentative d\'inscription avec les données:', {
         email: formData.email,
         name: formData.name,
-        companyName: formData.companyName
+        companyName: formData.companyName,
+        companyAddress: formData.companyAddress,
+        companyPhone: formData.companyPhone
       });
       
       const { data, error } = await signUp(
@@ -84,7 +129,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         formData.password,
         {
           full_name: formData.name,
-          company_name: formData.companyName
+          company_name: formData.companyName,
+          company_address: formData.companyAddress,
+          company_phone: formData.companyPhone,
+          company_email: formData.companyEmail || formData.email
         }
       );
       
@@ -145,24 +193,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
   const passwordStrength = getPasswordStrength();
 
-  return (
-    <div>
+  const renderStep1 = () => (
+    <>
       <div className="text-center mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Créer un compte</h2>
-        <p className="text-gray-600 text-sm sm:text-base">Rejoignez Solvix dès aujourd'hui</p>
+        <p className="text-gray-600 text-sm sm:text-base">Étape 1/2 : Informations personnelles</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-        {generalError && (
-          <div className={`border rounded-lg p-4 ${
-            generalError.includes('succès') 
-              ? 'bg-green-50 border-green-200 text-green-800' 
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}>
-            <p className="text-sm">{generalError}</p>
-          </div>
-        )}
-
+      <div className="space-y-4 sm:space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Nom complet
@@ -184,30 +222,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
           {errors.name && (
             <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Nom de l'entreprise
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Building className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              value={formData.companyName}
-              onChange={(e) => handleInputChange('companyName', e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 ${
-                errors.companyName ? 'border-red-300 bg-red-50' : 'border-gray-300'
-              }`}
-              placeholder="Mon Entreprise"
-              disabled={isLoading}
-            />
-          </div>
-          {errors.companyName && (
-            <p className="mt-1 text-sm text-red-600">{errors.companyName}</p>
           )}
         </div>
 
@@ -341,30 +355,168 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
           )}
         </div>
+      </div>
 
-        <div className="flex items-start">
-          <input
-            type="checkbox"
-            required
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
-            disabled={isLoading}
-          />
-          <label className="ml-2 text-sm text-gray-600">
-            J'accepte les{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
-              conditions d'utilisation
-            </a>{' '}
-            et la{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
-              politique de confidentialité
-            </a>
+      <div className="mt-6 flex justify-between">
+        <button
+          onClick={onSwitchToLogin}
+          className="text-blue-600 hover:text-blue-700 font-medium"
+          disabled={isLoading}
+        >
+          Retour à la connexion
+        </button>
+        <button
+          type="button"
+          onClick={nextStep}
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+          disabled={isLoading}
+        >
+          Suivant
+        </button>
+      </div>
+    </>
+  );
+
+  const renderStep2 = () => (
+    <>
+      <div className="text-center mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Informations entreprise</h2>
+        <p className="text-gray-600 text-sm sm:text-base">Étape 2/2 : Configurez votre entreprise</p>
+      </div>
+
+      <div className="space-y-4 sm:space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Nom de l'entreprise *
           </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Building className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.companyName}
+              onChange={(e) => handleInputChange('companyName', e.target.value)}
+              className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 ${
+                errors.companyName ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+              placeholder="Nom de votre entreprise"
+              disabled={isLoading}
+            />
+          </div>
+          {errors.companyName && (
+            <p className="mt-1 text-sm text-red-600">{errors.companyName}</p>
+          )}
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Adresse de l'entreprise *
+          </label>
+          <div className="relative">
+            <div className="absolute top-3 left-3 pointer-events-none">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+            <textarea
+              value={formData.companyAddress}
+              onChange={(e) => handleInputChange('companyAddress', e.target.value)}
+              rows={3}
+              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 ${
+                errors.companyAddress ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+              placeholder="Adresse complète de l'entreprise"
+              disabled={isLoading}
+            />
+          </div>
+          {errors.companyAddress && (
+            <p className="mt-1 text-sm text-red-600">{errors.companyAddress}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Téléphone de l'entreprise *
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Phone className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="tel"
+              value={formData.companyPhone}
+              onChange={(e) => handleInputChange('companyPhone', e.target.value)}
+              className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 ${
+                errors.companyPhone ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+              placeholder="+33 1 23 45 67 89"
+              disabled={isLoading}
+            />
+          </div>
+          {errors.companyPhone && (
+            <p className="mt-1 text-sm text-red-600">{errors.companyPhone}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email de l'entreprise (optionnel)
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="email"
+              value={formData.companyEmail}
+              onChange={(e) => handleInputChange('companyEmail', e.target.value)}
+              className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 ${
+                errors.companyEmail ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              }`}
+              placeholder="contact@entreprise.com (si différent)"
+              disabled={isLoading}
+            />
+          </div>
+          {errors.companyEmail && (
+            <p className="mt-1 text-sm text-red-600">{errors.companyEmail}</p>
+          )}
+          <p className="mt-1 text-xs text-gray-500">
+            Si non renseigné, votre email personnel sera utilisé
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-start mt-6">
+        <input
+          type="checkbox"
+          required
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
+          disabled={isLoading}
+        />
+        <label className="ml-2 text-sm text-gray-600">
+          J'accepte les{' '}
+          <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
+            conditions d'utilisation
+          </a>{' '}
+          et la{' '}
+          <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
+            politique de confidentialité
+          </a>
+        </label>
+      </div>
+
+      <div className="mt-6 flex justify-between">
+        <button
+          type="button"
+          onClick={prevStep}
+          className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200"
+          disabled={isLoading}
+        >
+          Retour
+        </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
@@ -375,20 +527,25 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             'Créer mon compte'
           )}
         </button>
-      </form>
-
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
-          Déjà un compte ?{' '}
-          <button
-            onClick={onSwitchToLogin}
-            className="text-blue-600 hover:text-blue-700 font-medium"
-            disabled={isLoading}
-          >
-            Se connecter
-          </button>
-        </p>
       </div>
+    </>
+  );
+
+  return (
+    <div>
+      {generalError && (
+        <div className={`border rounded-lg p-4 mb-6 ${
+          generalError.includes('succès') 
+            ? 'bg-green-50 border-green-200 text-green-800' 
+            : 'bg-red-50 border-red-200 text-red-800'
+        }`}>
+          <p className="text-sm">{generalError}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        {currentStep === 1 ? renderStep1() : renderStep2()}
+      </form>
     </div>
   );
 };

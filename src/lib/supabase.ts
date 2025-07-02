@@ -115,6 +115,36 @@ export const authService = {
     if (data?.user) {
       console.log('✅ INSCRIPTION RÉUSSIE - User ID:', data.user.id);
       console.log('📧 Email utilisateur:', data.user.email);
+      
+      // Si l'inscription est réussie et que nous avons des données d'entreprise,
+      // créer ou mettre à jour le profil immédiatement
+      if (metadata && metadata.company_name) {
+        try {
+          // Attendre un peu pour s'assurer que le trigger de création de profil a eu le temps de s'exécuter
+          setTimeout(async () => {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .upsert({
+                user_id: data.user.id,
+                company_name: metadata.company_name,
+                company_address: metadata.company_address || '',
+                company_phone: metadata.company_phone || '',
+                company_email: metadata.company_email || email,
+                updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'user_id'
+              });
+              
+            if (profileError) {
+              console.error('❌ Erreur lors de la création du profil:', profileError);
+            } else {
+              console.log('✅ Profil entreprise créé avec succès');
+            }
+          }, 1000);
+        } catch (profileError) {
+          console.error('❌ Exception lors de la création du profil:', profileError);
+        }
+      }
     }
     
     return { data, error };
@@ -314,6 +344,8 @@ export const notificationService = {
         user_id: user.id,
         ...updates,
         updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
       })
       .select()
       .single();
