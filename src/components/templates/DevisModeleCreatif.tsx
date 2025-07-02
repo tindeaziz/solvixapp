@@ -89,21 +89,32 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       <div className="header-section" style={{
         height: '60mm',
         marginBottom: '10mm',
-        background: 'linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%)',
-        borderRadius: '12px',
+        background: 'linear-gradient(120deg, #6366F1 0%, #8B5CF6 100%)',
+        borderRadius: '16px',
         padding: '15mm',
         color: 'white',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        boxShadow: '0 10px 25px rgba(99, 102, 241, 0.2)'
       }}>
         {/* Éléments décoratifs */}
         <div style={{
           position: 'absolute',
-          top: '-10px',
-          right: '-10px',
-          width: '60px',
-          height: '60px',
+          top: '-30px',
+          right: '-30px',
+          width: '100px',
+          height: '100px',
           background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '50%'
+        }}></div>
+        
+        <div style={{
+          position: 'absolute',
+          bottom: '-20px',
+          left: '30%',
+          width: '80px',
+          height: '80px',
+          background: 'rgba(255, 255, 255, 0.08)',
           borderRadius: '50%'
         }}></div>
         
@@ -111,7 +122,9 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          height: '100%'
+          height: '100%',
+          position: 'relative',
+          zIndex: 2
         }}>
           {/* Logo et entreprise - Gauche */}
           <div className="entreprise-info" style={{ width: '45%' }}>
@@ -120,19 +133,20 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
                 src={entrepriseData.logo} 
                 style={{ 
                   maxHeight: '40px', 
-                  marginBottom: '8px',
+                  marginBottom: '12px',
                   filter: 'brightness(0) invert(1)'
                 }} 
               />
             )}
             <h2 style={{
-              fontSize: '16px',
+              fontSize: '18px',
               margin: '0 0 8px 0',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              letterSpacing: '0.5px'
             }}>
               {entrepriseData.name}
             </h2>
-            <div style={{ fontSize: '10px', lineHeight: '1.3', opacity: '0.9' }}>
+            <div style={{ fontSize: '10px', lineHeight: '1.5', opacity: '0.9' }}>
               <p style={{ margin: '2px 0' }}>{entrepriseData.address}</p>
               <p style={{ margin: '2px 0' }}>{entrepriseData.phone} | {entrepriseData.email}</p>
             </div>
@@ -141,21 +155,22 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
           {/* Titre DEVIS - Centre */}
           <div className="devis-title" style={{ width: '30%', textAlign: 'center' }}>
             <h1 style={{
-              fontSize: '24px',
+              fontSize: '28px',
               fontWeight: 'bold',
-              margin: '0 0 8px 0',
-              letterSpacing: '2px',
+              margin: '0 0 12px 0',
+              letterSpacing: '3px',
               textShadow: '0 2px 4px rgba(0,0,0,0.2)'
             }}>
               DEVIS
             </h1>
             <div style={{
-              fontSize: '14px',
+              fontSize: '15px',
               fontWeight: 'bold',
-              padding: '6px 12px',
+              padding: '8px 16px',
               backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: '20px',
-              backdropFilter: 'blur(10px)'
+              borderRadius: '30px',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}>
               {devisData.numeroDevis}
             </div>
@@ -163,7 +178,13 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
 
           {/* Dates - Droite */}
           <div className="dates-info" style={{ width: '25%', textAlign: 'right' }}>
-            <div style={{ fontSize: '10px', opacity: '0.9' }}>
+            <div style={{ 
+              fontSize: '11px', 
+              opacity: '0.9',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              padding: '10px',
+              borderRadius: '12px'
+            }}>
               <p style={{ margin: '4px 0' }}><strong>Date:</strong> {formatDate(devisData.dateCreation)}</p>
               <p style={{ margin: '4px 0' }}><strong>Valide jusqu'au:</strong> {formatDate(devisData.dateExpiration)}</p>
             </div>
@@ -173,68 +194,142 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
 
       {/* SECTION CLIENT - 15% de la page */}
       <div className="client-section" style={{
-        background: 'linear-gradient(135deg, #F7FAFC 0%, #E2E8F0 100%)',
-        padding: '12px',
-        borderRadius: '8px',
+        background: 'linear-gradient(to right, #F9FAFB, #F3F4F6)',
+        padding: '16px',
+        borderRadius: '12px',
         marginBottom: '15mm',
-        borderLeft: '4px solid #FF6B35'
+        borderLeft: '4px solid #8B5CF6',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
       }}>
         <h3 style={{
-          fontSize: '12px',
-          color: '#6F42C1',
-          margin: '0 0 8px 0',
-          fontWeight: 'bold'
+          fontSize: '13px',
+          color: '#4F46E5',
+          margin: '0 0 10px 0',
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center'
         }}>
-          CLIENT:
+          <span style={{
+            display: 'inline-block',
+            width: '18px',
+            height: '18px',
+            borderRadius: '50%',
+            backgroundColor: '#8B5CF6',
+            marginRight: '8px',
+            position: 'relative'
+          }}>
+            <span style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: 'white',
+              fontSize: '10px',
+              fontWeight: 'bold'
+            }}>C</span>
+          </span>
+          CLIENT
         </h3>
-        <div style={{ fontSize: '11px' }}>
-          <p style={{ margin: '2px 0', fontWeight: 'bold', color: '#2D3748' }}>{clientData.name}</p>
-          <p style={{ margin: '2px 0', color: '#FF6B35' }}>{clientData.company}</p>
-          <p style={{ margin: '2px 0', color: '#718096' }}>{clientData.address}</p>
-          <p style={{ margin: '2px 0', color: '#718096' }}>{clientData.phone} | {clientData.email}</p>
+        <div style={{ 
+          fontSize: '11px',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '10px'
+        }}>
+          <div>
+            <p style={{ margin: '2px 0', fontWeight: 'bold', color: '#1F2937', fontSize: '13px' }}>{clientData.name}</p>
+            <p style={{ margin: '2px 0', color: '#6366F1', fontWeight: '500' }}>{clientData.company}</p>
+            <p style={{ margin: '8px 0 2px 0', color: '#4B5563' }}>{clientData.address}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ margin: '2px 0', color: '#4B5563' }}>
+              <span style={{ 
+                display: 'inline-block',
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                backgroundColor: '#EEF2FF',
+                textAlign: 'center',
+                marginRight: '5px',
+                fontSize: '9px',
+                color: '#6366F1'
+              }}>✉</span>
+              {clientData.email}
+            </p>
+            <p style={{ margin: '2px 0', color: '#4B5563' }}>
+              <span style={{ 
+                display: 'inline-block',
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                backgroundColor: '#EEF2FF',
+                textAlign: 'center',
+                marginRight: '5px',
+                fontSize: '9px',
+                color: '#6366F1'
+              }}>✆</span>
+              {clientData.phone}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* TABLEAU PRESTATIONS - 45% de la page */}
       <div className="prestations-section" style={{ marginBottom: '15mm' }}>
         <h3 style={{
-          fontSize: '12px',
-          color: '#2D3748',
-          margin: '0 0 8px 0',
-          fontWeight: 'bold'
+          fontSize: '13px',
+          color: '#1F2937',
+          margin: '0 0 12px 0',
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center'
         }}>
-          🎨 Prestations Créatives:
+          <span style={{
+            display: 'inline-block',
+            width: '20px',
+            height: '20px',
+            borderRadius: '6px',
+            backgroundColor: '#EEF2FF',
+            marginRight: '8px',
+            textAlign: 'center',
+            lineHeight: '20px',
+            color: '#6366F1'
+          }}>✓</span>
+          PRESTATIONS
         </h3>
 
         <table style={{
           width: '100%',
-          borderCollapse: 'collapse',
+          borderCollapse: 'separate',
+          borderSpacing: '0',
           fontSize: '10px',
-          borderRadius: '8px',
+          borderRadius: '12px',
           overflow: 'hidden',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
         }}>
           <thead>
-            <tr style={{ background: 'linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%)', color: 'white' }}>
-              <th style={{ padding: '10px 8px', textAlign: 'left', width: '45%', fontWeight: 'bold' }}>DESCRIPTION</th>
-              <th style={{ padding: '10px 8px', textAlign: 'center', width: '10%', fontWeight: 'bold' }}>QTÉ</th>
-              <th style={{ padding: '10px 8px', textAlign: 'right', width: '15%', fontWeight: 'bold' }}>PRIX</th>
-              <th style={{ padding: '10px 8px', textAlign: 'center', width: '10%', fontWeight: 'bold' }}>TVA</th>
-              <th style={{ padding: '10px 8px', textAlign: 'right', width: '20%', fontWeight: 'bold' }}>TOTAL</th>
+            <tr style={{ 
+              background: 'linear-gradient(120deg, #6366F1 0%, #8B5CF6 100%)', 
+              color: 'white' 
+            }}>
+              <th style={{ padding: '12px 10px', textAlign: 'left', width: '45%', fontWeight: 'bold' }}>DESCRIPTION</th>
+              <th style={{ padding: '12px 10px', textAlign: 'center', width: '10%', fontWeight: 'bold' }}>QTÉ</th>
+              <th style={{ padding: '12px 10px', textAlign: 'right', width: '15%', fontWeight: 'bold' }}>PRIX</th>
+              <th style={{ padding: '12px 10px', textAlign: 'center', width: '10%', fontWeight: 'bold' }}>TVA</th>
+              <th style={{ padding: '12px 10px', textAlign: 'right', width: '20%', fontWeight: 'bold' }}>TOTAL</th>
             </tr>
           </thead>
           <tbody>
             {articles.map((article, index) => (
               <tr key={article.id} style={{
-                borderBottom: '1px solid #E2E8F0',
-                backgroundColor: index % 2 === 0 ? '#ffffff' : '#F7FAFC',
-                borderLeft: index % 2 === 0 ? '3px solid #FF6B35' : '3px solid #6F42C1'
+                backgroundColor: index % 2 === 0 ? '#ffffff' : '#F9FAFB',
+                borderLeft: index % 2 === 0 ? '3px solid #6366F1' : '3px solid #8B5CF6'
               }}>
-                <td style={{ padding: '8px', color: '#2D3748' }}>{article.designation}</td>
-                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#FF6B35' }}>{article.quantity}</td>
-                <td style={{ padding: '8px', textAlign: 'right', color: '#2D3748' }}>{formatCurrency(article.unitPrice, devisData.devise)}</td>
-                <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', color: '#6F42C1' }}>{article.vatRate}%</td>
-                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#FF6B35' }}>
+                <td style={{ padding: '10px', color: '#1F2937' }}>{article.designation}</td>
+                <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: '#6366F1' }}>{article.quantity}</td>
+                <td style={{ padding: '10px', textAlign: 'right', color: '#1F2937' }}>{formatCurrency(article.unitPrice, devisData.devise)}</td>
+                <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold', color: '#8B5CF6' }}>{article.vatRate}%</td>
+                <td style={{ padding: '10px', textAlign: 'right', fontWeight: 'bold', color: '#6366F1' }}>
                   {formatCurrency(calculateItemTotal(article), devisData.devise)}
                 </td>
               </tr>
@@ -251,29 +346,28 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       }}>
         <div style={{
           width: '40%',
-          borderRadius: '8px',
-          padding: '12px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          overflow: 'hidden'
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)'
         }}>
-          <div style={{ backgroundColor: '#F7FAFC', padding: '8px 12px', marginBottom: '4px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <span style={{ color: '#718096' }}>Sous-total HT:</span>
-              <span style={{ fontWeight: 'bold', color: '#2D3748' }}>{formatCurrency(calculateSubtotal(), devisData.devise)}</span>
+          <div style={{ backgroundColor: '#F9FAFB', padding: '12px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: '#6B7280' }}>Sous-total HT:</span>
+              <span style={{ fontWeight: 'bold', color: '#1F2937' }}>{formatCurrency(calculateSubtotal(), devisData.devise)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <span style={{ color: '#718096' }}>TVA:</span>
-              <span style={{ fontWeight: 'bold', color: '#2D3748' }}>{formatCurrency(calculateVAT(), devisData.devise)}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ color: '#6B7280' }}>TVA:</span>
+              <span style={{ fontWeight: 'bold', color: '#1F2937' }}>{formatCurrency(calculateVAT(), devisData.devise)}</span>
             </div>
           </div>
           <div style={{
-            background: 'linear-gradient(135deg, #FF6B35 0%, #6F42C1 100%)',
-            padding: '12px',
+            background: 'linear-gradient(120deg, #6366F1 0%, #8B5CF6 100%)',
+            padding: '14px 16px',
             color: 'white'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '12px', fontWeight: 'bold' }}>TOTAL TTC:</span>
-              <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', fontWeight: 'bold' }}>TOTAL TTC:</span>
+              <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
                 {formatCurrency(calculateTotal(), devisData.devise)}
               </span>
             </div>
@@ -284,25 +378,40 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
       {/* NOTES */}
       {devisData.notes && (
         <div style={{
-          background: 'linear-gradient(135deg, #F7FAFC 0%, #E2E8F0 100%)',
-          padding: '12px',
-          borderRadius: '8px',
+          background: 'linear-gradient(to right, #F9FAFB, #F3F4F6)',
+          padding: '16px',
+          borderRadius: '12px',
           marginBottom: '10mm',
-          border: '2px solid #E2E8F0'
+          border: '1px solid #E5E7EB',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
         }}>
           <h4 style={{
-            fontSize: '10px',
+            fontSize: '12px',
             fontWeight: 'bold',
-            color: '#6F42C1',
-            margin: '0 0 6px 0'
+            color: '#4F46E5',
+            margin: '0 0 8px 0',
+            display: 'flex',
+            alignItems: 'center'
           }}>
-            📝 Notes et conditions:
+            <span style={{
+              display: 'inline-block',
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              backgroundColor: '#EEF2FF',
+              marginRight: '8px',
+              textAlign: 'center',
+              lineHeight: '18px',
+              color: '#6366F1'
+            }}>i</span>
+            Notes et conditions
           </h4>
           <p style={{
-            fontSize: '9px',
-            color: '#4A5568',
+            fontSize: '10px',
+            color: '#4B5563',
             margin: '0',
-            whiteSpace: 'pre-line'
+            whiteSpace: 'pre-line',
+            lineHeight: '1.6'
           }}>
             {devisData.notes}
           </p>
@@ -316,10 +425,10 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
           justifyContent: 'space-between',
           alignItems: 'flex-end',
           marginTop: 'auto',
-          borderTop: '1px solid #E2E8F0',
+          borderTop: '1px solid #E5E7EB',
           paddingTop: '12px'
         }}>
-          <div style={{ fontSize: '9px', color: '#718096' }}>
+          <div style={{ fontSize: '9px', color: '#9CA3AF' }}>
             <p style={{ margin: '2px 0' }}>Devis généré le {formatDate(new Date().toISOString().split('T')[0])}</p>
             <p style={{ margin: '2px 0' }}>Solvix - Génération de devis professionnels</p>
           </div>
@@ -328,7 +437,7 @@ const DevisModeleCreatif: React.FC<DevisModeleCreatifProps> = ({
             <p style={{
               fontSize: '10px',
               margin: '0 0 8px 0',
-              color: '#718096',
+              color: '#9CA3AF',
               fontStyle: 'italic'
             }}>
               Fait le {formatDate(new Date().toISOString().split('T')[0])}, {entrepriseData.name}

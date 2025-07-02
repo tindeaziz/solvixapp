@@ -13,6 +13,8 @@ import DevisModeleArtisan from './templates/DevisModeleArtisan';
 import DevisModeleElegant from './templates/DevisModeleElegant';
 import DevisModeleProfessionnel from './templates/DevisModeleProfessionnel';
 import DevisModeleMinimaliste from './templates/DevisModeleMinimaliste';
+import DevisModeleClassique from './templates/DevisModeleClassique';
+import DevisModeleModerne from './templates/DevisModeleModerne';
 
 interface QuoteItem {
   id: string;
@@ -197,8 +199,12 @@ const QuotePreview: React.FC = () => {
         return <DevisModeleProfessionnel {...templateProps} />;
       case 'minimaliste':
         return <DevisModeleMinimaliste {...templateProps} />;
+      case 'classic':
+        return <DevisModeleClassique {...templateProps} />;
+      case 'modern':
+        return <DevisModeleModerne {...templateProps} />;
       default:
-        return <DevisModeleCreatif {...templateProps} />;
+        return <DevisModeleClassique {...templateProps} />;
     }
   };
 
