@@ -137,6 +137,12 @@ const Layout: React.FC<LayoutProps> = ({
     onLogout();
   };
 
+  const handleUpgradeClick = () => {
+    if (onShowPremiumModal) {
+      onShowPremiumModal();
+    }
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -158,12 +164,6 @@ const Layout: React.FC<LayoutProps> = ({
         )}
       </div>
     );
-  };
-
-  const handleUpgradeClick = () => {
-    if (onShowPremiumModal) {
-      onShowPremiumModal();
-    }
   };
 
   return (
