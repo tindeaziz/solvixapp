@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { isPremiumActive } from './security';
 
 interface QuoteItem {
   id: string;
@@ -53,6 +54,10 @@ import DevisModeleMinimaliste from '../components/templates/DevisModeleMinimalis
 export const generateDevisPDF = async (devisData: DevisData) => {
   try {
     console.log('🔄 PDF_GENERATOR - Début de la génération PDF pour devis:', devisData.numeroDevis);
+    
+    // Vérifier si l'utilisateur est premium
+    const isPremium = isPremiumActive();
+    console.log('💎 PDF_GENERATOR - Statut premium:', isPremium ? 'Actif' : 'Inactif');
     
     // Créer un élément temporaire pour le rendu
     const container = document.createElement('div');
@@ -119,9 +124,11 @@ export const generateDevisPDF = async (devisData: DevisData) => {
     
     console.log('🎨 PDF_GENERATOR - Rendu du template terminé, capture en cours...');
     
-    // Configurer html2canvas pour une meilleure qualité
+    // Configurer html2canvas pour une meilleure qualité et optimisation
+    const scale = isPremium ? 1.5 : 1.2; // Réduire la résolution pour optimiser la taille
+    
     const canvas = await html2canvas(container, {
-      scale: 2, // Augmenter la résolution
+      scale: scale, // Résolution adaptée selon le statut premium
       useCORS: true, // Permettre le chargement d'images cross-origin
       allowTaint: true, // Permettre le rendu d'images potentiellement non sécurisées
       backgroundColor: '#FFFFFF', // Fond blanc
@@ -144,7 +151,7 @@ export const generateDevisPDF = async (devisData: DevisData) => {
     });
     
     // Calculer les dimensions pour ajuster l'image au format A4
-    const imgData = canvas.toDataURL('image/png');
+    const imgData = canvas.toDataURL('image/jpeg', isPremium ? 0.9 : 0.7); // Qualité d'image adaptée
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
     
@@ -169,10 +176,29 @@ export const generateDevisPDF = async (devisData: DevisData) => {
     const yOffset = (pdfHeight - imgHeight) / 2;
     
     // Ajouter l'image au PDF
-    pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+    pdf.addImage(imgData, 'JPEG', xOffset, yOffset, imgWidth, imgHeight);
     
-    // Sauvegarder le PDF
-    pdf.save(`devis-${devisData.numeroDevis}.pdf`);
+    // Ajouter un filigrane pour les utilisateurs non premium
+    if (!isPremium) {
+      pdf.setTextColor(200, 200, 200); // Gris clair
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'italic');
+      
+      // Texte en bas de page
+      pdf.text('Généré avec Solvix - Version gratuite', pdfWidth / 2, pdfHeight - 10, { 
+        align: 'center'
+      });
+    }
+    
+    // Optimiser la taille du PDF
+    const pdfOptions = {
+      compress: true,
+      precision: 2,
+      userUnit: 1.0
+    };
+    
+    // Sauvegarder le PDF avec les options d'optimisation
+    pdf.save(`devis-${devisData.numeroDevis}.pdf`, pdfOptions);
     
     // Nettoyer
     root.unmount();
