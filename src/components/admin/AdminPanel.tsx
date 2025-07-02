@@ -40,7 +40,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // Mot de passe admin (en production, cela serait géré côté serveur)
-  const ADMIN_PASSWORD = 'SolvixAdmin2025!';
+  const ADMIN_PASSWORD = 'OnFavor@98$Win';
 
   useEffect(() => {
     if (isAuthenticated) {
