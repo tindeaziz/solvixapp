@@ -55,7 +55,7 @@ interface QuotaData {
 export const getSecureQuotaInfo = () => {
   const currentMonth = new Date().getMonth() + new Date().getFullYear() * 12;
   const deviceId = getDeviceFingerprint();
-  const FREE_QUOTA_LIMIT = 3;
+  const FREE_QUOTA_LIMIT = 1; // Modifié: un seul devis gratuit
 
   try {
     const encryptedData = localStorage.getItem('solvix_quota_data');

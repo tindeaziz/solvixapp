@@ -75,7 +75,7 @@ const QuotaDisplay: React.FC<QuotaDisplayProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-red-700 mb-3 font-inter">
-                  Vous avez atteint votre limite mensuelle de {quotaInfo.total} devis gratuits.
+                  Vous avez atteint votre limite mensuelle de {quotaInfo.total} devis gratuit.
                 </p>
                 <button
                   onClick={onUpgradeClick}
@@ -88,7 +88,7 @@ const QuotaDisplay: React.FC<QuotaDisplayProps> = ({
             ) : (
               <div className="text-center">
                 <p className="text-xs text-gray-600 mb-2 font-inter">
-                  {quotaInfo.remaining} devis restants ce mois
+                  {quotaInfo.remaining} devis restant ce mois
                 </p>
                 <button
                   onClick={onUpgradeClick}

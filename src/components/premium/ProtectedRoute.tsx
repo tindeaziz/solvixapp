@@ -84,7 +84,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               Quota Épuisé
             </h2>
             <p className="text-gray-600 font-inter">
-              Vous avez utilisé vos {quotaInfo.total} devis gratuits ce mois.
+              Vous avez utilisé votre {quotaInfo.total} devis gratuit ce mois.
             </p>
           </div>
 
