@@ -3,19 +3,31 @@ import { Menu, X, LayoutDashboard, FileText, Settings as SettingsIcon, LogOut, U
 import type { ActiveSection } from '../App';
 import { useAuth } from '../hooks/useAuth';
 import { profileService } from '../lib/supabase';
+import { isPremiumActive, getSecureQuotaInfo } from '../utils/security';
+import PremiumBadge from './premium/PremiumBadge';
+import QuotaDisplay from './premium/QuotaDisplay';
 
 interface LayoutProps {
   children: React.ReactNode;
   activeSection: ActiveSection;
   setActiveSection: (section: ActiveSection) => void;
   onLogout: () => void;
+  onShowPremiumModal?: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSection, onLogout }) => {
+const Layout: React.FC<LayoutProps> = ({ 
+  children, 
+  activeSection, 
+  setActiveSection, 
+  onLogout,
+  onShowPremiumModal 
+}) => {
   const { user } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isPremium, setIsPremium] = useState(isPremiumActive());
+  const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
   
   // États pour les informations utilisateur réelles
   const [userInfo, setUserInfo] = useState({
@@ -32,6 +44,24 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
     { id: 'quote-management' as ActiveSection, name: 'Mes devis', icon: List },
     { id: 'settings' as ActiveSection, name: 'Paramètres', icon: SettingsIcon },
   ];
+
+  // Vérification périodique du statut Premium et quota
+  useEffect(() => {
+    const checkPremiumStatus = () => {
+      setIsPremium(isPremiumActive());
+      if (!isPremiumActive()) {
+        setQuotaInfo(getSecureQuotaInfo());
+      }
+    };
+
+    // Vérification initiale
+    checkPremiumStatus();
+
+    // Vérification périodique toutes les 30 secondes
+    const interval = setInterval(checkPremiumStatus, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Charger les informations utilisateur réelles
   useEffect(() => {
@@ -130,6 +160,12 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
     );
   };
 
+  const handleUpgradeClick = () => {
+    if (onShowPremiumModal) {
+      onShowPremiumModal();
+    }
+  };
+
   return (
     <div className="app-layout">
       {/* Logout Confirmation Modal */}
@@ -181,14 +217,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
       <header className="top-navbar fixed top-0 left-0 right-0 z-50 bg-solvix-blue text-white shadow-solvix-lg">
         <div className="navbar-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo et Brand - Logo seul sur desktop, avec texte sur mobile */}
+            {/* Logo et Brand */}
             <div className="navbar-brand flex items-center space-x-3">
               <img 
                 src="/Logo-Solvix-blanc.png" 
                 alt="Solvix Logo" 
                 className="h-8 w-auto"
               />
-              {/* Texte visible uniquement sur mobile */}
               <span className="brand-name text-xl font-bold text-white font-poppins block sm:hidden">
                 Solvix
               </span>
@@ -222,6 +257,18 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
 
             {/* Actions Desktop */}
             <div className="navbar-actions hidden md:flex items-center space-x-4">
+              {/* Premium Badge et Quota */}
+              <div className="flex items-center space-x-3">
+                {isPremium ? (
+                  <PremiumBadge variant="compact" />
+                ) : (
+                  <QuotaDisplay 
+                    onUpgradeClick={handleUpgradeClick}
+                    variant="header"
+                  />
+                )}
+              </div>
+
               {/* User Menu */}
               <div className="relative">
                 <button
@@ -262,6 +309,19 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
                             </p>
                           )}
                         </div>
+                      </div>
+                      
+                      {/* Premium Status dans le menu */}
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        {isPremium ? (
+                          <PremiumBadge variant="detailed" className="w-full" />
+                        ) : (
+                          <QuotaDisplay 
+                            onUpgradeClick={handleUpgradeClick}
+                            variant="card"
+                            className="w-full"
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -334,6 +394,18 @@ const Layout: React.FC<LayoutProps> = ({ children, activeSection, setActiveSecti
                 
                 {/* Mobile User Section */}
                 <div className="border-t border-solvix-blue-dark pt-3 mt-3">
+                  {/* Premium/Quota Status Mobile */}
+                  <div className="px-3 py-2 mb-3">
+                    {isPremium ? (
+                      <PremiumBadge variant="default" />
+                    ) : (
+                      <QuotaDisplay 
+                        onUpgradeClick={handleUpgradeClick}
+                        variant="inline"
+                      />
+                    )}
+                  </div>
+
                   <div className="flex items-center space-x-3 px-3 py-2">
                     {loadingUserInfo ? (
                       <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full animate-pulse"></div>

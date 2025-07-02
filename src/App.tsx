@@ -9,20 +9,55 @@ import Settings from './components/Settings';
 import AuthWrapper from './components/auth/AuthWrapper';
 import QuotePreview from './components/QuotePreview';
 import ResetPasswordPage from './components/auth/ResetPasswordPage';
+import PremiumActivation from './components/premium/PremiumActivation';
+import ProtectedRoute from './components/premium/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
+import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage } from './utils/security';
 
 export type ActiveSection = 'dashboard' | 'create-quote' | 'quote-management' | 'settings';
 
 function App() {
   const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
   const { user, loading, signOut } = useAuth();
+  
+  // États Premium et Quota
+  const [isPremium, setIsPremium] = useState(isPremiumActive());
+  const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  // Vérification périodique du statut Premium
+  useEffect(() => {
+    const checkPremiumStatus = () => {
+      const premiumStatus = isPremiumActive();
+      setIsPremium(premiumStatus);
+      
+      if (!premiumStatus) {
+        setQuotaInfo(getSecureQuotaInfo());
+      }
+    };
+
+    // Vérification initiale
+    checkPremiumStatus();
+
+    // Vérification périodique toutes les 60 secondes
+    const interval = setInterval(checkPremiumStatus, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
         return <Dashboard onNavigate={setActiveSection} />;
       case 'create-quote':
-        return <CreateQuote />;
+        return (
+          <ProtectedRoute 
+            requireQuota={true}
+            onUpgradeClick={() => setShowPremiumModal(true)}
+          >
+            <CreateQuote onQuoteCreated={handleQuoteCreated} />
+          </ProtectedRoute>
+        );
       case 'quote-management':
         return <QuoteManagement />;
       case 'settings':
@@ -35,9 +70,24 @@ function App() {
   const handleLogout = async () => {
     try {
       await signOut();
-      setActiveSection('dashboard'); // Reset to dashboard on logout
+      setActiveSection('dashboard');
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
+  const handlePremiumActivation = () => {
+    setIsPremium(true);
+    setShowPremiumModal(false);
+    setQuotaInfo({ used: 0, remaining: Infinity, total: Infinity, canCreateQuote: true });
+  };
+
+  const handleQuoteCreated = () => {
+    if (!isPremium) {
+      const success = incrementQuotaUsage();
+      if (success) {
+        setQuotaInfo(getSecureQuotaInfo());
+      }
     }
   };
 
@@ -54,34 +104,46 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* Route pour la réinitialisation du mot de passe - accessible sans authentification */}
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
-      
-      {/* Route pour la prévisualisation d'impression */}
-      <Route path="/devis/preview/:id" element={<QuotePreview />} />
-      <Route path="/devis/preview/new" element={<QuotePreview />} />
-      <Route path="/devis/preview/edit" element={<QuotePreview />} />
-      
-      {/* Route pour la gestion des devis */}
-      <Route path="/devis" element={user ? <QuoteManagement /> : <AuthWrapper onAuthSuccess={() => {}} />} />
-      <Route path="/devis/edit/:id" element={user ? <EditQuote /> : <AuthWrapper onAuthSuccess={() => {}} />} />
-      
-      {/* Routes principales de l'application */}
-      <Route path="/*" element={
-        user ? (
-          <Layout 
-            activeSection={activeSection} 
-            setActiveSection={setActiveSection}
-            onLogout={handleLogout}
-          >
-            {renderContent()}
-          </Layout>
-        ) : (
-          <AuthWrapper onAuthSuccess={() => {}} />
-        )
-      } />
-    </Routes>
+    <>
+      <Routes>
+        {/* Route pour la réinitialisation du mot de passe - accessible sans authentification */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        
+        {/* Route pour la prévisualisation d'impression */}
+        <Route path="/devis/preview/:id" element={<QuotePreview />} />
+        <Route path="/devis/preview/new" element={<QuotePreview />} />
+        <Route path="/devis/preview/edit" element={<QuotePreview />} />
+        
+        {/* Route pour la gestion des devis */}
+        <Route path="/devis" element={user ? <QuoteManagement /> : <AuthWrapper onAuthSuccess={() => {}} />} />
+        <Route path="/devis/edit/:id" element={user ? <EditQuote /> : <AuthWrapper onAuthSuccess={() => {}} />} />
+        
+        {/* Routes principales de l'application */}
+        <Route path="/*" element={
+          user ? (
+            <Layout 
+              activeSection={activeSection} 
+              setActiveSection={setActiveSection}
+              onLogout={handleLogout}
+              onShowPremiumModal={() => setShowPremiumModal(true)}
+            >
+              {renderContent()}
+            </Layout>
+          ) : (
+            <AuthWrapper onAuthSuccess={() => {}} />
+          )
+        } />
+      </Routes>
+
+      {/* Modal d'activation Premium */}
+      {showPremiumModal && (
+        <PremiumActivation
+          isOpen={showPremiumModal}
+          onClose={() => setShowPremiumModal(false)}
+          onSuccess={handlePremiumActivation}
+        />
+      )}
+    </>
   );
 }
 

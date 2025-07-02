@@ -23,7 +23,11 @@ import { useAuth } from '../hooks/useAuth';
 import { devisService, clientService, articleService, profileService } from '../lib/supabase';
 import { CURRENCIES, formatCurrency, getCurrencyByCode } from '../types/currency';
 import { generateDevisPDF } from '../utils/pdfGenerator';
+import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage } from '../utils/security';
+import { sanitizeFormData } from '../utils/sanitizer';
+import { useSecureForm } from '../hooks/useSecureForm';
 import ShareModal from './ShareModal';
+import QuotaDisplay from './premium/QuotaDisplay';
 
 interface QuoteItem {
   id: string;
@@ -51,7 +55,11 @@ interface CompanyInfo {
   signature?: string;
 }
 
-const CreateQuote: React.FC = () => {
+interface CreateQuoteProps {
+  onQuoteCreated?: () => void;
+}
+
+const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -61,6 +69,10 @@ const CreateQuote: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  
+  // États Premium et Quota
+  const [isPremium, setIsPremium] = useState(isPremiumActive());
+  const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
   
   // États pour le devis
   const [quoteData, setQuoteData] = useState({
@@ -99,6 +111,20 @@ const CreateQuote: React.FC = () => {
 
   const [showPreview, setShowPreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+
+  // Vérification périodique du quota
+  useEffect(() => {
+    const checkQuotaStatus = () => {
+      setIsPremium(isPremiumActive());
+      if (!isPremiumActive()) {
+        setQuotaInfo(getSecureQuotaInfo());
+      }
+    };
+
+    checkQuotaStatus();
+    const interval = setInterval(checkQuotaStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Charger les données entreprise et générer le numéro de devis
   useEffect(() => {
@@ -213,10 +239,16 @@ const CreateQuote: React.FC = () => {
     }));
   };
 
-  // Sauvegarde
+  // Sauvegarde sécurisée
   const handleSave = async () => {
     if (!user) {
       setError('Utilisateur non connecté');
+      return;
+    }
+
+    // Vérifier le quota avant de sauvegarder
+    if (!isPremium && !quotaInfo.canCreateQuote) {
+      setError('Quota mensuel épuisé. Passez au Premium pour un accès illimité.');
       return;
     }
 
@@ -227,15 +259,18 @@ const CreateQuote: React.FC = () => {
     try {
       console.log('💾 CREATE_QUOTE - Sauvegarde du devis:', quoteData.number);
 
+      // Nettoyer les données avant sauvegarde
+      const sanitizedData = sanitizeFormData(quoteData);
+
       // 1. Créer le client si nécessaire
       let clientId = null;
-      if (quoteData.client.name.trim()) {
+      if (sanitizedData.client.name.trim()) {
         const { data: newClient, error: clientError } = await clientService.createClient({
-          name: quoteData.client.name,
-          company: quoteData.client.company,
-          email: quoteData.client.email,
-          phone: quoteData.client.phone,
-          address: quoteData.client.address
+          name: sanitizedData.client.name,
+          company: sanitizedData.client.company,
+          email: sanitizedData.client.email,
+          phone: sanitizedData.client.phone,
+          address: sanitizedData.client.address
         });
 
         if (clientError) {
@@ -248,13 +283,13 @@ const CreateQuote: React.FC = () => {
 
       // 2. Créer le devis
       const { data: newDevis, error: devisError } = await devisService.createDevis({
-        quote_number: quoteData.number,
-        date_creation: quoteData.date,
-        date_expiration: quoteData.validUntil,
-        currency: quoteData.currency,
-        template: quoteData.template,
-        notes: quoteData.notes,
-        status: quoteData.status,
+        quote_number: sanitizedData.number,
+        date_creation: sanitizedData.date,
+        date_expiration: sanitizedData.validUntil,
+        currency: sanitizedData.currency,
+        template: sanitizedData.template,
+        notes: sanitizedData.notes,
+        status: sanitizedData.status,
         subtotal_ht: calculateSubtotal(),
         total_vat: calculateVAT(),
         total_ttc: calculateTotal(),
@@ -267,7 +302,7 @@ const CreateQuote: React.FC = () => {
       }
 
       // 3. Créer les articles
-      const validItems = quoteData.items.filter(item => item.designation.trim() !== '');
+      const validItems = sanitizedData.items.filter(item => item.designation.trim() !== '');
       if (validItems.length > 0 && newDevis) {
         const articlesData = validItems.map((item, index) => ({
           devis_id: newDevis.id,
@@ -283,6 +318,17 @@ const CreateQuote: React.FC = () => {
         if (articlesError) {
           console.error('❌ CREATE_QUOTE - Erreur création articles:', articlesError);
           throw new Error('Erreur lors de la création des articles');
+        }
+      }
+
+      // 4. Incrémenter le quota si pas Premium
+      if (!isPremium) {
+        const quotaSuccess = incrementQuotaUsage();
+        if (quotaSuccess) {
+          setQuotaInfo(getSecureQuotaInfo());
+          if (onQuoteCreated) {
+            onQuoteCreated();
+          }
         }
       }
 
@@ -399,6 +445,15 @@ const CreateQuote: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
+            {/* Affichage du quota */}
+            {!isPremium && (
+              <QuotaDisplay 
+                onUpgradeClick={() => {}} 
+                variant="inline"
+                className="bg-gray-50 px-3 py-2 rounded-lg"
+              />
+            )}
+
             {/* Messages de statut */}
             {saveSuccess && (
               <div className="bg-green-50 border border-green-200 rounded-lg px-3 sm:px-4 py-2 flex items-center">
@@ -429,7 +484,7 @@ const CreateQuote: React.FC = () => {
             </button>
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || (!isPremium && !quotaInfo.canCreateQuote)}
               className="inline-flex items-center px-3 sm:px-4 py-2 bg-solvix-orange text-white rounded-lg text-sm font-medium hover:bg-solvix-orange-dark transition-colors duration-200 disabled:opacity-50 font-inter shadow-solvix"
             >
               {saving ? (
@@ -765,30 +820,48 @@ const CreateQuote: React.FC = () => {
                 { id: 'modern', name: 'Moderne', description: 'Style contemporain et épuré' },
                 { id: 'minimal', name: 'Minimaliste', description: 'Design simple et élégant' },
                 { id: 'corporate', name: 'Corporate', description: 'Style très professionnel' },
-                { id: 'creatif', name: 'Créatif', description: 'Design moderne avec accents colorés' },
-                { id: 'artisan', name: 'Artisan', description: 'Style chaleureux avec bordures décoratives' },
-                { id: 'elegant', name: 'Élégant', description: 'Design raffiné avec typographie serif' },
-                { id: 'professionnel', name: 'Professionnel', description: 'Style business avec bandes colorées' },
-                { id: 'minimaliste', name: 'Ultra Minimaliste', description: 'Design épuré et moderne' }
+                { id: 'creatif', name: 'Créatif', description: 'Design moderne avec accents colorés', premium: true },
+                { id: 'artisan', name: 'Artisan', description: 'Style chaleureux avec bordures décoratives', premium: true },
+                { id: 'elegant', name: 'Élégant', description: 'Design raffiné avec typographie serif', premium: true },
+                { id: 'professionnel', name: 'Professionnel', description: 'Style business avec bandes colorées', premium: true },
+                { id: 'minimaliste', name: 'Ultra Minimaliste', description: 'Design épuré et moderne', premium: true }
               ].map((template) => (
                 <div
                   key={template.id}
-                  className={`border-2 rounded-lg p-3 cursor-pointer transition-all duration-200 ${
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-all duration-200 relative ${
                     quoteData.template === template.id
                       ? 'border-solvix-blue bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => setQuoteData(prev => ({ ...prev, template: template.id as any }))}
+                  } ${template.premium && !isPremium ? 'opacity-60' : ''}`}
+                  onClick={() => {
+                    if (!template.premium || isPremium) {
+                      setQuoteData(prev => ({ ...prev, template: template.id as any }));
+                    }
+                  }}
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-10 sm:w-16 sm:h-12 bg-gray-100 rounded border flex items-center justify-center flex-shrink-0">
                       <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-solvix-dark font-inter text-sm truncate">{template.name}</h4>
+                      <h4 className="font-medium text-solvix-dark font-inter text-sm truncate">
+                        {template.name}
+                        {template.premium && (
+                          <span className="ml-1 text-yellow-500">★</span>
+                        )}
+                      </h4>
                       <p className="text-xs text-gray-500 font-inter truncate">{template.description}</p>
                     </div>
                   </div>
+                  
+                  {/* Badge Premium */}
+                  {template.premium && !isPremium && (
+                    <div className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4">
+                      <span className="bg-yellow-400 text-xs text-white px-2 py-1 rounded-full font-bold shadow-md">
+                        PRO
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -814,7 +887,7 @@ const CreateQuote: React.FC = () => {
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || (!isPremium && !quotaInfo.canCreateQuote)}
                 className="flex items-center justify-center px-4 py-3 bg-solvix-blue text-white rounded-lg text-sm font-medium hover:bg-solvix-blue-dark transition-colors duration-200 disabled:opacity-50 font-inter shadow-solvix"
               >
                 {saving ? (
