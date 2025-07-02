@@ -25,6 +25,7 @@ import { devisService, clientService, articleService, profileService, type Devis
 import { CURRENCIES, formatCurrency, getCurrencyByCode } from '../types/currency';
 import { generateDevisPDF } from '../utils/pdfGenerator';
 import { notifyQuoteStatusChanged } from '../utils/notifications';
+import { isPremiumActive } from '../utils/security';
 import ShareModal from './ShareModal';
 
 interface QuoteItem {
@@ -95,8 +96,9 @@ const EditQuote: React.FC = () => {
   });
 
   const [originalDevis, setOriginalDevis] = useState<Devis | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [defaultVatRate, setDefaultVatRate] = useState<number>(20);
+  const [vatEnabled, setVatEnabled] = useState<boolean>(true);
 
   // Charger le devis à éditer
   useEffect(() => {
@@ -111,6 +113,22 @@ const EditQuote: React.FC = () => {
       console.log('📄 EDIT_QUOTE - Chargement du devis ID:', id, 'pour User ID:', user.id);
 
       try {
+        // Charger les paramètres de TVA depuis le profil
+        const { data: profile } = await profileService.getProfile();
+        if (profile) {
+          setDefaultVatRate(profile.vat_rate || 20);
+          setVatEnabled(profile.vat_enabled !== undefined ? profile.vat_enabled : true);
+          
+          setEntrepriseData({
+            name: profile.company_name || 'Mon Entreprise',
+            address: profile.company_address || 'Adresse à renseigner',
+            phone: profile.company_phone || 'Téléphone à renseigner',
+            email: profile.company_email || 'Email à renseigner',
+            logo: profile.company_logo || undefined,
+            signature: profile.company_signature || undefined
+          });
+        }
+
         // Charger le devis
         const { data: devis, error: devisError } = await devisService.getDevisById(id);
         
@@ -155,7 +173,7 @@ const EditQuote: React.FC = () => {
             designation: '',
             quantity: 1,
             unitPrice: 0,
-            vatRate: 20,
+            vatRate: vatEnabled ? defaultVatRate : 0,
             total: 0
           }],
           currency: devis.currency,
@@ -163,19 +181,6 @@ const EditQuote: React.FC = () => {
           template: devis.template as any,
           status: devis.status
         });
-
-        // Charger les données entreprise
-        const { data: profile } = await profileService.getProfile();
-        if (profile) {
-          setEntrepriseData({
-            name: profile.company_name || 'Mon Entreprise',
-            address: profile.company_address || 'Adresse à renseigner',
-            phone: profile.company_phone || 'Téléphone à renseigner',
-            email: profile.company_email || 'Email à renseigner',
-            logo: profile.company_logo || undefined,
-            signature: profile.company_signature || undefined
-          });
-        }
 
       } catch (error) {
         console.error('❌ EDIT_QUOTE - Exception chargement:', error);
@@ -210,12 +215,15 @@ const EditQuote: React.FC = () => {
 
   // Gestion des articles
   const addItem = () => {
+    // Récupérer le taux de TVA du premier article pour l'appliquer aux nouveaux
+    const vatRate = quoteData.items.length > 0 ? quoteData.items[0].vatRate : (vatEnabled ? defaultVatRate : 0);
+    
     const newItem: QuoteItem = {
       id: `new-${Date.now()}`,
       designation: '',
       quantity: 1,
       unitPrice: 0,
-      vatRate: 20,
+      vatRate: vatRate, // Utiliser le même taux de TVA que les autres articles
       total: 0
     };
     setQuoteData(prev => ({
@@ -546,7 +554,7 @@ const EditQuote: React.FC = () => {
             )}
             
             <button
-              onClick={() => setShowPreview(true)}
+              onClick={handlePreview}
               className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
             >
               <Eye className="h-4 w-4 mr-2" />
@@ -955,7 +963,7 @@ const EditQuote: React.FC = () => {
             <h3 className="text-lg font-semibold text-solvix-dark mb-4 font-poppins">Actions</h3>
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => setShowPreview(true)}
+                onClick={handlePreview}
                 className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
               >
                 <Eye className="h-4 w-4 mr-2" />

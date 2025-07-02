@@ -110,7 +110,6 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
     signature: undefined
   });
 
-  const [showPreview, setShowPreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [notificationSent, setNotificationSent] = useState(false);
 
@@ -157,6 +156,17 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
           if (profile.default_currency) {
             setQuoteData(prev => ({ ...prev, currency: profile.default_currency }));
           }
+          
+          // Appliquer le taux de TVA par défaut à tous les articles
+          if (profile.vat_rate !== undefined) {
+            setQuoteData(prev => ({
+              ...prev,
+              items: prev.items.map(item => ({
+                ...item,
+                vatRate: profile.vat_enabled ? profile.vat_rate : 0
+              }))
+            }));
+          }
         }
 
         // Générer le numéro de devis
@@ -197,12 +207,15 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
 
   // Gestion des articles
   const addItem = () => {
+    // Récupérer le taux de TVA du premier article pour l'appliquer aux nouveaux
+    const vatRate = quoteData.items.length > 0 ? quoteData.items[0].vatRate : 20;
+    
     const newItem: QuoteItem = {
       id: `new-${Date.now()}`,
       designation: '',
       quantity: 1,
       unitPrice: 0,
-      vatRate: 20,
+      vatRate: vatRate, // Utiliser le même taux de TVA que les autres articles
       total: 0
     };
     setQuoteData(prev => ({
@@ -495,7 +508,7 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
             )}
             
             <button
-              onClick={() => setShowPreview(true)}
+              onClick={handlePreview}
               className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
             >
               <Eye className="h-4 w-4 mr-2" />
@@ -898,7 +911,7 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
             <h3 className="text-lg font-semibold text-solvix-dark mb-4 font-poppins">Actions</h3>
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => setShowPreview(true)}
+                onClick={handlePreview}
                 className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-solvix-light transition-colors duration-200 font-inter"
               >
                 <Eye className="h-4 w-4 mr-2" />
