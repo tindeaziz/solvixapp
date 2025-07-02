@@ -185,7 +185,9 @@ export class SecureCodeManager {
       customerInfo: customerInfo || {},
       price: 5000,
       usedAt: null,
-      deviceId: null
+      deviceId: null,
+      revokedAt: null,
+      revokedReason: null
     };
     
     this.codes.push(codeData);
@@ -228,6 +230,13 @@ export class SecureCodeManager {
       return { success: false, message: 'Code déjà utilisé' };
     }
     
+    if (codeItem.status === 'REVOKED') {
+      return { 
+        success: false, 
+        message: `Code révoqué${codeItem.revokedReason ? ': ' + codeItem.revokedReason : ''}` 
+      };
+    }
+    
     if (codeItem.status !== 'SOLD' && codeItem.status !== 'AVAILABLE') {
       return { success: false, message: 'Code non disponible' };
     }
@@ -241,16 +250,31 @@ export class SecureCodeManager {
     return { success: true, message: 'Code activé avec succès!' };
   }
   
+  public revokeCode(code: string, reason: string = ''): boolean {
+    const codeItem = this.codes.find(c => c.code === code);
+    if (!codeItem) return false;
+    
+    // On peut révoquer un code disponible, vendu ou même utilisé
+    codeItem.status = 'REVOKED';
+    codeItem.revokedAt = new Date().toISOString();
+    codeItem.revokedReason = reason || 'Révoqué par l\'administrateur';
+    
+    this.saveCodes();
+    return true;
+  }
+  
   public getStats(): CodeStats {
     const available = this.codes.filter(c => c.status === 'AVAILABLE').length;
     const sold = this.codes.filter(c => c.status === 'SOLD').length;
     const used = this.codes.filter(c => c.status === 'USED').length;
+    const revoked = this.codes.filter(c => c.status === 'REVOKED').length;
     const revenue = (sold + used) * 5000;
     
     return { 
       available, 
       sold, 
-      used, 
+      used,
+      revoked,
       revenue, 
       total: this.codes.length 
     };
@@ -261,14 +285,17 @@ export class SecureCodeManager {
   }
   
   public exportToCSV(): string {
-    const headers = ['Code', 'Status', 'Created', 'Sold', 'Used', 'Customer', 'Price'];
+    const headers = ['Code', 'Status', 'Created', 'Sold', 'Used', 'Revoked', 'Customer', 'Device', 'Reason', 'Price'];
     const rows = this.codes.map(c => [
       c.code,
       c.status,
       c.createdAt,
       c.soldAt || '',
       c.usedAt || '',
+      c.revokedAt || '',
       c.customerInfo?.contact || '',
+      c.deviceId?.substring(0, 8) || '',
+      c.revokedReason || '',
       c.price.toString()
     ]);
     
@@ -309,6 +336,8 @@ interface ActivationCode {
   soldAt?: string | null;
   usedAt?: string | null;
   deviceId?: string | null;
+  revokedAt?: string | null;
+  revokedReason?: string | null;
   customerInfo: CustomerInfo;
   price: number;
 }
@@ -322,6 +351,7 @@ interface CodeStats {
   available: number;
   sold: number;
   used: number;
+  revoked: number;
   revenue: number;
   total: number;
 }
@@ -363,13 +393,21 @@ export const validatePremiumCode = (code: string): boolean => {
     }
   }
   
-  // Vérifier si le code n'a pas déjà été utilisé
-  return !isCodeUsed(normalizedCode);
+  // Vérifier si le code n'a pas déjà été utilisé ou révoqué
+  return !isCodeUsedOrRevoked(normalizedCode);
 };
 
-// Vérifier si un code a déjà été utilisé
-const isCodeUsed = (code: string): boolean => {
+// Vérifier si un code a déjà été utilisé ou révoqué
+const isCodeUsedOrRevoked = (code: string): boolean => {
   try {
+    // Vérifier d'abord dans le gestionnaire de codes
+    const allCodes = codeManager.getAllCodes();
+    const codeItem = allCodes.find(c => c.code === code);
+    if (codeItem && (codeItem.status === 'USED' || codeItem.status === 'REVOKED')) {
+      return true;
+    }
+    
+    // Vérifier ensuite dans la liste locale des codes utilisés
     const usedCodes = getUsedCodes();
     return usedCodes.includes(code);
   } catch {
@@ -435,6 +473,15 @@ export const isPremiumActive = (): boolean => {
     
     // Vérifier l'expiration si définie
     if (premiumData.expirationDate && Date.now() > premiumData.expirationDate) {
+      return false;
+    }
+    
+    // Vérifier si le code a été révoqué
+    const allCodes = codeManager.getAllCodes();
+    const codeItem = allCodes.find(c => c.code === premiumData.code);
+    if (codeItem && codeItem.status === 'REVOKED') {
+      // Désactiver automatiquement le premium si le code a été révoqué
+      deactivatePremium();
       return false;
     }
 

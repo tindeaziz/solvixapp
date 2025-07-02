@@ -102,7 +102,7 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
           setMessage('Trop de tentatives incorrectes. Accès bloqué pendant 24h.');
           setMessageType('error');
         } else {
-          setMessage(`Code invalide ou déjà utilisé. ${5 - newAttempts} tentatives restantes.`);
+          setMessage(`Code invalide, déjà utilisé ou révoqué. ${5 - newAttempts} tentatives restantes.`);
           setMessageType('error');
         }
         setLoading(false);
@@ -179,7 +179,8 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
                 'Tous les modèles professionnels',
                 'Export PDF sans filigrane',
                 'Support WhatsApp prioritaire',
-                'Sauvegarde cloud sécurisée'
+                'Sauvegarde cloud sécurisée',
+                'Un code = un seul appareil'
               ].map((feature, index) => (
                 <li key={index} className="flex items-center text-sm text-solvix-dark font-inter">
                   <CheckCircle className="h-4 w-4 text-solvix-success mr-2 flex-shrink-0" />
@@ -283,7 +284,10 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
                   <strong>ID Dispositif:</strong> {getDeviceFingerprint().substring(0, 16)}...
                 </p>
                 <p className="text-xs text-gray-500 font-inter">
-                  Cet identifiant unique sécurise votre licence Premium sur cet appareil.
+                  Cet identifiant unique sécurise votre licence Premium sur cet appareil uniquement.
+                </p>
+                <p className="text-xs text-red-500 font-inter mt-2">
+                  <strong>Important:</strong> Un code d'activation ne peut être utilisé que sur un seul appareil.
                 </p>
               </div>
             )}

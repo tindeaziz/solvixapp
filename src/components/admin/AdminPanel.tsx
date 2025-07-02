@@ -14,7 +14,10 @@ import {
   DollarSign,
   FileText,
   Clipboard,
-  Calendar
+  Calendar,
+  Ban,
+  ShieldOff,
+  Smartphone
 } from 'lucide-react';
 import { codeManager } from '../../utils/security';
 
@@ -38,6 +41,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'code'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [showRevokeModal, setShowRevokeModal] = useState(false);
+  const [revokeReason, setRevokeReason] = useState('');
 
   // Mot de passe admin (en production, cela serait géré côté serveur)
   const ADMIN_PASSWORD = 'OnFavor@98$Win';
@@ -94,6 +99,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     setSelectedCode(code);
     setCustomerContact('');
     setShowCustomerForm(true);
+    setShowRevokeModal(false);
+  };
+
+  const handleRevokeCode = (code: string) => {
+    setSelectedCode(code);
+    setRevokeReason('');
+    setShowRevokeModal(true);
+    setShowCustomerForm(false);
+  };
+
+  const confirmRevokeCode = () => {
+    if (!selectedCode) return;
+    
+    const success = codeManager.revokeCode(selectedCode, revokeReason);
+    if (success) {
+      refreshData();
+      setMessage(`Code ${selectedCode} révoqué avec succès`);
+      setMessageType('success');
+      setShowRevokeModal(false);
+    } else {
+      setMessage('Erreur: Impossible de révoquer ce code');
+      setMessageType('error');
+    }
   };
 
   const confirmMarkAsSold = () => {
@@ -142,11 +170,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       case 'SOLD':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'USED':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'REVOKED':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'AVAILABLE':
+        return <CheckCircle className="h-4 w-4 mr-1" />;
+      case 'SOLD':
+        return <Users className="h-4 w-4 mr-1" />;
+      case 'USED':
+        return <Smartphone className="h-4 w-4 mr-1" />;
+      case 'REVOKED':
+        return <Ban className="h-4 w-4 mr-1" />;
+      default:
+        return null;
     }
   };
 
@@ -169,7 +212,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(code => 
         code.code.toLowerCase().includes(term) || 
-        (code.customerInfo?.contact || '').toLowerCase().includes(term)
+        (code.customerInfo?.contact || '').toLowerCase().includes(term) ||
+        (code.deviceId || '').toLowerCase().includes(term) ||
+        (code.revokedReason || '').toLowerCase().includes(term)
       );
     }
     
@@ -291,7 +336,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
         )}
 
         {/* Statistiques */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
@@ -320,10 +365,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 font-inter">Codes utilisés</p>
-                <p className="text-2xl font-bold text-gray-600 font-poppins">{stats.used || 0}</p>
+                <p className="text-2xl font-bold text-blue-600 font-poppins">{stats.used || 0}</p>
               </div>
-              <div className="p-3 bg-gray-100 rounded-full">
-                <CheckCircle className="h-6 w-6 text-gray-600" />
+              <div className="p-3 bg-blue-100 rounded-full">
+                <Smartphone className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 font-inter">Codes révoqués</p>
+                <p className="text-2xl font-bold text-red-600 font-poppins">{stats.revoked || 0}</p>
+              </div>
+              <div className="p-3 bg-red-100 rounded-full">
+                <Ban className="h-6 w-6 text-red-600" />
               </div>
             </div>
           </div>
@@ -458,6 +515,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Client
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Appareil
+                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
@@ -471,16 +531,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(codeItem.status)}`}>
+                        {getStatusIcon(codeItem.status)}
                         {codeItem.status}
                       </span>
+                      {codeItem.status === 'REVOKED' && codeItem.revokedReason && (
+                        <p className="text-xs text-red-600 mt-1">{codeItem.revokedReason}</p>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div>Créé: {formatDate(codeItem.createdAt)}</div>
                       {codeItem.soldAt && <div>Vendu: {formatDate(codeItem.soldAt)}</div>}
                       {codeItem.usedAt && <div>Utilisé: {formatDate(codeItem.usedAt)}</div>}
+                      {codeItem.revokedAt && <div>Révoqué: {formatDate(codeItem.revokedAt)}</div>}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {codeItem.customerInfo?.contact || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {codeItem.deviceId ? (
+                        <span className="font-mono">{codeItem.deviceId.substring(0, 8)}...</span>
+                      ) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       {codeItem.status === 'AVAILABLE' && (
@@ -489,6 +559,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                           className="text-yellow-600 hover:text-yellow-900 mr-3"
                         >
                           Marquer vendu
+                        </button>
+                      )}
+                      {(codeItem.status === 'AVAILABLE' || codeItem.status === 'SOLD' || codeItem.status === 'USED') && (
+                        <button
+                          onClick={() => handleRevokeCode(codeItem.code)}
+                          className="text-red-600 hover:text-red-900 mr-3"
+                        >
+                          Révoquer
                         </button>
                       )}
                       <button
@@ -548,6 +626,53 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                 className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200 font-inter"
               >
                 Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal pour révoquer un code */}
+      {showRevokeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-solvix-dark mb-4 font-poppins flex items-center">
+              <ShieldOff className="h-5 w-5 mr-2 text-red-600" />
+              Révoquer un code
+            </h3>
+            <p className="text-sm text-gray-600 mb-2 font-inter">
+              Code: <span className="font-mono font-medium">{selectedCode}</span>
+            </p>
+            <p className="text-sm text-red-600 mb-4 font-inter">
+              Attention: La révocation est irréversible et désactivera immédiatement l'accès Premium pour l'utilisateur.
+            </p>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-inter">
+                Raison de la révocation (optionnel)
+              </label>
+              <textarea
+                value={revokeReason}
+                onChange={(e) => setRevokeReason(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:border-transparent font-inter"
+                placeholder="Ex: Utilisation frauduleuse, demande de remboursement..."
+                rows={3}
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowRevokeModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 font-inter"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmRevokeCode}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-inter flex items-center"
+              >
+                <Ban className="h-4 w-4 mr-2" />
+                Révoquer le code
               </button>
             </div>
           </div>
