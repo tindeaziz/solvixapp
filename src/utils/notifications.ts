@@ -26,14 +26,16 @@ export const sendNotification = async (type: string, data: any) => {
 
     if (error) {
       console.error('❌ NOTIFICATIONS - Erreur envoi notification:', error);
-      return { success: false, error };
+      // Don't throw error, just log it and return success: false
+      return { success: false, error: error.message || 'Erreur lors de l\'envoi de la notification' };
     } else {
       console.log('✅ NOTIFICATIONS - Notification envoyée:', response);
       return { success: true, data: response };
     }
   } catch (error) {
     console.error('❌ NOTIFICATIONS - Exception envoi notification:', error);
-    return { success: false, error };
+    // Don't throw error, just return failure status
+    return { success: false, error: error.message || 'Exception lors de l\'envoi de la notification' };
   }
 };
 
@@ -42,12 +44,19 @@ export const sendNotification = async (type: string, data: any) => {
  * @param quoteData Données du devis
  */
 export const notifyNewQuote = async (quoteData: any) => {
-  return await sendNotification('new_quote', {
+  const result = await sendNotification('new_quote', {
     quoteNumber: quoteData.quote_number,
     clientName: quoteData.client?.name || 'Client',
     amount: quoteData.total_ttc || 0,
     currency: quoteData.currency || 'FCFA'
   });
+  
+  // Log result but don't throw errors
+  if (!result.success) {
+    console.warn('⚠️ Notification nouveau devis échouée:', result.error);
+  }
+  
+  return result;
 };
 
 /**
@@ -55,12 +64,19 @@ export const notifyNewQuote = async (quoteData: any) => {
  * @param quoteData Données du devis
  */
 export const notifyQuoteAccepted = async (quoteData: any) => {
-  return await sendNotification('quote_accepted', {
+  const result = await sendNotification('quote_accepted', {
     quoteNumber: quoteData.quote_number,
     clientName: quoteData.client?.name || 'Client',
     amount: quoteData.total_ttc || 0,
     currency: quoteData.currency || 'FCFA'
   });
+  
+  // Log result but don't throw errors
+  if (!result.success) {
+    console.warn('⚠️ Notification devis accepté échouée:', result.error);
+  }
+  
+  return result;
 };
 
 /**
@@ -70,7 +86,7 @@ export const notifyQuoteAccepted = async (quoteData: any) => {
  * @param newStatus Nouveau statut
  */
 export const notifyQuoteStatusChanged = async (quoteData: any, oldStatus: string, newStatus: string) => {
-  return await sendNotification('quote_status_changed', {
+  const result = await sendNotification('quote_status_changed', {
     quoteNumber: quoteData.quote_number,
     clientName: quoteData.client?.name || 'Client',
     amount: quoteData.total_ttc || 0,
@@ -78,4 +94,11 @@ export const notifyQuoteStatusChanged = async (quoteData: any, oldStatus: string
     oldStatus,
     newStatus
   });
+  
+  // Log result but don't throw errors
+  if (!result.success) {
+    console.warn('⚠️ Notification changement statut échouée:', result.error);
+  }
+  
+  return result;
 };
