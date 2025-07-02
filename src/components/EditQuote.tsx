@@ -24,6 +24,7 @@ import { useAuth } from '../hooks/useAuth';
 import { devisService, clientService, articleService, profileService, type Devis, type ArticleDevis } from '../lib/supabase';
 import { CURRENCIES, formatCurrency, getCurrencyByCode } from '../types/currency';
 import { generateDevisPDF } from '../utils/pdfGenerator';
+import { notifyQuoteStatusChanged } from '../utils/notifications';
 import ShareModal from './ShareModal';
 
 interface QuoteItem {
@@ -63,6 +64,7 @@ const EditQuote: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [notificationSent, setNotificationSent] = useState(false);
   
   // États pour le devis
   const [quoteData, setQuoteData] = useState({
@@ -262,9 +264,14 @@ const EditQuote: React.FC = () => {
     setSaving(true);
     setError('');
     setSaveSuccess(false);
+    setNotificationSent(false);
 
     try {
       console.log('💾 EDIT_QUOTE - Sauvegarde du devis:', quoteData.number);
+
+      // Vérifier si le statut a changé
+      const statusChanged = originalDevis.status !== quoteData.status;
+      const oldStatus = originalDevis.status;
 
       // 1. Mettre à jour le client si nécessaire
       let clientId = originalDevis.client_id;
@@ -303,7 +310,7 @@ const EditQuote: React.FC = () => {
       }
 
       // 2. Mettre à jour le devis
-      const { error: devisError } = await devisService.updateDevis(originalDevis.id, {
+      const { data: updatedDevis, error: devisError } = await devisService.updateDevis(originalDevis.id, {
         quote_number: quoteData.number,
         date_creation: quoteData.date,
         date_expiration: quoteData.validUntil,
@@ -346,6 +353,31 @@ const EditQuote: React.FC = () => {
         if (articlesError) {
           console.error('❌ EDIT_QUOTE - Erreur création articles:', articlesError);
           throw new Error('Erreur lors de la création des articles');
+        }
+      }
+
+      // 5. Envoyer une notification si le statut a changé
+      if (statusChanged && updatedDevis) {
+        try {
+          const notificationResult = await notifyQuoteStatusChanged(
+            {
+              ...updatedDevis,
+              client: {
+                name: quoteData.client.name,
+                company: quoteData.client.company
+              }
+            },
+            oldStatus,
+            quoteData.status
+          );
+          
+          if (notificationResult.success) {
+            console.log('✅ EDIT_QUOTE - Notification de changement de statut envoyée');
+            setNotificationSent(true);
+          }
+        } catch (notifError) {
+          console.error('⚠️ EDIT_QUOTE - Erreur notification (non bloquante):', notifError);
+          // Ne pas bloquer la sauvegarde si la notification échoue
         }
       }
 
@@ -501,7 +533,9 @@ const EditQuote: React.FC = () => {
             {saveSuccess && (
               <div className="bg-green-50 border border-green-200 rounded-lg px-3 sm:px-4 py-2 flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                <span className="text-sm text-green-800 font-inter">Devis sauvegardé !</span>
+                <span className="text-sm text-green-800 font-inter">
+                  {notificationSent ? 'Devis sauvegardé et notification envoyée !' : 'Devis sauvegardé !'}
+                </span>
               </div>
             )}
             {error && (
