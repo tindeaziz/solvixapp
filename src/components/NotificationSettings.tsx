@@ -94,6 +94,8 @@ const NotificationSettings: React.FC = () => {
           new_quotes_notifications: preferences.new_quotes_notifications,
           accepted_quotes_notifications: preferences.accepted_quotes_notifications,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) {
