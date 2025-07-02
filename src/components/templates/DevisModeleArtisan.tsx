@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatCurrency } from '../../types/currency';
+import { isPremiumActive } from '../../utils/security';
 
 interface QuoteItem {
   id: string;
@@ -66,6 +67,9 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR');
   };
+
+  // Vérifier si l'utilisateur est premium
+  const isPremium = isPremiumActive();
 
   return (
     <div className="devis-container" style={{
@@ -330,37 +334,39 @@ const DevisModeleArtisan: React.FC<DevisModeleArtisanProps> = ({
           </div>
         )}
 
-        {/* FOOTER - 5% de la page */}
-        <div className="footer-section" style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          marginTop: 'auto',
-          borderTop: '3px double #8B4513',
-          paddingTop: '12px'
-        }}>
-          <div style={{ fontSize: '9px', color: '#6B8E23' }}>
-            <p style={{ margin: '2px 0' }}>Devis généré le {formatDate(new Date().toISOString().split('T')[0])}</p>
-            <p style={{ margin: '2px 0' }}>Solvix - Génération de devis professionnels</p>
-          </div>
+        {/* FOOTER - 5% de la page - Supprimé pour les utilisateurs premium */}
+        {!isPremium && (
+          <div className="footer-section" style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            marginTop: 'auto',
+            borderTop: '3px double #8B4513',
+            paddingTop: '12px'
+          }}>
+            <div style={{ fontSize: '9px', color: '#6B8E23' }}>
+              <p style={{ margin: '2px 0' }}>Devis généré le {formatDate(new Date().toISOString().split('T')[0])}</p>
+              <p style={{ margin: '2px 0' }}>Solvix - Génération de devis professionnels</p>
+            </div>
 
-          <div style={{ textAlign: 'center' }}>
-            <p style={{
-              fontSize: '10px',
-              margin: '0 0 8px 0',
-              color: '#6B8E23',
-              fontStyle: 'italic'
-            }}>
-              Fait le {formatDate(new Date().toISOString().split('T')[0])}, {entrepriseData.name}
-            </p>
-            {entrepriseData.signature && (
-              <img 
-                src={entrepriseData.signature} 
-                style={{ maxHeight: '40px', maxWidth: '120px' }} 
-              />
-            )}
+            <div style={{ textAlign: 'center' }}>
+              <p style={{
+                fontSize: '10px',
+                margin: '0 0 8px 0',
+                color: '#6B8E23',
+                fontStyle: 'italic'
+              }}>
+                Fait le {formatDate(new Date().toISOString().split('T')[0])}, {entrepriseData.name}
+              </p>
+              {entrepriseData.signature && (
+                <img 
+                  src={entrepriseData.signature} 
+                  style={{ maxHeight: '40px', maxWidth: '120px' }} 
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

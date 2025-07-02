@@ -147,7 +147,8 @@ export const generateDevisPDF = async (devisData: DevisData) => {
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: 'a4',
+      compress: true // Activer la compression
     });
     
     // Calculer les dimensions pour ajuster l'image au format A4
