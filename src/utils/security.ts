@@ -55,16 +55,18 @@ interface QuotaData {
 export const getSecureQuotaInfo = () => {
   const currentMonth = new Date().getMonth() + new Date().getFullYear() * 12;
   const deviceId = getDeviceFingerprint();
-  const FREE_QUOTA_LIMIT = 1; // Modifié: un seul devis gratuit
+  const FREE_QUOTA_LIMIT = 3; // Corrigé: 3 devis gratuits par mois
 
   try {
     const encryptedData = localStorage.getItem('solvix_quota_data');
     if (!encryptedData) {
+      console.log('📅 Première utilisation - Initialisation quota à 3 devis');
       return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
     }
 
     const decryptedData = decryptData(encryptedData);
     if (!decryptedData) {
+      console.log('🔑 Données de quota corrompues - Réinitialisation');
       return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
     }
 
@@ -72,14 +74,21 @@ export const getSecureQuotaInfo = () => {
 
     // Vérification de l'intégrité du dispositif
     if (quotaData.deviceFingerprint !== deviceId) {
-      console.warn('Device fingerprint mismatch - resetting quota');
+      console.warn('🔒 Device fingerprint mismatch - resetting quota');
       return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
     }
 
     // Reset automatique si nouveau mois
     if (quotaData.month !== currentMonth) {
+      console.log('📅 Nouveau mois détecté - Reset quota à 3 devis');
       return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
     }
+
+    console.log('📊 Quota actuel:', { 
+      used: quotaData.count, 
+      remaining: Math.max(0, FREE_QUOTA_LIMIT - quotaData.count),
+      total: FREE_QUOTA_LIMIT
+    });
 
     return {
       used: quotaData.count,
@@ -88,7 +97,7 @@ export const getSecureQuotaInfo = () => {
       canCreateQuote: quotaData.count < FREE_QUOTA_LIMIT
     };
   } catch (error) {
-    console.error('Erreur lors de la récupération du quota:', error);
+    console.error('❌ Erreur lors de la récupération du quota:', error);
     return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
   }
 };
@@ -105,8 +114,9 @@ const resetQuota = (month: number, deviceId: string, limit: number) => {
   try {
     const encrypted = encryptData(JSON.stringify(quotaData));
     localStorage.setItem('solvix_quota_data', encrypted);
+    console.log('✅ Quota réinitialisé avec succès:', { used: 0, remaining: limit, total: limit });
   } catch (error) {
-    console.error('Erreur lors du reset du quota:', error);
+    console.error('❌ Erreur lors du reset du quota:', error);
   }
   
   return { 
@@ -122,6 +132,7 @@ export const incrementQuotaUsage = (): boolean => {
   try {
     const quotaInfo = getSecureQuotaInfo();
     if (!quotaInfo.canCreateQuote) {
+      console.log('❌ Quota épuisé - Création impossible');
       return false;
     }
 
@@ -135,12 +146,84 @@ export const incrementQuotaUsage = (): boolean => {
       lastReset: Date.now()
     };
 
+    console.log('📈 Incrémentation quota:', quotaInfo.used, '->', quotaData.count);
+
     const encrypted = encryptData(JSON.stringify(quotaData));
     localStorage.setItem('solvix_quota_data', encrypted);
     
     return true;
   } catch (error) {
-    console.error('Erreur lors de l\'incrémentation du quota:', error);
+    console.error('❌ Erreur lors de l\'incrémentation du quota:', error);
+    return false;
+  }
+};
+
+// Fonction pour vérifier et corriger les quotas existants
+export const fixExistingQuotas = async () => {
+  try {
+    const currentMonth = new Date().getMonth() + new Date().getFullYear() * 12;
+    const deviceId = getDeviceFingerprint();
+    const FREE_QUOTA_LIMIT = 3;
+    
+    const encryptedData = localStorage.getItem('solvix_quota_data');
+    if (!encryptedData) {
+      console.log('🔧 Aucun quota existant - Initialisation à 3 devis');
+      resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
+      return;
+    }
+    
+    const decryptedData = decryptData(encryptedData);
+    if (!decryptedData) {
+      console.log('🔧 Données de quota invalides - Réinitialisation');
+      resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
+      return;
+    }
+    
+    const quotaData: QuotaData = JSON.parse(decryptedData);
+    
+    // Si l'utilisateur a un quota de 1 mais n'a pas encore créé de devis
+    if (quotaData.count > 0 && !(await hasCreatedAnyQuote())) {
+      console.log('🐛 Bug détecté: Quota utilisé sans devis créé - Correction');
+      resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
+      return;
+    }
+    
+    // Si le mois est différent, réinitialiser
+    if (quotaData.month !== currentMonth) {
+      console.log('🔄 Mois différent - Réinitialisation du quota');
+      resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
+      return;
+    }
+    
+    console.log('✅ Vérification quota terminée - Aucune correction nécessaire');
+  } catch (error) {
+    console.error('❌ Erreur lors de la correction des quotas:', error);
+  }
+};
+
+// Vérifier si l'utilisateur a créé des devis
+const hasCreatedAnyQuote = async (): Promise<boolean> => {
+  try {
+    // Importer supabase de manière dynamique pour éviter les problèmes de dépendance circulaire
+    const { supabase } = await import('../lib/supabase');
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    
+    const { data, error } = await supabase
+      .from('devis')
+      .select('id')
+      .eq('user_id', user.id)
+      .limit(1);
+      
+    if (error) {
+      console.error('❌ Erreur vérification devis:', error);
+      return false;
+    }
+    
+    return data && data.length > 0;
+  } catch (error) {
+    console.error('❌ Erreur vérification devis:', error);
     return false;
   }
 };
