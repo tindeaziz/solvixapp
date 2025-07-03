@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, Crown, Zap } from 'lucide-react';
 import { isPremiumActive, getPremiumInfo } from '../../utils/security';
 
@@ -8,8 +8,34 @@ interface PremiumBadgeProps {
 }
 
 const PremiumBadge: React.FC<PremiumBadgeProps> = ({ variant = 'default', className = '' }) => {
-  const isActive = isPremiumActive();
-  const premiumInfo = getPremiumInfo();
+  const [isActive, setIsActive] = useState(false);
+  const [premiumInfo, setPremiumInfo] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      setIsLoading(true);
+      try {
+        const active = await isPremiumActive();
+        setIsActive(active);
+        
+        if (active && variant === 'detailed') {
+          const info = await getPremiumInfo();
+          setPremiumInfo(info);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut premium:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkPremiumStatus();
+  }, [variant]);
+
+  if (isLoading) {
+    return null;
+  }
 
   if (!isActive) return null;
 

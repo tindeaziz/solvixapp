@@ -539,41 +539,39 @@ export const validatePremiumCode = async (code: string): Promise<boolean> => {
   }
 };
 
-// Interface pour les données Premium
-interface PremiumData {
-  status: 'active' | 'inactive';
-  code: string;
-  deviceId: string;
-  activationTimestamp: number;
-  version: string;
-  expirationDate?: number;
-}
-
 // Vérifier si Premium est actif
-export const isPremiumActive = (): boolean => {
+export const isPremiumActive = async (): Promise<boolean> => {
   try {
-    const encryptedData = localStorage.getItem('solvix_premium_data');
-    if (!encryptedData) return false;
-
-    const decryptedData = decryptData(encryptedData);
-    if (!decryptedData) return false;
-
-    const premiumData: PremiumData = JSON.parse(decryptedData);
-    
-    // Vérifications de sécurité
-    if (premiumData.status !== 'active') return false;
-    if (premiumData.deviceId !== getDeviceFingerprint()) return false;
-    
-    // Vérifier l'expiration si définie
-    if (premiumData.expirationDate && Date.now() > premiumData.expirationDate) {
+    // Récupérer l'utilisateur connecté
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log('❌ PREMIUM - Utilisateur non connecté');
       return false;
     }
     
-    // Vérifier si le code a été révoqué (cette vérification sera mise à jour pour utiliser Supabase)
-    // Pour l'instant, on garde la vérification locale pour la compatibilité
-    return true;
+    // Récupérer l'ID de l'appareil
+    const deviceId = getDeviceFingerprint();
+    
+    // Vérifier si l'utilisateur a un code premium actif
+    const { data, error } = await supabase
+      .from('premium_activation_codes')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('device_id', deviceId)
+      .eq('status', 'USED')
+      .maybeSingle();
+    
+    if (error) {
+      console.error('❌ PREMIUM - Erreur vérification statut:', error);
+      return false;
+    }
+    
+    const isPremium = !!data;
+    console.log(`🔍 PREMIUM - Statut pour User ID ${user.id}: ${isPremium ? 'Actif' : 'Inactif'}`);
+    
+    return isPremium;
   } catch (error) {
-    console.error('Erreur lors de la vérification Premium:', error);
+    console.error('❌ PREMIUM - Exception vérification statut:', error);
     return false;
   }
 };
@@ -593,19 +591,6 @@ export const activatePremium = async (code: string): Promise<boolean> => {
     if (!result.success) {
       return false;
     }
-
-    // Sauvegarder les informations premium localement pour une vérification rapide
-    const premiumData: PremiumData = {
-      status: 'active',
-      code: code.trim().toUpperCase(),
-      deviceId: deviceId,
-      activationTimestamp: Date.now(),
-      version: '1.0'
-      // Pas d'expiration pour l'accès à vie
-    };
-
-    const encrypted = encryptData(JSON.stringify(premiumData));
-    localStorage.setItem('solvix_premium_data', encrypted);
     
     return true;
   } catch (error) {
@@ -614,31 +599,36 @@ export const activatePremium = async (code: string): Promise<boolean> => {
   }
 };
 
-// Désactiver Premium (pour les tests ou support)
-export const deactivatePremium = (): void => {
-  try {
-    localStorage.removeItem('solvix_premium_data');
-  } catch (error) {
-    console.error('Erreur lors de la désactivation Premium:', error);
-  }
-};
-
 // Obtenir les informations Premium
-export const getPremiumInfo = () => {
+export const getPremiumInfo = async () => {
   try {
-    const encryptedData = localStorage.getItem('solvix_premium_data');
-    if (!encryptedData) return null;
-
-    const decryptedData = decryptData(encryptedData);
-    if (!decryptedData) return null;
-
-    const premiumData: PremiumData = JSON.parse(decryptedData);
+    // Récupérer l'utilisateur connecté
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return null;
+    }
+    
+    // Récupérer l'ID de l'appareil
+    const deviceId = getDeviceFingerprint();
+    
+    // Récupérer les informations du code premium
+    const { data, error } = await supabase
+      .from('premium_activation_codes')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('device_id', deviceId)
+      .eq('status', 'USED')
+      .maybeSingle();
+    
+    if (error || !data) {
+      return null;
+    }
     
     return {
-      isActive: isPremiumActive(),
-      activationDate: new Date(premiumData.activationTimestamp),
-      code: premiumData.code.slice(-4), // Afficher seulement les 4 derniers caractères
-      version: premiumData.version
+      isActive: true,
+      activationDate: new Date(data.used_at),
+      code: data.code.slice(-4), // Afficher seulement les 4 derniers caractères
+      version: '1.0'
     };
   } catch {
     return null;

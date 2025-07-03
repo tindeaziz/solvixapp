@@ -26,7 +26,8 @@ const Layout: React.FC<LayoutProps> = ({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isPremium, setIsPremium] = useState(isPremiumActive());
+  const [isPremium, setIsPremium] = useState(false);
+  const [isCheckingPremium, setIsCheckingPremium] = useState(true);
   const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
   
   // États pour les informations utilisateur réelles
@@ -47,10 +48,19 @@ const Layout: React.FC<LayoutProps> = ({
 
   // Vérification périodique du statut Premium et quota
   useEffect(() => {
-    const checkPremiumStatus = () => {
-      setIsPremium(isPremiumActive());
-      if (!isPremiumActive()) {
-        setQuotaInfo(getSecureQuotaInfo());
+    const checkPremiumStatus = async () => {
+      setIsCheckingPremium(true);
+      try {
+        const premiumStatus = await isPremiumActive();
+        setIsPremium(premiumStatus);
+        
+        if (!premiumStatus) {
+          setQuotaInfo(getSecureQuotaInfo());
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut premium:', error);
+      } finally {
+        setIsCheckingPremium(false);
       }
     };
 
@@ -259,13 +269,15 @@ const Layout: React.FC<LayoutProps> = ({
             <div className="navbar-actions hidden md:flex items-center space-x-4">
               {/* Premium Badge et Quota */}
               <div className="flex items-center space-x-3">
-                {isPremium ? (
-                  <PremiumBadge variant="compact" />
-                ) : (
-                  <QuotaDisplay 
-                    onUpgradeClick={handleUpgradeClick}
-                    variant="header"
-                  />
+                {!isCheckingPremium && (
+                  isPremium ? (
+                    <PremiumBadge variant="compact" />
+                  ) : (
+                    <QuotaDisplay 
+                      onUpgradeClick={handleUpgradeClick}
+                      variant="header"
+                    />
+                  )
                 )}
               </div>
 
@@ -313,14 +325,16 @@ const Layout: React.FC<LayoutProps> = ({
                       
                       {/* Premium Status dans le menu */}
                       <div className="mt-3 pt-3 border-t border-gray-100">
-                        {isPremium ? (
-                          <PremiumBadge variant="detailed" className="w-full" />
-                        ) : (
-                          <QuotaDisplay 
-                            onUpgradeClick={handleUpgradeClick}
-                            variant="card"
-                            className="w-full"
-                          />
+                        {!isCheckingPremium && (
+                          isPremium ? (
+                            <PremiumBadge variant="default" className="w-full" />
+                          ) : (
+                            <QuotaDisplay 
+                              onUpgradeClick={handleUpgradeClick}
+                              variant="card"
+                              className="w-full"
+                            />
+                          )
                         )}
                       </div>
                     </div>
@@ -396,13 +410,15 @@ const Layout: React.FC<LayoutProps> = ({
                 <div className="border-t border-solvix-blue-dark pt-3 mt-3">
                   {/* Premium/Quota Status Mobile */}
                   <div className="px-3 py-2 mb-3">
-                    {isPremium ? (
-                      <PremiumBadge variant="default" />
-                    ) : (
-                      <QuotaDisplay 
-                        onUpgradeClick={handleUpgradeClick}
-                        variant="inline"
-                      />
+                    {!isCheckingPremium && (
+                      isPremium ? (
+                        <PremiumBadge variant="default" />
+                      ) : (
+                        <QuotaDisplay 
+                          onUpgradeClick={handleUpgradeClick}
+                          variant="inline"
+                        />
+                      )
                     )}
                   </div>
 

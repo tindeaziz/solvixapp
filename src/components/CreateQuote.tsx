@@ -72,7 +72,8 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
   // États Premium et Quota
-  const [isPremium, setIsPremium] = useState(isPremiumActive());
+  const [isPremium, setIsPremium] = useState(false);
+  const [isCheckingPremium, setIsCheckingPremium] = useState(true);
   const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
   
   // États pour le devis
@@ -115,10 +116,19 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
 
   // Vérification périodique du quota
   useEffect(() => {
-    const checkQuotaStatus = () => {
-      setIsPremium(isPremiumActive());
-      if (!isPremiumActive()) {
-        setQuotaInfo(getSecureQuotaInfo());
+    const checkQuotaStatus = async () => {
+      setIsCheckingPremium(true);
+      try {
+        const premiumStatus = await isPremiumActive();
+        setIsPremium(premiumStatus);
+        
+        if (!premiumStatus) {
+          setQuotaInfo(getSecureQuotaInfo());
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut premium:', error);
+      } finally {
+        setIsCheckingPremium(false);
       }
     };
 
@@ -454,7 +464,7 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
   const selectedCurrency = getCurrencyByCode(quoteData.currency);
 
   // Affichage de chargement
-  if (loading) {
+  if (loading || isCheckingPremium) {
     return (
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-center py-16">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatCurrency } from '../../types/currency';
 import { isPremiumActive } from '../../utils/security';
 
@@ -47,6 +47,22 @@ const DevisModeleClassique: React.FC<DevisModeleClassiqueProps> = ({
   clientData,
   articles
 }) => {
+  const [isPremium, setIsPremium] = useState(false);
+  
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      try {
+        const premiumStatus = await isPremiumActive();
+        setIsPremium(premiumStatus);
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut premium:', error);
+        setIsPremium(false);
+      }
+    };
+    
+    checkPremiumStatus();
+  }, []);
+
   const calculateItemTotal = (item: QuoteItem) => item.quantity * item.unitPrice;
   
   const calculateSubtotal = () => {
@@ -67,9 +83,6 @@ const DevisModeleClassique: React.FC<DevisModeleClassiqueProps> = ({
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR');
   };
-
-  // Vérifier si l'utilisateur est premium
-  const isPremium = isPremiumActive();
 
   return (
     <div className="devis-container" style={{

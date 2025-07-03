@@ -23,7 +23,8 @@ function App() {
   const { user, loading, signOut } = useAuth();
   
   // États Premium et Quota
-  const [isPremium, setIsPremium] = useState(isPremiumActive());
+  const [isPremium, setIsPremium] = useState(false);
+  const [isCheckingPremium, setIsCheckingPremium] = useState(true);
   const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -33,12 +34,19 @@ function App() {
     // Corriger les quotas mal initialisés au démarrage
     fixExistingQuotas();
     
-    const checkPremiumStatus = () => {
-      const premiumStatus = isPremiumActive();
-      setIsPremium(premiumStatus);
-      
-      if (!premiumStatus) {
-        setQuotaInfo(getSecureQuotaInfo());
+    const checkPremiumStatus = async () => {
+      setIsCheckingPremium(true);
+      try {
+        const premiumStatus = await isPremiumActive();
+        setIsPremium(premiumStatus);
+        
+        if (!premiumStatus) {
+          setQuotaInfo(getSecureQuotaInfo());
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut premium:', error);
+      } finally {
+        setIsCheckingPremium(false);
       }
     };
 
@@ -154,7 +162,7 @@ function App() {
       </Routes>
 
       {/* Bouton Premium flottant pour les utilisateurs non premium */}
-      {user && !isPremium && !showPremiumModal && (
+      {user && !isPremium && !isCheckingPremium && !showPremiumModal && (
         <button
           onClick={() => setShowPremiumModal(true)}
           className="fixed bottom-4 right-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 z-40 flex items-center"

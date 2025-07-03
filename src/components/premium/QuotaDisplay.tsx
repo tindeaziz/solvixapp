@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, AlertTriangle, Zap, Crown } from 'lucide-react';
 import { getSecureQuotaInfo, isPremiumActive } from '../../utils/security';
 
@@ -13,8 +13,33 @@ const QuotaDisplay: React.FC<QuotaDisplayProps> = ({
   variant = 'header',
   className = '' 
 }) => {
-  const isPremium = isPremiumActive();
-  const quotaInfo = getSecureQuotaInfo();
+  const [isPremium, setIsPremium] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
+
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      setIsLoading(true);
+      try {
+        const premiumStatus = await isPremiumActive();
+        setIsPremium(premiumStatus);
+        
+        if (!premiumStatus) {
+          setQuotaInfo(getSecureQuotaInfo());
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut premium:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkPremiumStatus();
+  }, []);
+
+  if (isLoading) {
+    return null;
+  }
 
   if (isPremium) {
     return (

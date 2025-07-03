@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import { isPremiumActive, getSecureQuotaInfo } from '../../utils/security';
-import { AlertTriangle, Crown, Zap, FileText } from 'lucide-react';
+import { AlertTriangle, Crown, Zap, FileText, Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -17,8 +17,40 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   fallback,
   onUpgradeClick
 }) => {
-  const isPremium = isPremiumActive();
-  const quotaInfo = getSecureQuotaInfo();
+  const [isPremium, setIsPremium] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
+
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      setIsLoading(true);
+      try {
+        const premiumStatus = await isPremiumActive();
+        setIsPremium(premiumStatus);
+        
+        if (!premiumStatus) {
+          setQuotaInfo(getSecureQuotaInfo());
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut premium:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkPremiumStatus();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-solvix-light to-blue-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 text-solvix-blue animate-spin mx-auto mb-4" />
+          <p className="text-solvix-dark font-inter">Vérification de vos droits d'accès...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Si Premium requis et utilisateur n'est pas Premium
   if (requirePremium && !isPremium) {
