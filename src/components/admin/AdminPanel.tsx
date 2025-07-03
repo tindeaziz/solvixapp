@@ -53,13 +53,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     }
   }, [isAuthenticated]);
 
-  const refreshData = () => {
+  const refreshData = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setCodes(codeManager.getAllCodes());
-      setStats(codeManager.getStats());
+    try {
+      // Récupérer les codes depuis la base de données
+      const allCodes = await codeManager.getAllCodes();
+      setCodes(allCodes);
+      
+      // Récupérer les statistiques
+      const statsData = await codeManager.getStats();
+      setStats(statsData);
+    } catch (error) {
+      console.error('Erreur lors du chargement des données:', error);
+      setMessage('Erreur lors du chargement des données');
+      setMessageType('error');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   const handleLogin = () => {
@@ -73,26 +83,46 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const generateSingleCode = () => {
+  const generateSingleCode = async () => {
     setLoading(true);
-    setTimeout(() => {
-      const newCode = codeManager.generateCode();
-      refreshData();
-      setMessage(`Code généré: ${newCode}`);
-      setMessageType('success');
+    try {
+      const newCode = await codeManager.generateCode();
+      if (newCode) {
+        await refreshData();
+        setMessage(`Code généré: ${newCode}`);
+        setMessageType('success');
+      } else {
+        setMessage('Erreur lors de la génération du code');
+        setMessageType('error');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la génération du code:', error);
+      setMessage('Erreur lors de la génération du code');
+      setMessageType('error');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
-  const generateBatchCodes = () => {
+  const generateBatchCodes = async () => {
     setLoading(true);
-    setTimeout(() => {
-      const newCodes = codeManager.generateBatch(batchSize);
-      refreshData();
-      setMessage(`${batchSize} codes générés avec succès`);
-      setMessageType('success');
+    try {
+      const newCodes = await codeManager.generateBatch(batchSize);
+      if (newCodes.length > 0) {
+        await refreshData();
+        setMessage(`${newCodes.length} codes générés avec succès`);
+        setMessageType('success');
+      } else {
+        setMessage('Erreur lors de la génération des codes');
+        setMessageType('error');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la génération des codes:', error);
+      setMessage('Erreur lors de la génération des codes');
+      setMessageType('error');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleMarkAsSold = (code: string) => {
@@ -109,37 +139,55 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     setShowCustomerForm(false);
   };
 
-  const confirmRevokeCode = () => {
+  const confirmRevokeCode = async () => {
     if (!selectedCode) return;
     
-    const success = codeManager.revokeCode(selectedCode, revokeReason);
-    if (success) {
-      refreshData();
-      setMessage(`Code ${selectedCode} révoqué avec succès`);
-      setMessageType('success');
-      setShowRevokeModal(false);
-    } else {
+    setLoading(true);
+    try {
+      const success = await codeManager.revokeCode(selectedCode, revokeReason);
+      if (success) {
+        await refreshData();
+        setMessage(`Code ${selectedCode} révoqué avec succès`);
+        setMessageType('success');
+        setShowRevokeModal(false);
+      } else {
+        setMessage('Erreur: Impossible de révoquer ce code');
+        setMessageType('error');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la révocation du code:', error);
       setMessage('Erreur: Impossible de révoquer ce code');
       setMessageType('error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const confirmMarkAsSold = () => {
+  const confirmMarkAsSold = async () => {
     if (!customerContact.trim()) {
       setMessage('Le contact client est requis');
       setMessageType('error');
       return;
     }
 
-    const success = codeManager.markAsSold(selectedCode, customerContact);
-    if (success) {
-      refreshData();
-      setMessage(`Code ${selectedCode} marqué comme vendu à ${customerContact}`);
-      setMessageType('success');
-      setShowCustomerForm(false);
-    } else {
+    setLoading(true);
+    try {
+      const success = await codeManager.markAsSold(selectedCode, customerContact);
+      if (success) {
+        await refreshData();
+        setMessage(`Code ${selectedCode} marqué comme vendu à ${customerContact}`);
+        setMessageType('success');
+        setShowCustomerForm(false);
+      } else {
+        setMessage('Erreur: Impossible de marquer ce code comme vendu');
+        setMessageType('error');
+      }
+    } catch (error) {
+      console.error('Erreur lors du marquage du code comme vendu:', error);
       setMessage('Erreur: Impossible de marquer ce code comme vendu');
       setMessageType('error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -150,17 +198,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     setTimeout(() => setMessage(''), 2000);
   };
 
-  const exportCodes = () => {
-    const csv = codeManager.exportToCSV();
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `solvix-codes-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setMessage('Codes exportés avec succès');
-    setMessageType('success');
+  const exportCodes = async () => {
+    try {
+      const csv = await codeManager.exportToCSV();
+      if (!csv) {
+        setMessage('Erreur lors de l\'export des codes');
+        setMessageType('error');
+        return;
+      }
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `solvix-codes-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setMessage('Codes exportés avec succès');
+      setMessageType('success');
+    } catch (error) {
+      console.error('Erreur lors de l\'export des codes:', error);
+      setMessage('Erreur lors de l\'export des codes');
+      setMessageType('error');
+    }
   };
 
   const getStatusColor = (status: string) => {

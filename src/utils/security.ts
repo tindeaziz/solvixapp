@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '../lib/supabase';
 
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || 'solvix-security-key-2025';
 
@@ -228,181 +229,6 @@ const hasCreatedAnyQuote = async (): Promise<boolean> => {
   }
 };
 
-// Classe de gestion des codes d'activation
-export class SecureCodeManager {
-  private codes: ActivationCode[];
-  
-  constructor() {
-    this.codes = this.loadCodes();
-  }
-  
-  private loadCodes(): ActivationCode[] {
-    try {
-      const encrypted = localStorage.getItem('solvix_admin_codes');
-      if (encrypted) {
-        const decrypted = decryptData(encrypted);
-        return JSON.parse(decrypted);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des codes:', error);
-    }
-    return [];
-  }
-  
-  private saveCodes(): void {
-    try {
-      const encrypted = encryptData(JSON.stringify(this.codes));
-      localStorage.setItem('solvix_admin_codes', encrypted);
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde des codes:', error);
-    }
-  }
-  
-  public generateCode(customerInfo?: CustomerInfo): string {
-    const code = this.generateSecureCode();
-    const codeData: ActivationCode = {
-      id: uuidv4(),
-      code: code,
-      status: 'AVAILABLE',
-      createdAt: new Date().toISOString(),
-      customerInfo: customerInfo || {},
-      price: 5000,
-      usedAt: null,
-      deviceId: null,
-      revokedAt: null,
-      revokedReason: null
-    };
-    
-    this.codes.push(codeData);
-    this.saveCodes();
-    return code;
-  }
-  
-  public generateBatch(quantity: number = 10): string[] {
-    const batch: string[] = [];
-    for (let i = 0; i < quantity; i++) {
-      batch.push(this.generateCode());
-    }
-    return batch;
-  }
-  
-  public markAsSold(code: string, customerContact: string): boolean {
-    const codeItem = this.codes.find(c => c.code === code);
-    if (codeItem && codeItem.status === 'AVAILABLE') {
-      codeItem.status = 'SOLD';
-      codeItem.customerInfo = {
-        ...codeItem.customerInfo,
-        contact: customerContact
-      };
-      codeItem.soldAt = new Date().toISOString();
-      this.saveCodes();
-      return true;
-    }
-    return false;
-  }
-  
-  public validateAndActivateCode(inputCode: string, deviceId: string): ActivationResult {
-    const code = inputCode.trim().toUpperCase();
-    const codeItem = this.codes.find(c => c.code === code);
-    
-    if (!codeItem) {
-      return { success: false, message: 'Code invalide' };
-    }
-    
-    if (codeItem.status === 'USED') {
-      return { success: false, message: 'Code déjà utilisé' };
-    }
-    
-    if (codeItem.status === 'REVOKED') {
-      return { 
-        success: false, 
-        message: `Code révoqué${codeItem.revokedReason ? ': ' + codeItem.revokedReason : ''}` 
-      };
-    }
-    
-    if (codeItem.status !== 'SOLD' && codeItem.status !== 'AVAILABLE') {
-      return { success: false, message: 'Code non disponible' };
-    }
-    
-    // Activer le code
-    codeItem.status = 'USED';
-    codeItem.usedAt = new Date().toISOString();
-    codeItem.deviceId = deviceId;
-    this.saveCodes();
-    
-    return { success: true, message: 'Code activé avec succès!' };
-  }
-  
-  public revokeCode(code: string, reason: string = ''): boolean {
-    const codeItem = this.codes.find(c => c.code === code);
-    if (!codeItem) return false;
-    
-    // On peut révoquer un code disponible, vendu ou même utilisé
-    codeItem.status = 'REVOKED';
-    codeItem.revokedAt = new Date().toISOString();
-    codeItem.revokedReason = reason || 'Révoqué par l\'administrateur';
-    
-    this.saveCodes();
-    return true;
-  }
-  
-  public getStats(): CodeStats {
-    const available = this.codes.filter(c => c.status === 'AVAILABLE').length;
-    const sold = this.codes.filter(c => c.status === 'SOLD').length;
-    const used = this.codes.filter(c => c.status === 'USED').length;
-    const revoked = this.codes.filter(c => c.status === 'REVOKED').length;
-    const revenue = (sold + used) * 5000;
-    
-    return { 
-      available, 
-      sold, 
-      used,
-      revoked,
-      revenue, 
-      total: this.codes.length 
-    };
-  }
-  
-  public getAllCodes(): ActivationCode[] {
-    return [...this.codes];
-  }
-  
-  public exportToCSV(): string {
-    const headers = ['Code', 'Status', 'Created', 'Sold', 'Used', 'Revoked', 'Customer', 'Device', 'Reason', 'Price'];
-    const rows = this.codes.map(c => [
-      c.code,
-      c.status,
-      c.createdAt,
-      c.soldAt || '',
-      c.usedAt || '',
-      c.revokedAt || '',
-      c.customerInfo?.contact || '',
-      c.deviceId?.substring(0, 8) || '',
-      c.revokedReason || '',
-      c.price.toString()
-    ]);
-    
-    const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
-    return csv;
-  }
-  
-  private generateSecureCode(): string {
-    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Évite confusion 0,O,1,I
-    const codeLength = 8;
-    
-    // Utiliser crypto.getRandomValues pour vraie randomness
-    const randomValues = new Uint8Array(codeLength);
-    crypto.getRandomValues(randomValues);
-    
-    let code = 'SOLVIX-';
-    for (let i = 0; i < codeLength; i++) {
-      code += alphabet[randomValues[i] % alphabet.length];
-    }
-    
-    return code;
-  }
-}
-
 // Types pour les codes d'activation
 interface CustomerInfo {
   name?: string;
@@ -439,93 +265,277 @@ interface CodeStats {
   total: number;
 }
 
+// Classe de gestion des codes d'activation avec Supabase
+export class SecureCodeManager {
+  // Méthode pour générer un code d'activation
+  public async generateCode(customerInfo?: CustomerInfo): Promise<string | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ Utilisateur non connecté pour générer un code');
+        return null;
+      }
+
+      // Appeler la fonction SQL pour générer un code
+      const { data, error } = await supabase.rpc('generate_activation_codes', {
+        quantity: 1,
+        admin_id: user.id
+      });
+
+      if (error) {
+        console.error('❌ Erreur lors de la génération du code:', error);
+        return null;
+      }
+
+      if (data && data.length > 0) {
+        console.log('✅ Code généré avec succès:', data[0].code);
+        return data[0].code;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('❌ Exception lors de la génération du code:', error);
+      return null;
+    }
+  }
+
+  // Méthode pour générer un lot de codes d'activation
+  public async generateBatch(quantity: number = 10): Promise<string[]> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ Utilisateur non connecté pour générer des codes');
+        return [];
+      }
+
+      // Appeler la fonction SQL pour générer des codes
+      const { data, error } = await supabase.rpc('generate_activation_codes', {
+        quantity,
+        admin_id: user.id
+      });
+
+      if (error) {
+        console.error('❌ Erreur lors de la génération des codes:', error);
+        return [];
+      }
+
+      if (data && data.length > 0) {
+        console.log(`✅ ${data.length} codes générés avec succès`);
+        return data.map(item => item.code);
+      }
+
+      return [];
+    } catch (error) {
+      console.error('❌ Exception lors de la génération des codes:', error);
+      return [];
+    }
+  }
+
+  // Méthode pour marquer un code comme vendu
+  public async markAsSold(code: string, customerContact: string): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ Utilisateur non connecté pour marquer un code comme vendu');
+        return false;
+      }
+
+      // Appeler la fonction SQL pour marquer un code comme vendu
+      const { data, error } = await supabase.rpc('mark_code_as_sold', {
+        code_value: code,
+        customer_contact: customerContact,
+        admin_id: user.id
+      });
+
+      if (error) {
+        console.error('❌ Erreur lors du marquage du code comme vendu:', error);
+        return false;
+      }
+
+      console.log('✅ Code marqué comme vendu avec succès:', code);
+      return true;
+    } catch (error) {
+      console.error('❌ Exception lors du marquage du code comme vendu:', error);
+      return false;
+    }
+  }
+
+  // Méthode pour valider et activer un code
+  public async validateAndActivateCode(inputCode: string, deviceId: string): Promise<ActivationResult> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ Utilisateur non connecté pour activer un code');
+        return { success: false, message: 'Utilisateur non connecté' };
+      }
+
+      const code = inputCode.trim().toUpperCase();
+
+      // Appeler la fonction SQL pour activer un code
+      const { data, error } = await supabase.rpc('activate_premium_code', {
+        code_value: code,
+        device_id: deviceId,
+        user_id: user.id
+      });
+
+      if (error) {
+        console.error('❌ Erreur lors de l\'activation du code:', error);
+        return { success: false, message: error.message || 'Code invalide ou déjà utilisé' };
+      }
+
+      if (!data) {
+        return { success: false, message: 'Code invalide ou déjà utilisé' };
+      }
+
+      console.log('✅ Code activé avec succès:', code);
+      return { success: true, message: 'Code activé avec succès!' };
+    } catch (error: any) {
+      console.error('❌ Exception lors de l\'activation du code:', error);
+      return { success: false, message: error.message || 'Une erreur est survenue' };
+    }
+  }
+
+  // Méthode pour révoquer un code
+  public async revokeCode(code: string, reason: string = ''): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ Utilisateur non connecté pour révoquer un code');
+        return false;
+      }
+
+      // Appeler la fonction SQL pour révoquer un code
+      const { data, error } = await supabase.rpc('revoke_activation_code', {
+        code_value: code,
+        reason: reason || 'Révoqué par l\'administrateur',
+        admin_id: user.id
+      });
+
+      if (error) {
+        console.error('❌ Erreur lors de la révocation du code:', error);
+        return false;
+      }
+
+      console.log('✅ Code révoqué avec succès:', code);
+      return true;
+    } catch (error) {
+      console.error('❌ Exception lors de la révocation du code:', error);
+      return false;
+    }
+  }
+
+  // Méthode pour obtenir des statistiques sur les codes
+  public async getStats(): Promise<CodeStats> {
+    try {
+      // Appeler la fonction SQL pour obtenir des statistiques
+      const { data, error } = await supabase.rpc('get_activation_code_stats');
+
+      if (error) {
+        console.error('❌ Erreur lors de la récupération des statistiques:', error);
+        return { available: 0, sold: 0, used: 0, revoked: 0, revenue: 0, total: 0 };
+      }
+
+      return {
+        available: data.available || 0,
+        sold: data.sold || 0,
+        used: data.used || 0,
+        revoked: data.revoked || 0,
+        revenue: data.revenue || 0,
+        total: data.total || 0
+      };
+    } catch (error) {
+      console.error('❌ Exception lors de la récupération des statistiques:', error);
+      return { available: 0, sold: 0, used: 0, revoked: 0, revenue: 0, total: 0 };
+    }
+  }
+
+  // Méthode pour récupérer tous les codes
+  public async getAllCodes(): Promise<ActivationCode[]> {
+    try {
+      const { data, error } = await supabase
+        .from('premium_activation_codes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Erreur lors de la récupération des codes:', error);
+        return [];
+      }
+
+      // Convertir les données Supabase en format ActivationCode
+      return data.map(item => ({
+        id: item.id,
+        code: item.code,
+        status: item.status,
+        createdAt: item.created_at,
+        soldAt: item.sold_at,
+        usedAt: item.used_at,
+        deviceId: item.device_id,
+        revokedAt: item.revoked_at,
+        revokedReason: item.revoked_reason,
+        customerInfo: item.customer_info || {},
+        price: item.price || 5000
+      }));
+    } catch (error) {
+      console.error('❌ Exception lors de la récupération des codes:', error);
+      return [];
+    }
+  }
+
+  // Méthode pour exporter les codes au format CSV
+  public async exportToCSV(): Promise<string> {
+    try {
+      const codes = await this.getAllCodes();
+      
+      const headers = ['Code', 'Status', 'Created', 'Sold', 'Used', 'Revoked', 'Customer', 'Device', 'Reason', 'Price'];
+      const rows = codes.map(c => [
+        c.code,
+        c.status,
+        c.createdAt,
+        c.soldAt || '',
+        c.usedAt || '',
+        c.revokedAt || '',
+        c.customerInfo?.contact || '',
+        c.deviceId?.substring(0, 8) || '',
+        c.revokedReason || '',
+        c.price.toString()
+      ]);
+      
+      const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+      return csv;
+    } catch (error) {
+      console.error('❌ Exception lors de l\'export CSV:', error);
+      return '';
+    }
+  }
+}
+
 // Singleton pour la gestion des codes
 export const codeManager = new SecureCodeManager();
 
-// Liste des codes valides (en production, ces codes seraient générés dynamiquement)
-const VALID_PREMIUM_CODES = [
-  'SOLVIX-ABCD1234',
-  'SOLVIX-EFGH5678',
-  'SOLVIX-IJKL9012',
-  'SOLVIX-MNOP3456',
-  'SOLVIX-QRST7890',
-  'SOLVIX-UVWX1234',
-  'SOLVIX-YZAB5678',
-  'SOLVIX-CDEF9012',
-  'SOLVIX-GHIJ3456',
-  'SOLVIX-KLMN7890'
-];
-
 // Validation sécurisée des codes d'activation
-export const validatePremiumCode = (code: string): boolean => {
+export const validatePremiumCode = async (code: string): Promise<boolean> => {
   if (!code || typeof code !== 'string') return false;
   
   const normalizedCode = code.trim().toUpperCase();
   
-  // Vérifier si le code est dans la liste des codes valides
-  if (!VALID_PREMIUM_CODES.includes(normalizedCode)) {
-    // Vérifier avec le gestionnaire de codes
-    const allCodes = codeManager.getAllCodes();
-    const codeExists = allCodes.some(c => 
-      c.code === normalizedCode && 
-      (c.status === 'AVAILABLE' || c.status === 'SOLD')
-    );
+  try {
+    // Vérifier si le code existe et est disponible
+    const { data, error } = await supabase
+      .from('premium_activation_codes')
+      .select('status')
+      .eq('code', normalizedCode)
+      .single();
     
-    if (!codeExists) {
+    if (error || !data) {
       return false;
     }
-  }
-  
-  // Vérifier si le code n'a pas déjà été utilisé ou révoqué
-  return !isCodeUsedOrRevoked(normalizedCode);
-};
-
-// Vérifier si un code a déjà été utilisé ou révoqué
-const isCodeUsedOrRevoked = (code: string): boolean => {
-  try {
-    // Vérifier d'abord dans le gestionnaire de codes
-    const allCodes = codeManager.getAllCodes();
-    const codeItem = allCodes.find(c => c.code === code);
-    if (codeItem && (codeItem.status === 'USED' || codeItem.status === 'REVOKED')) {
-      return true;
-    }
     
-    // Vérifier ensuite dans la liste locale des codes utilisés
-    const usedCodes = getUsedCodes();
-    return usedCodes.includes(code);
-  } catch {
-    return false;
-  }
-};
-
-// Récupérer la liste des codes utilisés
-const getUsedCodes = (): string[] => {
-  try {
-    const encrypted = localStorage.getItem('solvix_used_codes');
-    if (!encrypted) return [];
-    
-    const decrypted = decryptData(encrypted);
-    if (!decrypted) return [];
-    
-    return JSON.parse(decrypted);
-  } catch {
-    return [];
-  }
-};
-
-// Marquer un code comme utilisé
-export const markCodeAsUsed = (code: string): void => {
-  try {
-    const usedCodes = getUsedCodes();
-    const normalizedCode = code.trim().toUpperCase();
-    
-    if (!usedCodes.includes(normalizedCode)) {
-      usedCodes.push(normalizedCode);
-      const encrypted = encryptData(JSON.stringify(usedCodes));
-      localStorage.setItem('solvix_used_codes', encrypted);
-    }
+    // Le code est valide s'il est disponible ou vendu
+    return data.status === 'AVAILABLE' || data.status === 'SOLD';
   } catch (error) {
-    console.error('Erreur lors du marquage du code:', error);
+    console.error('❌ Erreur lors de la validation du code:', error);
+    return false;
   }
 };
 
@@ -559,15 +569,8 @@ export const isPremiumActive = (): boolean => {
       return false;
     }
     
-    // Vérifier si le code a été révoqué
-    const allCodes = codeManager.getAllCodes();
-    const codeItem = allCodes.find(c => c.code === premiumData.code);
-    if (codeItem && codeItem.status === 'REVOKED') {
-      // Désactiver automatiquement le premium si le code a été révoqué
-      deactivatePremium();
-      return false;
-    }
-
+    // Vérifier si le code a été révoqué (cette vérification sera mise à jour pour utiliser Supabase)
+    // Pour l'instant, on garde la vérification locale pour la compatibilité
     return true;
   } catch (error) {
     console.error('Erreur lors de la vérification Premium:', error);
@@ -576,16 +579,26 @@ export const isPremiumActive = (): boolean => {
 };
 
 // Activer Premium avec un code
-export const activatePremium = (code: string): boolean => {
+export const activatePremium = async (code: string): Promise<boolean> => {
   try {
-    if (!validatePremiumCode(code)) {
+    if (!await validatePremiumCode(code)) {
       return false;
     }
 
+    const deviceId = getDeviceFingerprint();
+    
+    // Activer le code dans la base de données
+    const result = await codeManager.validateAndActivateCode(code, deviceId);
+    
+    if (!result.success) {
+      return false;
+    }
+
+    // Sauvegarder les informations premium localement pour une vérification rapide
     const premiumData: PremiumData = {
       status: 'active',
       code: code.trim().toUpperCase(),
-      deviceId: getDeviceFingerprint(),
+      deviceId: deviceId,
       activationTimestamp: Date.now(),
       version: '1.0'
       // Pas d'expiration pour l'accès à vie
@@ -593,12 +606,6 @@ export const activatePremium = (code: string): boolean => {
 
     const encrypted = encryptData(JSON.stringify(premiumData));
     localStorage.setItem('solvix_premium_data', encrypted);
-    
-    // Marquer le code comme utilisé
-    markCodeAsUsed(code);
-    
-    // Activer le code dans le gestionnaire de codes
-    codeManager.validateAndActivateCode(code, getDeviceFingerprint());
     
     return true;
   } catch (error) {

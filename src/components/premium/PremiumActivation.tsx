@@ -85,8 +85,10 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
       // Simulation d'un délai pour éviter les attaques par force brute
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Validation du code
-      if (!validatePremiumCode(code)) {
+      // Validation du code avec la base de données
+      const isValid = await validatePremiumCode(code);
+      
+      if (!isValid) {
         const newAttempts = attempts + 1;
         setAttempts(newAttempts);
         
@@ -110,7 +112,7 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
       }
 
       // Activation du Premium
-      const success = activatePremium(code);
+      const success = await activatePremium(code);
       
       if (success) {
         setMessage('🎉 Premium activé avec succès !');
