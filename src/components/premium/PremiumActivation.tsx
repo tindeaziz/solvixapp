@@ -148,7 +148,7 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-solvix-blue to-solvix-orange text-white p-6 rounded-t-2xl">
           <button
@@ -259,10 +259,10 @@ const PremiumActivation: React.FC<PremiumActivationProps> = ({ isOpen, onClose, 
               </p>
               <div className="space-y-1">
                 <p className="font-semibold text-solvix-blue font-inter">
-                  📱 WhatsApp: +225 XX XX XX XX
+                  📱 WhatsApp: +225 01 03 58 79 21
                 </p>
                 <p className="font-semibold text-solvix-blue font-inter">
-                  📧 Email: premium@solvix.com
+                  📧 Email: hello@solvix-app.com
                 </p>
               </div>
               <p className="text-xs text-gray-500 mt-2 font-inter">
