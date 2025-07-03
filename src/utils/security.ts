@@ -525,7 +525,7 @@ export const validatePremiumCode = async (code: string): Promise<boolean> => {
       .from('premium_activation_codes')
       .select('status')
       .eq('code', normalizedCode)
-      .single();
+      .maybeSingle();
     
     if (error || !data) {
       return false;
