@@ -13,7 +13,7 @@ import PremiumActivation from './components/premium/PremiumActivation';
 import ProtectedRoute from './components/premium/ProtectedRoute';
 import AdminPanel from './components/admin/AdminPanel';
 import { useAuth } from './hooks/useAuth';
-import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage, fixExistingQuotas } from './utils/security';
+import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage } from './utils/security';
 import { Star } from 'lucide-react';
 
 export type ActiveSection = 'dashboard' | 'create-quote' | 'quote-management' | 'settings';
@@ -29,11 +29,8 @@ function App() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
-  // Vérification périodique du statut Premium et correction des quotas
+  // Vérification périodique du statut Premium
   useEffect(() => {
-    // Corriger les quotas mal initialisés au démarrage
-    fixExistingQuotas();
-    
     const checkPremiumStatus = async () => {
       setIsCheckingPremium(true);
       try {
