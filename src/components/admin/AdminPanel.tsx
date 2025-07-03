@@ -20,6 +20,8 @@ import {
   Smartphone
 } from 'lucide-react';
 import { codeManager } from '../../utils/security';
+import { useAuth } from '../../hooks/useAuth';
+import { supabase } from '../../lib/supabase';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -27,8 +29,9 @@ interface AdminPanelProps {
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [codes, setCodes] = useState<any[]>([]);
   const [stats, setStats] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -44,14 +47,53 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   const [showRevokeModal, setShowRevokeModal] = useState(false);
   const [revokeReason, setRevokeReason] = useState('');
 
-  // Mot de passe admin (en production, cela serait géré côté serveur)
-  const ADMIN_PASSWORD = 'OnFavor@98$Win';
+  // Check if user is admin when component mounts or user changes
+  useEffect(() => {
+    checkAdminStatus();
+  }, [user]);
 
   useEffect(() => {
     if (isAuthenticated) {
       refreshData();
     }
   }, [isAuthenticated]);
+
+  const checkAdminStatus = async () => {
+    setIsCheckingAuth(true);
+    try {
+      if (!user) {
+        setIsAuthenticated(false);
+        setMessage('Vous devez être connecté pour accéder au panneau d\'administration');
+        setMessageType('error');
+        setIsCheckingAuth(false);
+        return;
+      }
+
+      // Check if user has admin privileges by calling the is_admin function
+      const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
+      
+      if (error) {
+        console.error('Erreur lors de la vérification des privilèges admin:', error);
+        setIsAuthenticated(false);
+        setMessage('Erreur lors de la vérification des privilèges administrateur');
+        setMessageType('error');
+      } else if (data === true) {
+        setIsAuthenticated(true);
+        setMessage('');
+      } else {
+        setIsAuthenticated(false);
+        setMessage('Accès refusé: Privilèges administrateur requis');
+        setMessageType('error');
+      }
+    } catch (error) {
+      console.error('Exception lors de la vérification admin:', error);
+      setIsAuthenticated(false);
+      setMessage('Erreur lors de la vérification des privilèges');
+      setMessageType('error');
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
 
   const refreshData = async () => {
     setLoading(true);
@@ -69,17 +111,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       setMessageType('error');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setPassword('');
-      setMessage('');
-    } else {
-      setMessage('Mot de passe incorrect');
-      setMessageType('error');
     }
   };
 
@@ -311,14 +342,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full mx-4">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-solvix-blue mr-3" />
+            <span className="text-lg font-medium text-solvix-dark font-inter">
+              Vérification des privilèges...
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if not authenticated as admin
   if (!isAuthenticated) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full mx-4">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-solvix-dark font-poppins flex items-center">
-              <Lock className="h-6 w-6 mr-2 text-solvix-blue" />
-              Administration Solvix
+              <Lock className="h-6 w-6 mr-2 text-red-500" />
+              Accès Refusé
             </h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
               <X className="h-6 w-6" />
@@ -335,26 +383,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 font-inter">
-                Mot de passe administrateur
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-solvix-blue focus:border-transparent font-inter"
-                placeholder="Entrez le mot de passe admin"
-              />
+            <div className="text-center">
+              <div className="mb-4">
+                <ShieldOff className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                <p className="text-gray-600 font-inter">
+                  Vous n'avez pas les privilèges administrateur nécessaires pour accéder à ce panneau.
+                </p>
+              </div>
+              
+              <button
+                onClick={onClose}
+                className="w-full bg-gray-500 text-white py-3 rounded-lg font-medium hover:bg-gray-600 transition-colors duration-200 font-inter"
+              >
+                Fermer
+              </button>
             </div>
-
-            <button
-              onClick={handleLogin}
-              className="w-full bg-solvix-blue text-white py-3 rounded-lg font-medium hover:bg-solvix-blue-dark transition-colors duration-200 font-inter"
-            >
-              Se connecter
-            </button>
           </div>
         </div>
       </div>
