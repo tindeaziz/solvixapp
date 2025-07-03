@@ -52,14 +52,15 @@ export const useAuth = () => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    setLoading(true);
     console.log('🔐 HOOK AUTH - Tentative de connexion pour:', email);
     
     try {
       const { data, error } = await authService.signIn(email, password);
+      
       if (error) {
         console.error('❌ HOOK AUTH - Erreur de connexion:', error.message);
-        throw error;
+        // Return the error instead of throwing it
+        return { data: null, error };
       }
       
       if (data?.user) {
@@ -67,23 +68,22 @@ export const useAuth = () => {
       }
       
       return { data, error: null };
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ HOOK AUTH - Exception lors de la connexion:', error);
-      return { data: null, error };
-    } finally {
-      setLoading(false);
+      // Return the error as an object instead of throwing
+      return { data: null, error: { message: error.message || 'Une erreur est survenue lors de la connexion' } };
     }
   };
 
   const signUp = async (email: string, password: string, metadata?: any) => {
-    setLoading(true);
     console.log('📝 HOOK AUTH - Tentative d\'inscription pour:', email);
     
     try {
       const { data, error } = await authService.signUp(email, password, metadata);
+      
       if (error) {
         console.error('❌ HOOK AUTH - Erreur d\'inscription:', error.message);
-        throw error;
+        return { data: null, error };
       }
       
       if (data?.user) {
@@ -91,11 +91,9 @@ export const useAuth = () => {
       }
       
       return { data, error: null };
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ HOOK AUTH - Exception lors de l\'inscription:', error);
-      return { data: null, error };
-    } finally {
-      setLoading(false);
+      return { data: null, error: { message: error.message || 'Une erreur est survenue lors de l\'inscription' } };
     }
   };
 
@@ -107,16 +105,16 @@ export const useAuth = () => {
       const { error } = await authService.signOut();
       if (error) {
         console.error('❌ HOOK AUTH - Erreur de déconnexion:', error.message);
-        throw error;
+        return { error };
       }
       
       console.log('✅ HOOK AUTH - Déconnexion réussie');
       setUser(null);
       setSession(null);
       return { error: null };
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ HOOK AUTH - Exception lors de la déconnexion:', error);
-      return { error };
+      return { error: { message: error.message || 'Une erreur est survenue lors de la déconnexion' } };
     } finally {
       setLoading(false);
     }
@@ -133,9 +131,9 @@ export const useAuth = () => {
         console.log('✅ HOOK AUTH - Email de réinitialisation envoyé');
       }
       return { data, error };
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ HOOK AUTH - Exception réinitialisation:', error);
-      return { data: null, error };
+      return { data: null, error: { message: error.message || 'Une erreur est survenue lors de la réinitialisation' } };
     }
   };
 
