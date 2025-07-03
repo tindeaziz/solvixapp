@@ -15,26 +15,38 @@ const QuotaDisplay: React.FC<QuotaDisplayProps> = ({
 }) => {
   const [isPremium, setIsPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
+  const [quotaInfo, setQuotaInfo] = useState({
+    used: 0,
+    remaining: 0,
+    total: 3,
+    canCreateQuote: true
+  });
 
   useEffect(() => {
-    const checkPremiumStatus = async () => {
+    const checkPremiumAndQuota = async () => {
       setIsLoading(true);
       try {
+        // Vérifier d'abord le statut premium
         const premiumStatus = await isPremiumActive();
         setIsPremium(premiumStatus);
         
         if (!premiumStatus) {
-          setQuotaInfo(getSecureQuotaInfo());
+          // Si non premium, récupérer les informations de quota
+          const quota = await getSecureQuotaInfo();
+          setQuotaInfo(quota);
         }
       } catch (error) {
-        console.error('Erreur lors de la vérification du statut premium:', error);
+        console.error('Erreur lors de la vérification du statut premium/quota:', error);
       } finally {
         setIsLoading(false);
       }
     };
     
-    checkPremiumStatus();
+    checkPremiumAndQuota();
+    
+    // Vérifier périodiquement (toutes les 30 secondes)
+    const interval = setInterval(checkPremiumAndQuota, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   if (isLoading) {

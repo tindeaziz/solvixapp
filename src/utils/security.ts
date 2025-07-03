@@ -44,187 +44,146 @@ export const getDeviceFingerprint = (): string => {
   }
 };
 
-// Interface pour les données de quota
-interface QuotaData {
-  month: number;
-  count: number;
-  deviceFingerprint: string;
-  lastReset: number;
+// Interface pour les informations de quota
+interface QuotaInfo {
+  used: number;
+  remaining: number;
+  total: number;
+  canCreateQuote: boolean;
+  isPremium?: boolean;
 }
 
-// Gestion sécurisée des quotas
-export const getSecureQuotaInfo = () => {
-  const currentMonth = new Date().getMonth() + new Date().getFullYear() * 12;
-  const deviceId = getDeviceFingerprint();
-  const FREE_QUOTA_LIMIT = 3; // Corrigé: 3 devis gratuits par mois
-
+// Gestion des quotas basée sur la base de données
+export const getSecureQuotaInfo = async (): Promise<QuotaInfo> => {
   try {
-    const encryptedData = localStorage.getItem('solvix_quota_data');
-    if (!encryptedData) {
-      console.log('📅 Première utilisation - Initialisation quota à 3 devis');
-      return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
+    // Vérifier si l'utilisateur est connecté
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log('❌ QUOTA - Utilisateur non connecté');
+      return {
+        used: 0,
+        remaining: 0,
+        total: 0,
+        canCreateQuote: false
+      };
     }
 
-    const decryptedData = decryptData(encryptedData);
-    if (!decryptedData) {
-      console.log('🔑 Données de quota corrompues - Réinitialisation');
-      return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
+    // Vérifier d'abord si l'utilisateur est premium
+    const isPremiumStatus = await isPremiumActive();
+    if (isPremiumStatus) {
+      console.log('💎 QUOTA - Utilisateur premium, quota illimité');
+      return {
+        used: 0,
+        remaining: 999999,
+        total: 999999,
+        canCreateQuote: true,
+        isPremium: true
+      };
     }
 
-    const quotaData: QuotaData = JSON.parse(decryptedData);
-
-    // Vérification de l'intégrité du dispositif
-    if (quotaData.deviceFingerprint !== deviceId) {
-      console.warn('🔒 Device fingerprint mismatch - resetting quota');
-      return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
+    // Récupérer les informations de quota depuis la base de données
+    const { data, error } = await supabase.rpc('get_user_quota_info');
+    
+    if (error) {
+      console.error('❌ QUOTA - Erreur lors de la récupération du quota:', error);
+      
+      // Fallback en cas d'erreur
+      return {
+        used: 0,
+        remaining: 3,
+        total: 3,
+        canCreateQuote: true
+      };
     }
-
-    // Reset automatique si nouveau mois
-    if (quotaData.month !== currentMonth) {
-      console.log('📅 Nouveau mois détecté - Reset quota à 3 devis');
-      return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
-    }
-
-    console.log('📊 Quota actuel:', { 
-      used: quotaData.count, 
-      remaining: Math.max(0, FREE_QUOTA_LIMIT - quotaData.count),
-      total: FREE_QUOTA_LIMIT
-    });
-
+    
+    console.log('📊 QUOTA - Informations récupérées:', data);
+    
     return {
-      used: quotaData.count,
-      remaining: Math.max(0, FREE_QUOTA_LIMIT - quotaData.count),
-      total: FREE_QUOTA_LIMIT,
-      canCreateQuote: quotaData.count < FREE_QUOTA_LIMIT
+      used: data.used || 0,
+      remaining: data.remaining || 0,
+      total: data.total || 3,
+      canCreateQuote: data.canCreateQuote || false,
+      isPremium: data.isPremium || false
     };
   } catch (error) {
-    console.error('❌ Erreur lors de la récupération du quota:', error);
-    return resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
+    console.error('❌ QUOTA - Exception lors de la récupération du quota:', error);
+    
+    // Fallback en cas d'exception
+    return {
+      used: 0,
+      remaining: 3,
+      total: 3,
+      canCreateQuote: true
+    };
   }
-};
-
-// Reset du quota
-const resetQuota = (month: number, deviceId: string, limit: number) => {
-  const quotaData: QuotaData = { 
-    month, 
-    count: 0, 
-    deviceFingerprint: deviceId,
-    lastReset: Date.now()
-  };
-  
-  try {
-    const encrypted = encryptData(JSON.stringify(quotaData));
-    localStorage.setItem('solvix_quota_data', encrypted);
-    console.log('✅ Quota réinitialisé avec succès:', { used: 0, remaining: limit, total: limit });
-  } catch (error) {
-    console.error('❌ Erreur lors du reset du quota:', error);
-  }
-  
-  return { 
-    used: 0, 
-    remaining: limit, 
-    total: limit,
-    canCreateQuote: true
-  };
 };
 
 // Incrémenter le compteur de quota
-export const incrementQuotaUsage = (): boolean => {
+export const incrementQuotaUsage = async (): Promise<boolean> => {
   try {
-    const quotaInfo = getSecureQuotaInfo();
-    if (!quotaInfo.canCreateQuote) {
-      console.log('❌ Quota épuisé - Création impossible');
+    // Vérifier si l'utilisateur est connecté
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log('❌ QUOTA - Utilisateur non connecté pour incrémenter');
       return false;
     }
 
-    const currentMonth = new Date().getMonth() + new Date().getFullYear() * 12;
-    const deviceId = getDeviceFingerprint();
-    
-    const quotaData: QuotaData = {
-      month: currentMonth,
-      count: quotaInfo.used + 1,
-      deviceFingerprint: deviceId,
-      lastReset: Date.now()
-    };
+    // Vérifier d'abord si l'utilisateur est premium
+    const isPremiumStatus = await isPremiumActive();
+    if (isPremiumStatus) {
+      console.log('💎 QUOTA - Utilisateur premium, pas besoin d\'incrémenter');
+      return true;
+    }
 
-    console.log('📈 Incrémentation quota:', quotaInfo.used, '->', quotaData.count);
-
-    const encrypted = encryptData(JSON.stringify(quotaData));
-    localStorage.setItem('solvix_quota_data', encrypted);
+    // Appeler la fonction RPC pour incrémenter le quota
+    const { data, error } = await supabase.rpc('increment_user_quota', {
+      user_uuid: user.id
+    });
     
-    return true;
+    if (error) {
+      console.error('❌ QUOTA - Erreur lors de l\'incrémentation:', error);
+      return false;
+    }
+    
+    console.log('📈 QUOTA - Incrémentation réussie:', data);
+    return data === true;
   } catch (error) {
-    console.error('❌ Erreur lors de l\'incrémentation du quota:', error);
+    console.error('❌ QUOTA - Exception lors de l\'incrémentation:', error);
     return false;
   }
 };
 
-// Fonction pour vérifier et corriger les quotas existants
-export const fixExistingQuotas = async () => {
+// Fonction pour vérifier si l'utilisateur peut créer un devis
+export const canCreateQuote = async (): Promise<boolean> => {
   try {
-    const currentMonth = new Date().getMonth() + new Date().getFullYear() * 12;
-    const deviceId = getDeviceFingerprint();
-    const FREE_QUOTA_LIMIT = 3;
-    
-    const encryptedData = localStorage.getItem('solvix_quota_data');
-    if (!encryptedData) {
-      console.log('🔧 Aucun quota existant - Initialisation à 3 devis');
-      resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
-      return;
-    }
-    
-    const decryptedData = decryptData(encryptedData);
-    if (!decryptedData) {
-      console.log('🔧 Données de quota invalides - Réinitialisation');
-      resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
-      return;
-    }
-    
-    const quotaData: QuotaData = JSON.parse(decryptedData);
-    
-    // Si l'utilisateur a un quota de 1 mais n'a pas encore créé de devis
-    if (quotaData.count > 0 && !(await hasCreatedAnyQuote())) {
-      console.log('🐛 Bug détecté: Quota utilisé sans devis créé - Correction');
-      resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
-      return;
-    }
-    
-    // Si le mois est différent, réinitialiser
-    if (quotaData.month !== currentMonth) {
-      console.log('🔄 Mois différent - Réinitialisation du quota');
-      resetQuota(currentMonth, deviceId, FREE_QUOTA_LIMIT);
-      return;
-    }
-    
-    console.log('✅ Vérification quota terminée - Aucune correction nécessaire');
-  } catch (error) {
-    console.error('❌ Erreur lors de la correction des quotas:', error);
-  }
-};
-
-// Vérifier si l'utilisateur a créé des devis
-const hasCreatedAnyQuote = async (): Promise<boolean> => {
-  try {
-    // Importer supabase de manière dynamique pour éviter les problèmes de dépendance circulaire
-    const { supabase } = await import('../lib/supabase');
-    
+    // Vérifier si l'utilisateur est connecté
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    if (!user) {
+      console.log('❌ QUOTA - Utilisateur non connecté pour vérifier');
+      return false;
+    }
+
+    // Vérifier d'abord si l'utilisateur est premium
+    const isPremiumStatus = await isPremiumActive();
+    if (isPremiumStatus) {
+      console.log('💎 QUOTA - Utilisateur premium, peut créer un devis');
+      return true;
+    }
+
+    // Appeler la fonction RPC pour vérifier si l'utilisateur peut créer un devis
+    const { data, error } = await supabase.rpc('can_create_quote', {
+      user_uuid: user.id
+    });
     
-    const { data, error } = await supabase
-      .from('devis')
-      .select('id')
-      .eq('user_id', user.id)
-      .limit(1);
-      
     if (error) {
-      console.error('❌ Erreur vérification devis:', error);
+      console.error('❌ QUOTA - Erreur lors de la vérification:', error);
       return false;
     }
     
-    return data && data.length > 0;
+    console.log('🔍 QUOTA - Vérification réussie:', data);
+    return data === true;
   } catch (error) {
-    console.error('❌ Erreur vérification devis:', error);
+    console.error('❌ QUOTA - Exception lors de la vérification:', error);
     return false;
   }
 };
@@ -270,7 +229,13 @@ export class SecureCodeManager {
   // Méthode pour générer un code d'activation
   public async generateCode(customerInfo?: CustomerInfo): Promise<string | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('❌ ERREUR RÉCUPÉRATION UTILISATEUR:', userError);
+        return null;
+      }
+      
       if (!user) {
         console.error('❌ Utilisateur non connecté pour générer un code');
         return null;
@@ -302,7 +267,13 @@ export class SecureCodeManager {
   // Méthode pour générer un lot de codes d'activation
   public async generateBatch(quantity: number = 10): Promise<string[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('❌ ERREUR RÉCUPÉRATION UTILISATEUR:', userError);
+        return [];
+      }
+      
       if (!user) {
         console.error('❌ Utilisateur non connecté pour générer des codes');
         return [];
@@ -334,7 +305,13 @@ export class SecureCodeManager {
   // Méthode pour marquer un code comme vendu
   public async markAsSold(code: string, customerContact: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('❌ ERREUR RÉCUPÉRATION UTILISATEUR:', userError);
+        return false;
+      }
+      
       if (!user) {
         console.error('❌ Utilisateur non connecté pour marquer un code comme vendu');
         return false;
@@ -363,7 +340,13 @@ export class SecureCodeManager {
   // Méthode pour valider et activer un code
   public async validateAndActivateCode(inputCode: string, deviceId: string): Promise<ActivationResult> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('❌ ERREUR RÉCUPÉRATION UTILISATEUR:', userError);
+        return { success: false, message: 'Utilisateur non connecté' };
+      }
+      
       if (!user) {
         console.error('❌ Utilisateur non connecté pour activer un code');
         return { success: false, message: 'Utilisateur non connecté' };
@@ -398,7 +381,13 @@ export class SecureCodeManager {
   // Méthode pour révoquer un code
   public async revokeCode(code: string, reason: string = ''): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('❌ ERREUR RÉCUPÉRATION UTILISATEUR:', userError);
+        return false;
+      }
+      
       if (!user) {
         console.error('❌ Utilisateur non connecté pour révoquer un code');
         return false;

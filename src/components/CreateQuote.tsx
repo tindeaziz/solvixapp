@@ -23,7 +23,7 @@ import { useAuth } from '../hooks/useAuth';
 import { devisService, clientService, articleService, profileService } from '../lib/supabase';
 import { CURRENCIES, formatCurrency, getCurrencyByCode } from '../types/currency';
 import { generateDevisPDF } from '../utils/pdfGenerator';
-import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage } from '../utils/security';
+import { isPremiumActive, getSecureQuotaInfo, incrementQuotaUsage, canCreateQuote } from '../utils/security';
 import { sanitizeFormData } from '../utils/sanitizer';
 import { useSecureForm } from '../hooks/useSecureForm';
 import { notifyNewQuote } from '../utils/notifications';
@@ -74,7 +74,12 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
   // États Premium et Quota
   const [isPremium, setIsPremium] = useState(false);
   const [isCheckingPremium, setIsCheckingPremium] = useState(true);
-  const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
+  const [quotaInfo, setQuotaInfo] = useState({
+    used: 0,
+    remaining: 0,
+    total: 3,
+    canCreateQuote: true
+  });
   
   // États pour le devis
   const [quoteData, setQuoteData] = useState({
@@ -119,14 +124,17 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
     const checkQuotaStatus = async () => {
       setIsCheckingPremium(true);
       try {
+        // Vérifier d'abord le statut premium
         const premiumStatus = await isPremiumActive();
         setIsPremium(premiumStatus);
         
         if (!premiumStatus) {
-          setQuotaInfo(getSecureQuotaInfo());
+          // Si non premium, récupérer les informations de quota
+          const quota = await getSecureQuotaInfo();
+          setQuotaInfo(quota);
         }
       } catch (error) {
-        console.error('Erreur lors de la vérification du statut premium:', error);
+        console.error('Erreur lors de la vérification du statut premium/quota:', error);
       } finally {
         setIsCheckingPremium(false);
       }
@@ -272,9 +280,12 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
     }
 
     // Vérifier le quota avant de sauvegarder
-    if (!isPremium && !quotaInfo.canCreateQuote) {
-      setError('Quota mensuel épuisé. Passez au Premium pour un accès illimité.');
-      return;
+    if (!isPremium) {
+      const canCreate = await canCreateQuote();
+      if (!canCreate) {
+        setError('Quota mensuel épuisé. Passez au Premium pour un accès illimité.');
+        return;
+      }
     }
 
     setSaving(true);
@@ -347,14 +358,14 @@ const CreateQuote: React.FC<CreateQuoteProps> = ({ onQuoteCreated }) => {
         }
       }
 
-      // 4. Incrémenter le quota si pas Premium
+      // 4. Le quota est automatiquement incrémenté par le trigger dans la base de données
+      // Mais on met à jour l'état local pour l'affichage
       if (!isPremium) {
-        const quotaSuccess = incrementQuotaUsage();
-        if (quotaSuccess) {
-          setQuotaInfo(getSecureQuotaInfo());
-          if (onQuoteCreated) {
-            onQuoteCreated();
-          }
+        const newQuotaInfo = await getSecureQuotaInfo();
+        setQuotaInfo(newQuotaInfo);
+        
+        if (onQuoteCreated) {
+          onQuoteCreated();
         }
       }
 

@@ -1,5 +1,5 @@
 import React, { ReactNode, useState, useEffect } from 'react';
-import { isPremiumActive, getSecureQuotaInfo } from '../../utils/security';
+import { isPremiumActive, getSecureQuotaInfo, canCreateQuote } from '../../utils/security';
 import { AlertTriangle, Crown, Zap, FileText, Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -19,27 +19,44 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const [isPremium, setIsPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [quotaInfo, setQuotaInfo] = useState(getSecureQuotaInfo());
+  const [quotaInfo, setQuotaInfo] = useState({
+    used: 0,
+    remaining: 0,
+    total: 3,
+    canCreateQuote: true
+  });
+  const [hasQuota, setHasQuota] = useState(true);
 
   useEffect(() => {
-    const checkPremiumStatus = async () => {
+    const checkAccess = async () => {
       setIsLoading(true);
       try {
+        // Vérifier d'abord le statut premium
         const premiumStatus = await isPremiumActive();
         setIsPremium(premiumStatus);
         
-        if (!premiumStatus) {
-          setQuotaInfo(getSecureQuotaInfo());
+        // Si premium, pas besoin de vérifier le quota
+        if (premiumStatus) {
+          setHasQuota(true);
+        } else if (requireQuota) {
+          // Vérifier si l'utilisateur peut créer un devis
+          const canCreate = await canCreateQuote();
+          setHasQuota(canCreate);
+          
+          // Récupérer les informations de quota pour l'affichage
+          const quota = await getSecureQuotaInfo();
+          setQuotaInfo(quota);
         }
       } catch (error) {
-        console.error('Erreur lors de la vérification du statut premium:', error);
+        console.error('Erreur lors de la vérification des accès:', error);
+        setHasQuota(false);
       } finally {
         setIsLoading(false);
       }
     };
     
-    checkPremiumStatus();
-  }, []);
+    checkAccess();
+  }, [requireQuota]);
 
   if (isLoading) {
     return (
@@ -104,7 +121,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Si quota requis et utilisateur a épuisé son quota (et n'est pas Premium)
-  if (requireQuota && !isPremium && !quotaInfo.canCreateQuote) {
+  if (requireQuota && !isPremium && !hasQuota) {
     return fallback || (
       <div className="min-h-screen bg-gradient-to-br from-solvix-light to-blue-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
